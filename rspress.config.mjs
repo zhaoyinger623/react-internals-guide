@@ -12,7 +12,7 @@ export default defineConfig({
   description: '用图解、动画和源码示例讲清 React 如何完成一次页面更新',
   icon: '/react.svg',
   logo: { light: '/react.svg', dark: '/react.svg' },
-  lang: 'zh-CN',
+  lang: 'zh',
   llms: true,
   themeConfig: {
     socialLinks: [

@@ -110,7 +110,7 @@ npx serve react-internals-multipage
 │   ├── EmbeddedChapter.tsx      # Rspress 与章节 iframe 的通信组件
 │   └── locked.css               # 导航栏、侧栏和正文布局样式
 ├── react-principles-simplified.html # 完整教程内容源
-├── rspress.config.ts
+├── rspress.config.mjs
 └── package.json
 ```
 

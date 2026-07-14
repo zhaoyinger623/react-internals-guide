@@ -6,10 +6,10 @@
   "type": "module",
   "scripts": {
     "predev": "npm run multipage:build",
-    "dev": "rspress dev",
+    "dev": "rspress dev -c rspress.config.mjs",
     "prebuild": "npm run multipage:build",
-    "build": "rspress build",
-    "preview": "rspress preview",
+    "build": "rspress build -c rspress.config.mjs",
+    "preview": "rspress preview -c rspress.config.mjs",
     "multipage:build": "node scripts/build-multipage.mjs",
     "multipage:dev": "python3 -m http.server 4174 --directory react-internals-multipage"
   },
