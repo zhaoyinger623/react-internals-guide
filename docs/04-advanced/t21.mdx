@@ -3,34 +3,6 @@ title: 渲染 bug 底层解释
 description: React 原理全景中的「渲染 bug 底层解释」，从运行机制继续深入源码。
 ---
 
-<div className="tutorial-chapter">
+import { EmbeddedChapter } from '../../theme/EmbeddedChapter';
 
-第六层 · 性能优化 / 21
-
-**🧭 主线**setState→Update→Lane→Scheduler→Render→Effect→Commit→DOM
-
-**🗺 本章路线图**
-
-**本节内容：**从更新队列、闭包、key 和批处理机制解释四种常见问题。
-
-本章包括：**setState 为何时同步时异步、多次 setState 为何合并、useTransition 为何能解卡顿、useEffect 依赖写错为何死循环**。
-
-### 为什么 setState 有时同步、有时异步?
-
-setState 本身**从不真正同步更新 state**——它总是**异步批处理**。所谓"同步"的错觉:在 React 16/17 的**事件回调**里,setState 后立即读 `this.state`/state 变量拿到的是**旧值**(还没渲染);而在 `setTimeout` 里(16/17 不批处理)每次 setState 会各自触发一次渲染,看起来"立即生效"。React 18 全局自动批处理后行为统一。要立即拿新值:`flushSync` 或 useReducer/函数式更新。
-
-### 为什么多次 setState 会合并?
-
-它们的 update 都进了同一个 `updateQueue.shared.pending` 环状链表,`ensureRootIsScheduled` 去重只排一次渲染,渲染时一起 reduce。`setCount(count+1)` 连写三次因闭包里 count 是旧值只 +1;用函数式 `setCount(c=>c+1)` 才会累加,因为每个 update 拿到的是前一个的结果。
-
-### 为什么 useTransition 能解决卡顿?
-
-它把大列表渲染降到 **TransitionLane(低优)**,于是这段渲染在 Concurrent 下**可被时间切片、可被用户输入抢占**。输入这类高优更新随时打断大渲染先响应,页面就跟手不卡(详见[第四层·Concurrent](/03-concurrent/t14)/[第四层·并发API](/03-concurrent/t15))。
-
-### 为什么 useEffect 依赖写错会无限循环?
-
-典型:effect 里 setState,但依赖数组包含了一个**每次渲染都新建的引用**(对象/数组/函数),或该 state 本身。流程:渲染 → effect 执行 → setState → 重渲染 → 依赖"变了" → effect 再执行 → …死循环。修法:用 `useCallback/useMemo` 稳定依赖、函数式更新去掉对 state 的依赖、或把不该进依赖的挪出去。
-
-**Trigger 阶段完成：**`setState` 产生 update，并将它放入更新队列。下一步进入 Schedule：由 [Lane](/02-update-pipeline/t13) 标记和选择更新优先级。
-
-</div>
+<EmbeddedChapter chapter="t21" />

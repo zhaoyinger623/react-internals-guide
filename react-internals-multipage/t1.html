@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+<title>组件渲染机制 · React 原理全景</title>
+<script>
+  const embedParams = new URLSearchParams(location.search);
+  if (embedParams.get('embed') === '1') document.documentElement.classList.add('is-embed');
+  if (embedParams.get('theme') === 'light') document.documentElement.classList.add('embed-light');
+</script>
+<link rel="stylesheet" href="./assets/site.css">
+</head>
+<body data-chapter="t1">
+<aside id="side">
+  <div class="brand">⚛️ React 原理全景</div>
+  <button class="themebtn" id="themeBtn"><span class="ic">🌙</span><span id="themeLabel">切换到浅色模式</span></button>
+  <a href="./intro.html" data-t="intro"><span class="n">◎</span>如何使用本页</a>
+  <div class="grp">更新流程</div>
+  <a href="./journey.html" data-t="journey"><span class="n">★</span>一次 setState 的完整旅程</a>
+  <div class="grp">第一层 · 表层原理</div>
+  <a href="./t1.html" data-t="t1" class="active" aria-current="page"><span class="n">1</span>组件渲染机制</a>
+  <a href="./t2.html" data-t="t2"><span class="n">2</span>虚拟 DOM 真实含义</a>
+  <a href="./t3.html" data-t="t3"><span class="n">3</span>生命周期执行顺序</a>
+  <div class="grp">第二层 · 一次更新的主线</div>
+  <a href="./t4.html" data-t="t4"><span class="n">4</span>更新的四个阶段</a>
+  <div class="grp">阶段一 · Trigger 触发</div>
+  <a href="./t9.html" data-t="t9"><span class="n">5</span>UpdateQueue：更新入队</a>
+  <div class="grp">阶段二 · Schedule 调度</div>
+  <a href="./t13.html" data-t="t13"><span class="n">6</span>Lane：选择更新</a>
+  <a href="./t12.html" data-t="t12"><span class="n">7</span>Scheduler：安排执行</a>
+  <div class="grp">阶段三 · Render 计算</div>
+  <a href="./t8.html" data-t="t8"><span class="n">8</span>Fiber：可中断工作单元</a>
+  <a href="./t5.html" data-t="t5"><span class="n">9</span>双缓存 Fiber 树</a>
+  <a href="./t7.html" data-t="t7"><span class="n">10</span>Hooks：读取与计算状态</a>
+  <a href="./t6.html" data-t="t6"><span class="n">11</span>Diff：协调子节点</a>
+  <a href="./t10.html" data-t="t10"><span class="n">12</span>flags：记录变更</a>
+  <div class="grp">阶段四 · Commit 提交</div>
+  <a href="./t11.html" data-t="t11"><span class="n">13</span>Commit：应用变更</a>
+  <div class="grp">并发延伸</div>
+  <a href="./t14.html" data-t="t14"><span class="n">14</span>Concurrent 并发渲染</a>
+  <a href="./t15.html" data-t="t15"><span class="n">15</span>两大并发 API</a>
+  <div class="grp">架构交互</div>
+  <a href="./t16.html" data-t="t16"><span class="n">16</span>三大模块协作</a>
+  <a href="./t17.html" data-t="t17"><span class="n">17</span>批量更新原理</a>
+  <a href="./t18.html" data-t="t18"><span class="n">18</span>Suspense / lazy</a>
+  <a href="./t19.html" data-t="t19"><span class="n">19</span>合成事件系统</a>
+  <div class="grp">性能优化</div>
+  <a href="./t20.html" data-t="t20"><span class="n">20</span>渲染优化底层</a>
+  <a href="./t21.html" data-t="t21"><span class="n">21</span>渲染 bug 底层解释</a>
+  <div class="grp">高级实践与新架构</div>
+  <a href="./t22.html" data-t="t22"><span class="n">22</span>SSR / Hydration / 流式</a>
+  <a href="./t23.html" data-t="t23"><span class="n">23</span>Server Components</a>
+  <a href="./t24.html" data-t="t24"><span class="n">24</span>React 19 新特性</a>
+  <a href="./t25.html" data-t="t25"><span class="n">25</span>外部状态与撕裂</a>
+  <a href="./t26.html" data-t="t26"><span class="n">26</span>React Compiler</a>
+  <a href="./t27.html" data-t="t27"><span class="n">27</span>高级模式与陷阱</a>
+  <a href="./t28.html" data-t="t28"><span class="n">28</span>性能诊断与工程化</a>
+  <div class="grp">补充专题 · 常被漏掉的核心</div>
+  <a href="./ctx.html" data-t="ctx"><span class="n">C1</span>Context 源码原理</a>
+  <a href="./ref.html" data-t="ref"><span class="n">C2</span>useRef 与 ref 体系</a>
+  <div class="grp">源码附录 · 按需查阅</div>
+  <a href="./pk.html" data-t="pk"><span class="n">A1</span>宏观包结构</a>
+  <a href="./boot.html" data-t="boot"><span class="n">A2</span>启动过程</a>
+  <a href="./obj.html" data-t="obj"><span class="n">A3</span>核心对象速查</a>
+  <a href="./source.html" data-t="source"><span class="n">A4</span>源码阅读路线</a>
+  <div class="grp">总结</div>
+  <a href="./main.html" data-t="main"><span class="n">★</span>React 更新流程总览</a>
+</aside>
+<main id="main"><section class="topic active" id="t1">
+  <div class="crumb">第一层 · 表层原理 / 01</div>
+  <h1>1 · 组件渲染机制</h1>
+  <div style="display:flex;flex-wrap:wrap;gap:3px;align-items:center;font-family:var(--mono);font-size:10.5px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:7px 10px;margin:6px 0 14px;overflow-x:auto"><b style="color:var(--txt2);margin-right:4px;font-family:inherit">🧭 主线</b><span data-go="t4" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:rgba(97,218,251,.22);border:1.5px solid var(--accent);color:var(--accent);font-weight:700">setState</span><span style="color:var(--dim)">→</span><span data-go="t9" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">Update</span><span style="color:var(--dim)">→</span><span data-go="t13" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">Lane</span><span style="color:var(--dim)">→</span><span data-go="t12" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">Scheduler</span><span style="color:var(--dim)">→</span><span data-go="t8" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">Render</span><span style="color:var(--dim)">→</span><span data-go="t10" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">Effect</span><span style="color:var(--dim)">→</span><span data-go="t11" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">Commit</span><span style="color:var(--dim)">→</span><span data-go="t11" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">DOM</span></div>
+  <div class="card" style="border-left:4px solid var(--accent)">
+    <b>🗺 本章路线图</b>
+    <p style="margin:8px 0 0">这里的“渲染”指 React 调用组件并取得组件返回的 JSX。本章介绍以下三部分：</p>
+    <p style="margin:6px 0 0"><b>① 函数 vs 类组件</b>怎么被渲染、状态存哪 · <b>② 什么情况会重新渲染</b>(state/props/context/父级)· <b>③ 怎么阻止无效重渲染</b>(memo / useMemo / useCallback + bailout)。</p>
+  </div>
+
+  <h2><span class="dot" style="background:var(--accent)"></span>函数组件与类组件如何完成渲染</h2>
+  <p>「渲染」= React 调用你的组件,拿到返回的 JSX(React 元素)。区别只在<b>怎么被调用、状态挂在哪</b>:</p>
+  <table class="simple">
+    <tr><th></th><th>类组件</th><th>函数组件</th></tr>
+    <tr><td>如何渲染</td><td>实例化后调用 <code>instance.render()</code></td><td>直接把函数当普通函数调用 <code>Component(props)</code></td></tr>
+    <tr><td>状态存哪</td><td>实例 <code>this.state</code> + <code>updateQueue</code></td><td>Fiber 的 <code>memoizedState</code> 上的 hooks 链表</td></tr>
+    <tr><td>每次渲染</td><td>同一实例,方法引用不变</td><td><b>函数整体重新执行一遍</b>,内部变量/函数全部重建</td></tr>
+  </table>
+
+  <div class="card">
+    <h3 style="margin-top:0">🗄️「状态存哪」图解:state 到底放在哪个对象上</h3>
+    <p style="font-size:13px;color:var(--dim);margin:2px 0 8px">「存储」= 你的 <code>count</code> 这类状态,React 把它保存在内存里的哪个对象上,下次渲染再从那里读回来。两种组件放的地方不同:</p>
+    <svg viewBox="0 0 1000 320" style="width:100%;height:auto" font-family="ui-monospace,monospace">
+      <defs><marker id="stA" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" style="fill:var(--fiber)"/></marker></defs>
+      <!-- divider -->
+      <line x1="500" y1="20" x2="500" y2="300" style="stroke:var(--line)" stroke-width="1" stroke-dasharray="4 4"/>
+
+      <!-- LEFT: class component -->
+      <text x="250" y="32" text-anchor="middle" style="fill:var(--render)" font-size="14" font-weight="700">类组件:存在「实例对象」上</text>
+      <rect x="60" y="55" width="380" height="60" rx="10" style="fill:rgba(255,123,156,.10);stroke:var(--render)" stroke-width="1.5"/>
+      <text x="80" y="82" style="fill:var(--txt)" font-size="12">class Counter extends Component</text>
+      <text x="80" y="102" style="fill:var(--dim)" font-size="10.5">↓ new Counter() 只创建一次,一直复用</text>
+      <!-- instance object -->
+      <rect x="120" y="140" width="260" height="140" rx="12" style="fill:var(--panel);stroke:var(--render)" stroke-width="2"/>
+      <text x="250" y="165" text-anchor="middle" style="fill:var(--render)" font-size="13" font-weight="700">Counter 实例(instance)</text>
+      <rect x="140" y="180" width="220" height="34" rx="6" style="fill:rgba(97,218,251,.14);stroke:var(--accent)"/><text x="250" y="202" text-anchor="middle" style="fill:var(--txt)" font-size="11">this.state = { count: 0 } ← 状态在这</text>
+      <rect x="140" y="222" width="220" height="30" rx="6" style="fill:var(--panel2);stroke:var(--line)"/><text x="250" y="242" text-anchor="middle" style="fill:var(--txt2)" font-size="10.5">this.updateQueue(待处理更新)</text>
+      <text x="250" y="272" text-anchor="middle" style="fill:var(--dim)" font-size="10">实例不变 → this.state 一直是同一个对象</text>
+
+      <!-- RIGHT: function component -->
+      <text x="750" y="32" text-anchor="middle" style="fill:var(--recon)" font-size="14" font-weight="700">函数组件:存在「Fiber 节点」上</text>
+      <rect x="560" y="55" width="380" height="60" rx="10" style="fill:rgba(126,231,135,.10);stroke:var(--recon)" stroke-width="1.5"/>
+      <text x="580" y="82" style="fill:var(--txt)" font-size="12">function Counter(){ useState(0) }</text>
+      <text x="580" y="102" style="fill:var(--dim)" font-size="10.5">↓ 函数每次渲染重跑,但 Fiber 一直在</text>
+      <!-- fiber node -->
+      <rect x="560" y="140" width="150" height="120" rx="12" style="fill:var(--panel);stroke:var(--fiber)" stroke-width="2"/>
+      <text x="635" y="165" text-anchor="middle" style="fill:var(--fiber)" font-size="12" font-weight="700">Counter 的 Fiber</text>
+      <rect x="575" y="180" width="120" height="60" rx="6" style="fill:rgba(167,139,250,.14);stroke:var(--fiber)"/><text x="635" y="205" text-anchor="middle" style="fill:var(--txt)" font-size="10">memoizedState</text><text x="635" y="222" text-anchor="middle" style="fill:var(--dim)" font-size="9">↓ 指向 hook 链表</text>
+      <!-- hook chain -->
+      <rect x="740" y="150" width="110" height="46" rx="8" style="fill:rgba(97,218,251,.14);stroke:var(--accent)"/><text x="795" y="170" text-anchor="middle" style="fill:var(--txt)" font-size="10.5" font-weight="700">hook1</text><text x="795" y="186" text-anchor="middle" style="fill:var(--dim)" font-size="9">count = 0 ← 状态</text>
+      <rect x="740" y="212" width="110" height="46" rx="8" style="fill:rgba(167,139,250,.12);stroke:var(--fiber)"/><text x="795" y="232" text-anchor="middle" style="fill:var(--txt)" font-size="10.5" font-weight="700">hook2</text><text x="795" y="248" text-anchor="middle" style="fill:var(--dim)" font-size="9">下一个 Hook</text>
+      <line x1="695" y1="200" x2="738" y2="176" style="stroke:var(--fiber)" stroke-width="2" marker-end="url(#stA)"/>
+      <line x1="795" y1="196" x2="795" y2="210" style="stroke:var(--fiber)" stroke-width="2" marker-end="url(#stA)"/>
+      <text x="895" y="180" text-anchor="middle" style="fill:var(--dim)" font-size="9">next</text>
+    </svg>
+    <p style="font-size:12.5px;color:var(--txt2);margin:6px 0 0">👉 要点：<b style="color:var(--render)">类组件</b>把状态放在「组件实例 <code>this</code>」上;<b style="color:var(--recon)">函数组件</b>没有实例,状态被 React 存到「这个组件对应的 <b>Fiber 节点</b>」的 <code>memoizedState</code> 链表里。所以函数每次重跑,还能从 Fiber 上把上次的 <code>count</code> 读回来。</p>
+  </div>
+
+  <div class="callout">函数组件更新时会再次执行整个函数。理解这一点后，才能继续分析 Hooks 的取值方式、闭包中的旧值以及 <code>useCallback</code> 的作用。</div>
+
+  <h3>①「函数整体重新执行」到底发生了什么</h3>
+  <p>每次状态变化,React 会<b>再调用一次你的函数组件</b>。函数体里除了 Hook 从「链表」里读到最新值外,<b>所有局部变量、所有内联函数都是全新创建的</b>——和上一次渲染没有任何关系:</p>
+  <pre><span class="kw">function</span> <span class="fn">Counter</span>(){
+  <span class="kw">const</span> [count, setCount] = <span class="fn">useState</span>(<span class="st">0</span>);   <span class="cm">// count 从 hooks 链表读到「本次」的值</span>
+
+  <span class="cm">// ↓ 下面这些,每次渲染都重新算/重新 new 一个:</span>
+  <span class="kw">const</span> doubled = count * <span class="st">2</span>;              <span class="cm">// 全新的局部变量</span>
+  <span class="kw">const</span> <span class="fn">handleClick</span> = () =&gt; <span class="fn">setCount</span>(count + <span class="st">1</span>); <span class="cm">// 全新的函数对象(引用每次都不同)</span>
+
+  <span class="kw">return</span> &lt;button onClick={handleClick}&gt;{count} · {doubled}&lt;/button&gt;;
+}</pre>
+  <p><code>handleClick</code> 捕获的是创建该函数时那次渲染中的 <code>count</code>。第一次渲染创建的函数读取 <code>count=0</code>，第二次渲染创建的新函数读取 <code>count=1</code>。这属于 JavaScript 的闭包行为：每次执行组件函数都会形成一组对应本次渲染的变量和函数。</p>
+
+  <h3>② 闭包陷阱(stale closure):最常见的 bug 来源</h3>
+  <p>问题出在:某个「旧渲染」里创建的函数,后来还在被使用,它读到的却是<b>那一次的旧值</b>。经典例子:</p>
+  <pre><span class="kw">function</span> <span class="fn">Timer</span>(){
+  <span class="kw">const</span> [count, setCount] = <span class="fn">useState</span>(<span class="st">0</span>);
+  <span class="fn">useEffect</span>(() =&gt; {
+    <span class="kw">const</span> id = <span class="fn">setInterval</span>(() =&gt; {
+      <span class="fn">setCount</span>(count + <span class="st">1</span>);   <span class="cm">// ❌ count 永远是 0 → 永远设成 1</span>
+    }, <span class="st">1000</span>);
+    <span class="kw">return</span> () =&gt; <span class="fn">clearInterval</span>(id);
+  }, []);                     <span class="cm">// 空依赖:effect 只在「第一次渲染」跑一次</span>
+}</pre>
+  <p>因为依赖数组是 <code>[]</code>,这个 <code>setInterval</code> 的回调是<b>第一次渲染时创建</b>的,它闭包里的 <code>count</code> 被永远定格在 <code>0</code>。之后即使界面上 count 变了,这个旧回调用的还是 0,于是计数器卡在 1。<b>两种修法</b>:</p>
+  <pre><span class="cm">// 修法A:函数式更新,不依赖闭包里的 count</span>
+<span class="fn">setCount</span>(c =&gt; c + <span class="st">1</span>);   <span class="cm">// c 是 React 给的「最新值」,与闭包无关 ✅</span>
+<span class="cm">// 修法B:把 count 放进依赖数组,让 effect 随 count 重建(拿到新闭包)</span>
+}, [count]);</pre>
+
+  <h3>③ 为什么需要 useCallback / useMemo</h3>
+  <p>既然每次渲染 <code>handleClick</code> 都是<b>新函数、新引用</b>,那把它传给一个 <code>React.memo</code> 包裹的子组件时,子组件做 props 浅比较会发现「函数引用变了」→ 误以为 props 变了 → <b>白白重渲染</b>。<code>useCallback</code> 就是让这个函数<b>跨渲染保持同一个引用</b>(依赖不变时返回上一次那个),从而让 memo 生效:</p>
+  <pre><span class="cm">// 不用 useCallback:每次渲染都是新函数 → &lt;Child memo&gt; 每次都重渲染</span>
+<span class="kw">const</span> <span class="fn">handleClick</span> = () =&gt; <span class="fn">setCount</span>(c =&gt; c + <span class="st">1</span>);
+<span class="cm">// 用 useCallback:deps 不变时,引用稳定不变 → Child 被 memo 跳过</span>
+<span class="kw">const</span> <span class="fn">handleClick</span> = <span class="fn">useCallback</span>(() =&gt; <span class="fn">setCount</span>(c =&gt; c + <span class="st">1</span>), []);</pre>
+  <p><code>useMemo</code> 同理,只是缓存的是「计算结果的值/对象」而非函数(详见<a class="xref" data-go="t7">Render·Hooks</a>)。</p>
+
+  <h3>④ 对比:类组件为什么没这些问题</h3>
+  <p>类组件的<b>实例只创建一次</b>并一直复用。<code>this</code>、方法引用在多次 <code>render</code> 之间<b>保持同一个</b>;<code>this.state</code> 是一个<b>可变对象</b>,你读 <code>this.state.count</code> 总能拿到最新值。所以类组件里:</p>
+  <ul class="clean">
+    <li>方法引用天然稳定,不会因为「重新执行函数体」而每次都变(但要注意手动 <code>bind</code> / 箭头属性)。</li>
+    <li>没有「函数组件那种每帧一套闭包」的问题——代价是换成了 <code>this</code> 指向、生命周期分散等另一类心智负担。</li>
+  </ul>
+
+  <div class="card" style="border-left:4px solid var(--warn)">
+    <h3 style="margin-top:0">用一条时间线看旧闭包</h3>
+    <pre><span class="kw">function</span> <span class="fn">delayedIncrement</span>() {
+  <span class="fn">setTimeout</span>(() =&gt; {
+    <span class="fn">setCount</span>(count + <span class="st">1</span>); <span class="cm">// 这里读取的是点击按钮时那次渲染的 count</span>
+  }, <span class="st">2000</span>);
+}</pre>
+    <div class="flow" style="margin-top:14px">
+      <div class="flowbox" style="border-color:var(--accent);text-align:left"><b style="color:var(--accent)">① 点击按钮</b><p style="font-size:12.5px">此时 <code>count = 0</code>。定时器回调在这次渲染中创建，因此回调里的 <code>count</code> 是 0。</p></div>
+      <div class="arrow">→</div>
+      <div class="flowbox" style="border-color:var(--fiber);text-align:left"><b style="color:var(--fiber)">② 等待期间</b><p style="font-size:12.5px">其他更新让页面上的 <code>count</code> 变成 2。组件已经重新渲染，但先前创建的回调没有变化。</p></div>
+      <div class="arrow">→</div>
+      <div class="flowbox" style="border-color:var(--warn);text-align:left"><b style="color:var(--warn)">③ 定时器执行</b><p style="font-size:12.5px">旧回调仍计算 <code>0 + 1</code>，于是调用 <code>setCount(1)</code>，而不是在当前值 2 上加 1。</p></div>
+    </div>
+    <div class="callout good" style="margin-bottom:0"><b>需要基于最新状态计算时，使用函数式更新：</b><code>setCount(c =&gt; c + 1)</code>。React 调用更新函数时传入当前状态；若当前值是 2，结果就是 3。</div>
+  </div>
+
+  <h2><span class="dot" style="background:var(--sched)"></span>重新渲染的全部触发条件</h2>
+  <ul class="clean">
+    <li><b>state 变化</b>:<code>setState</code> / <code>useState</code> 的 dispatch(且新旧值不同,详见 bailout)。</li>
+    <li><b>props 变化</b>:父组件重渲染,把新 props 传下来。<b>注意:父重渲染,子默认也会重渲染,哪怕 props 没变</b>。</li>
+    <li><b>context 变化</b>:<code>Provider</code> 的 value 变了,所有消费该 context 的组件重渲染(绕过 memo)。</li>
+    <li><b>父组件重渲染</b>:这是最容易被忽略的一条——默认情况下父渲染 = 整棵子树重渲染。</li>
+    <li><b>强制</b>:类组件 <code>forceUpdate</code>、hooks 里 <code>useReducer</code> dispatch 相同引用也可能触发一次。</li>
+  </ul>
+
+  <h2><span class="dot" style="background:var(--recon)"></span>如何阻止无效重渲染</h2>
+  <table class="simple">
+    <tr><th>API</th><th>缓存什么</th><th>解决什么</th></tr>
+    <tr><td><code>React.memo(Comp)</code></td><td>组件本身</td><td>props 浅比较相等就跳过(bailout)父级带来的无效重渲染</td></tr>
+    <tr><td><code>useMemo(fn,deps)</code></td><td>计算结果(值)</td><td>避免每次渲染重复昂贵计算;稳定传给 memo 子组件的对象引用</td></tr>
+    <tr><td><code>useCallback(fn,deps)</code></td><td>函数引用</td><td>= <code>useMemo(()=>fn,deps)</code>,稳定回调引用,配合 memo 子组件才有效</td></tr>
+  </table>
+  <div class="callout warn">常见误区:给普通子组件传 <code>useCallback</code> 但子组件没包 <code>memo</code> —— 完全无效,因为父一渲染子照样渲染。三者要<b>成对使用</b>才生效。</div>
+
+  <div class="callout"><b>什么是 bailout(提前退出)?</b> React 处理每个组件时会先问一句:「它有必要重渲染吗?」如果 <b>props 引用没变、自身没有待处理的 state 更新、context 也没变</b>,React 就<b>直接复用上一次的结果、跳过它连同整棵子树</b>——这个「跳过」动作就叫 <b>bailout</b>。<code>React.memo</code> 命中时就是靠它跳过。完整条件见<a class="xref" data-go="t20">第六层·渲染优化</a>。</div>
+
+  <div class="callout" style="border-color:var(--sched);background:rgba(242,184,75,.08)"><b>默认行为：</b>组件重新渲染时，它的子组件也会重新渲染，即使子组件的 props 没有变化。使用 <code>React.memo</code> 后，React 可以在 props 未变化时跳过该子组件。</div>
+
+  <div class="card">
+    <h3 style="margin-top:0">互动：哪些组件会重新渲染</h3>
+    <div class="demo-guide">
+      <b>操作顺序：</b><br>
+      ① 依次点击前两个按钮，观察 Child 自己发生更新时的结果。<br>
+      ② 不勾选 <code>React.memo</code>，点击“父组件更新”，观察 Child 是否执行。<br>
+      ③ 勾选 <code>React.memo</code>，再次点击同一个按钮，对比 Child 的变化。
+    </div>
+    <div class="legend"><span><i class="sw" style="background:rgba(255,123,156,.30);border:1px solid var(--render)"></i>红色：本次重新渲染</span><span><i class="sw" style="background:var(--panel2);border:1px solid var(--line)"></i>灰色：本次未渲染或被跳过</span></div>
+    <div id="rrTree" style="margin:10px 0"></div>
+    <div class="controls">
+      <button class="act" id="rrState">① Child 的 state 更新</button>
+      <button class="act" id="rrProps">② Child 收到的新 props</button>
+      <button class="act" id="rrParent">③ 只有父组件更新（props 不变）</button>
+      <label style="font-size:12px;color:var(--txt2);display:flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:8px;padding:7px 10px;background:var(--panel2)"><input type="checkbox" id="rrMemo">为 Child 启用 React.memo</label>
+      <button class="ghost" id="rrReset">重置</button>
+    </div>
+    <div class="status" id="rrStatus">从按钮①开始。每次点击后，红色节点表示这次执行了组件函数。</div>
+  </div>
+  <div class="callout good"><b>本章小结：</b>组件渲染 = 被 React 调用产出 JSX;<b>state / props / context / 父级</b>变化都会触发重渲染,而且默认<b>父渲染子必渲染</b>;想精准控制就用 <code>memo</code> + <code>useMemo</code>/<code>useCallback</code> 触发 bailout 跳过。→ 下一章:<a class="xref" data-go="t2">第一层·虚拟 DOM</a>,看这些 JSX 到底变成了什么。</div>
+  <div class="navbtns"><button class="ghost" data-go="journey">← ★一次 setState 的完整旅程</button><button class="act" data-go="t2">2虚拟 DOM 真实含义 →</button></div>
+</section></main>
+<script src="./assets/site.js"></script>
+<script src="./assets/demos.js"></script>
+</body>
+</html>

@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+<title>Concurrent 并发渲染 · React 原理全景</title>
+<script>
+  const embedParams = new URLSearchParams(location.search);
+  if (embedParams.get('embed') === '1') document.documentElement.classList.add('is-embed');
+  if (embedParams.get('theme') === 'light') document.documentElement.classList.add('embed-light');
+</script>
+<link rel="stylesheet" href="./assets/site.css">
+</head>
+<body data-chapter="t14">
+<aside id="side">
+  <div class="brand">⚛️ React 原理全景</div>
+  <button class="themebtn" id="themeBtn"><span class="ic">🌙</span><span id="themeLabel">切换到浅色模式</span></button>
+  <a href="./intro.html" data-t="intro"><span class="n">◎</span>如何使用本页</a>
+  <div class="grp">更新流程</div>
+  <a href="./journey.html" data-t="journey"><span class="n">★</span>一次 setState 的完整旅程</a>
+  <div class="grp">第一层 · 表层原理</div>
+  <a href="./t1.html" data-t="t1"><span class="n">1</span>组件渲染机制</a>
+  <a href="./t2.html" data-t="t2"><span class="n">2</span>虚拟 DOM 真实含义</a>
+  <a href="./t3.html" data-t="t3"><span class="n">3</span>生命周期执行顺序</a>
+  <div class="grp">第二层 · 一次更新的主线</div>
+  <a href="./t4.html" data-t="t4"><span class="n">4</span>更新的四个阶段</a>
+  <div class="grp">阶段一 · Trigger 触发</div>
+  <a href="./t9.html" data-t="t9"><span class="n">5</span>UpdateQueue：更新入队</a>
+  <div class="grp">阶段二 · Schedule 调度</div>
+  <a href="./t13.html" data-t="t13"><span class="n">6</span>Lane：选择更新</a>
+  <a href="./t12.html" data-t="t12"><span class="n">7</span>Scheduler：安排执行</a>
+  <div class="grp">阶段三 · Render 计算</div>
+  <a href="./t8.html" data-t="t8"><span class="n">8</span>Fiber：可中断工作单元</a>
+  <a href="./t5.html" data-t="t5"><span class="n">9</span>双缓存 Fiber 树</a>
+  <a href="./t7.html" data-t="t7"><span class="n">10</span>Hooks：读取与计算状态</a>
+  <a href="./t6.html" data-t="t6"><span class="n">11</span>Diff：协调子节点</a>
+  <a href="./t10.html" data-t="t10"><span class="n">12</span>flags：记录变更</a>
+  <div class="grp">阶段四 · Commit 提交</div>
+  <a href="./t11.html" data-t="t11"><span class="n">13</span>Commit：应用变更</a>
+  <div class="grp">并发延伸</div>
+  <a href="./t14.html" data-t="t14" class="active" aria-current="page"><span class="n">14</span>Concurrent 并发渲染</a>
+  <a href="./t15.html" data-t="t15"><span class="n">15</span>两大并发 API</a>
+  <div class="grp">架构交互</div>
+  <a href="./t16.html" data-t="t16"><span class="n">16</span>三大模块协作</a>
+  <a href="./t17.html" data-t="t17"><span class="n">17</span>批量更新原理</a>
+  <a href="./t18.html" data-t="t18"><span class="n">18</span>Suspense / lazy</a>
+  <a href="./t19.html" data-t="t19"><span class="n">19</span>合成事件系统</a>
+  <div class="grp">性能优化</div>
+  <a href="./t20.html" data-t="t20"><span class="n">20</span>渲染优化底层</a>
+  <a href="./t21.html" data-t="t21"><span class="n">21</span>渲染 bug 底层解释</a>
+  <div class="grp">高级实践与新架构</div>
+  <a href="./t22.html" data-t="t22"><span class="n">22</span>SSR / Hydration / 流式</a>
+  <a href="./t23.html" data-t="t23"><span class="n">23</span>Server Components</a>
+  <a href="./t24.html" data-t="t24"><span class="n">24</span>React 19 新特性</a>
+  <a href="./t25.html" data-t="t25"><span class="n">25</span>外部状态与撕裂</a>
+  <a href="./t26.html" data-t="t26"><span class="n">26</span>React Compiler</a>
+  <a href="./t27.html" data-t="t27"><span class="n">27</span>高级模式与陷阱</a>
+  <a href="./t28.html" data-t="t28"><span class="n">28</span>性能诊断与工程化</a>
+  <div class="grp">补充专题 · 常被漏掉的核心</div>
+  <a href="./ctx.html" data-t="ctx"><span class="n">C1</span>Context 源码原理</a>
+  <a href="./ref.html" data-t="ref"><span class="n">C2</span>useRef 与 ref 体系</a>
+  <div class="grp">源码附录 · 按需查阅</div>
+  <a href="./pk.html" data-t="pk"><span class="n">A1</span>宏观包结构</a>
+  <a href="./boot.html" data-t="boot"><span class="n">A2</span>启动过程</a>
+  <a href="./obj.html" data-t="obj"><span class="n">A3</span>核心对象速查</a>
+  <a href="./source.html" data-t="source"><span class="n">A4</span>源码阅读路线</a>
+  <div class="grp">总结</div>
+  <a href="./main.html" data-t="main"><span class="n">★</span>React 更新流程总览</a>
+</aside>
+<main id="main"><section class="topic active" id="t14">
+  <div class="crumb">第四层 · 并发架构 / 14</div>
+  <h1>14 · 并发渲染 Concurrent Mode</h1>
+  <div style="display:flex;flex-wrap:wrap;gap:3px;align-items:center;font-family:var(--mono);font-size:10.5px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:7px 10px;margin:6px 0 14px;overflow-x:auto"><b style="color:var(--txt2);margin-right:4px;font-family:inherit">🧭 主线</b><span data-go="t4" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">setState</span><span style="color:var(--dim)">→</span><span data-go="t9" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">Update</span><span style="color:var(--dim)">→</span><span data-go="t13" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">Lane</span><span style="color:var(--dim)">→</span><span data-go="t12" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:rgba(97,218,251,.22);border:1.5px solid var(--accent);color:var(--accent);font-weight:700">Scheduler</span><span style="color:var(--dim)">→</span><span data-go="t8" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:rgba(97,218,251,.22);border:1.5px solid var(--accent);color:var(--accent);font-weight:700">Render</span><span style="color:var(--dim)">→</span><span data-go="t10" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">Effect</span><span style="color:var(--dim)">→</span><span data-go="t11" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">Commit</span><span style="color:var(--dim)">→</span><span data-go="t11" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">DOM</span></div>
+  <div class="card" style="border-left:4px solid var(--accent)">
+    <b>🗺 本章路线图</b>
+    <p style="margin:8px 0 0">并发 = <b>可中断、可恢复、可抢占</b>;能被中断的是 <code>workLoop</code> 这个 while 循环,不是任何函数。</p>
+    <p style="margin:6px 0 0">本章包括：<b>① workLoop 可中断原理 ② 为何只有 Render 可中断 ③ 中断后丢弃 WIP ④ 靠 baseQueue 恢复</b>。</p>
+  </div>
+  <p>并发渲染建立在 Render 阶段可以暂停的基础上。这里需要区分两种情况：</p>
+  <div class="grid2">
+    <div class="card" style="border-color:rgba(126,231,135,.5)">
+      <h3 style="margin-top:0;color:var(--recon)">停法①:时间片让位(暂停,不丢)</h3>
+      <p style="font-size:13px;margin:0">每片约 5ms,<code>shouldYield()</code> 为真就 <code>break</code>。<b>这不是丢弃!</b><code>workInProgress</code> 指针原地保留,<code>performConcurrentWorkOnRoot</code> <b>返回「自己」作为续作</b>,下一个时间片从原地接着跑。<b>同一次渲染,只是切成了好几片。</b></p>
+    </div>
+    <div class="card" style="border-color:rgba(255,107,107,.5)">
+      <h3 style="margin-top:0;color:var(--warn)">停法②:高优抢占(丢弃,重来)</h3>
+      <p style="font-size:13px;margin:0">渲染低优期间,来了<b>更高优</b>的更新。<code>ensureRootIsScheduled</code> 发现后<b>取消当前任务、重排高优</b>。<b>这次才丢弃半成品 WIP</b>,从 current 重建、先渲染高优。低优之后再从头来过。</p>
+    </div>
+  </div>
+  <pre><span class="kw">function</span> <span class="fn">workLoopConcurrent</span>(){
+  <span class="kw">while</span>(workInProgress !== <span class="kw">null</span> &amp;&amp; !<span class="fn">shouldYield</span>()){ <span class="cm">// ★每处理完一个单元就检查</span>
+    <span class="fn">performUnitOfWork</span>(workInProgress);            <span class="cm">// 处理一个 fiber,瞬间完成</span>
+  }                                                <span class="cm">// 用完 5ms 就 break(指针保留)</span>
+}</pre>
+
+  <h2><span class="dot" style="background:var(--accent)"></span>渲染入口:renderRootConcurrent + prepareFreshStack</h2>
+  <p>上面两种「停」的区别,全在这段入口逻辑里:</p>
+  <pre><span class="kw">function</span> <span class="fn">performConcurrentWorkOnRoot</span>(root){
+  <span class="kw">const</span> lanes = <span class="fn">getNextLanes</span>(root);
+  <span class="kw">const</span> status = <span class="fn">renderRootConcurrent</span>(root, lanes);
+  <span class="kw">if</span>(status === RootInProgress){        <span class="cm">// 被时间片打断、还没渲完</span>
+<span class="hl">    <span class="kw">return</span> performConcurrentWorkOnRoot.bind(<span class="kw">null</span>, root); <span class="cm">// ★返回自己=续作,下片继续</span></span>
+  }
+  <span class="fn">commitRoot</span>(root);                      <span class="cm">// 渲完了才提交</span>
+}
+<span class="kw">function</span> <span class="fn">renderRootConcurrent</span>(root, lanes){
+  <span class="kw">if</span>(workInProgressRoot !== root || workInProgressRootRenderLanes !== lanes){
+    <span class="fn">prepareFreshStack</span>(root, lanes);   <span class="cm">// 优先级变了 → 以 current 建全新 WIP(丢弃旧的)</span>
+  }                                     <span class="cm">// 优先级没变(时间片续作)→ 不重建,接着旧 WIP 跑</span>
+  <span class="fn">workLoopConcurrent</span>();
+}</pre>
+  <p style="font-size:12.5px;color:var(--dim)">关键:<b>时间片续作</b>时 lanes 没变 → 跳过 prepareFreshStack,接着旧 WIP;<b>抢占</b>时 lanes 变了 → prepareFreshStack 用 <code>createWorkInProgress</code> 从 current 重建根 WIP,旧的半成品被丢弃。</p>
+
+  <h2><span class="dot" style="background:var(--recon)"></span>为什么只有 Render 阶段可中断</h2>
+  <p>Render 是<b>纯内存计算、无副作用</b>——WIP 只是内存对象,丢了重来没代价,用户也看不见(屏幕上一直是完好的 current 树)。Commit 直接改真实 DOM + 触发生命周期,<b>有外部副作用,中途停会画面撕裂、副作用重复</b>,所以必须同步、不可断。</p>
+
+  <h2><span class="dot" style="background:var(--warn)"></span>抢占的完整时间线(看一遍就懂)</h2>
+  <div class="card">
+    <p style="font-size:13px;margin:0 0 10px">场景:正在低优渲染一个大列表,渲到一半你点了个按钮(高优)。</p>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-family:var(--mono)">
+      <span style="padding:6px 9px;border:1px solid var(--fiber);background:rgba(167,139,250,.12);color:var(--fiber);border-radius:8px;font-size:11.5px;white-space:nowrap">低优·片1</span><span style="padding:6px 9px;border:1px solid var(--fiber);background:rgba(167,139,250,.12);color:var(--fiber);border-radius:8px;font-size:11.5px;white-space:nowrap">低优·片2</span>
+      <span style="color:var(--warn);font-weight:700">⚡ 你点击(高优 setState)</span>
+      <span style="padding:6px 9px;border:1px solid var(--dim);background:var(--panel2);color:var(--dim);border-radius:8px;font-size:11.5px;white-space:nowrap">丢弃低优 WIP</span><span style="color:var(--dim)">→</span>
+      <span style="padding:6px 9px;border:1px solid var(--warn);background:rgba(255,107,107,.12);color:var(--warn);border-radius:8px;font-size:11.5px;white-space:nowrap">高优·片1</span><span style="padding:6px 9px;border:1px solid var(--recon);background:rgba(126,231,135,.14);color:var(--recon);border-radius:8px;font-size:11.5px;white-space:nowrap">commit 高优 ✨</span><span style="color:var(--dim)">→</span>
+      <span style="padding:6px 9px;border:1px solid var(--fiber);background:rgba(167,139,250,.12);color:var(--fiber);border-radius:8px;font-size:11.5px;white-space:nowrap">重新渲低优·片1</span><span style="padding:6px 9px;border:1px solid var(--fiber);background:rgba(167,139,250,.12);color:var(--fiber);border-radius:8px;font-size:11.5px;white-space:nowrap">片2</span><span style="padding:6px 9px;border:1px solid var(--recon);background:rgba(126,231,135,.14);color:var(--recon);border-radius:8px;font-size:11.5px;white-space:nowrap">commit 低优 ✨</span>
+    </div>
+    <p style="font-size:12px;color:var(--dim);margin:10px 0 0">高优插队 → 丢弃低优半成品 → 先把高优渲染并上屏(你的点击立刻有反应)→ 再从头重渲低优。全程屏幕上都是完好画面,你感觉「点哪都跟手」。</p>
+  </div>
+
+  <div class="callout"><b>丢了低优 WIP,那它算了一半的 state 呢?</b> 靠 <a class="xref" data-go="t9">Trigger·UpdateQueue</a> 的 <code>baseQueue</code>:被跳过/未消费的 update 都存在 baseQueue 里,重跑时从 <code>baseState + baseQueue</code> 重新 reduce,结果依然正确。这就是"可恢复"的底层保证。</p>
+  <div class="card">
+    <h3 style="margin-top:0">互动:递归无法中断 vs 循环可中断+恢复</h3>
+    <div class="demo-guide"><b>怎么操作：</b>点击开始，处理过程中立即点击“插入高优任务”。左侧观察调用栈为何不能保存中间位置，右侧观察 <code>workInProgress</code> 指针如何暂停并恢复。</div>
+    <div class="grid2">
+      <div><div style="font-size:12px;color:var(--warn);margin-bottom:6px">递归:调用栈(无法暂停)</div><div class="loopbox" id="stackBox" style="border-color:var(--warn);background:rgba(255,107,107,.06)"></div></div>
+      <div><div style="font-size:12px;color:var(--recon);margin-bottom:6px">循环:workInProgress 指针(可存档)</div><div class="loopbox" id="loopBox"></div></div>
+    </div>
+    <div class="controls"><button class="act" id="intStart">▶ 处理 6 个单元</button><button class="warn" id="intInterrupt" disabled style="border:none">⚡ 插入高优任务</button><button class="ghost" id="intReset">重置</button></div>
+    <div class="status" id="intStatus">点开始,中途点⚡看谁能立刻让位并恢复。</div>
+  </div>
+  <div class="callout good"><b>本章小结：</b>Render 纯内存计算、可丢弃重来 → 可中断;Commit 有副作用 → 不可中断。被抢占就丢弃 WIP、从 current 重建,未执行的 update 存 baseQueue 保证结果正确。→ 下一章:<a class="xref" data-go="t15">第四层·并发 API</a>。</div>
+  <div class="navbtns"><button class="ghost" data-go="t11">← 13Commit：应用变更</button><button class="act" data-go="t15">15两大并发 API →</button></div>
+</section></main>
+<script src="./assets/site.js"></script>
+<script src="./assets/demos.js"></script>
+</body>
+</html>

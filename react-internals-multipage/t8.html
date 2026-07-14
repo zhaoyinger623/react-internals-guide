@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+<title>Fiber：可中断工作单元 · React 原理全景</title>
+<script>
+  const embedParams = new URLSearchParams(location.search);
+  if (embedParams.get('embed') === '1') document.documentElement.classList.add('is-embed');
+  if (embedParams.get('theme') === 'light') document.documentElement.classList.add('embed-light');
+</script>
+<link rel="stylesheet" href="./assets/site.css">
+</head>
+<body data-chapter="t8">
+<aside id="side">
+  <div class="brand">⚛️ React 原理全景</div>
+  <button class="themebtn" id="themeBtn"><span class="ic">🌙</span><span id="themeLabel">切换到浅色模式</span></button>
+  <a href="./intro.html" data-t="intro"><span class="n">◎</span>如何使用本页</a>
+  <div class="grp">更新流程</div>
+  <a href="./journey.html" data-t="journey"><span class="n">★</span>一次 setState 的完整旅程</a>
+  <div class="grp">第一层 · 表层原理</div>
+  <a href="./t1.html" data-t="t1"><span class="n">1</span>组件渲染机制</a>
+  <a href="./t2.html" data-t="t2"><span class="n">2</span>虚拟 DOM 真实含义</a>
+  <a href="./t3.html" data-t="t3"><span class="n">3</span>生命周期执行顺序</a>
+  <div class="grp">第二层 · 一次更新的主线</div>
+  <a href="./t4.html" data-t="t4"><span class="n">4</span>更新的四个阶段</a>
+  <div class="grp">阶段一 · Trigger 触发</div>
+  <a href="./t9.html" data-t="t9"><span class="n">5</span>UpdateQueue：更新入队</a>
+  <div class="grp">阶段二 · Schedule 调度</div>
+  <a href="./t13.html" data-t="t13"><span class="n">6</span>Lane：选择更新</a>
+  <a href="./t12.html" data-t="t12"><span class="n">7</span>Scheduler：安排执行</a>
+  <div class="grp">阶段三 · Render 计算</div>
+  <a href="./t8.html" data-t="t8" class="active" aria-current="page"><span class="n">8</span>Fiber：可中断工作单元</a>
+  <a href="./t5.html" data-t="t5"><span class="n">9</span>双缓存 Fiber 树</a>
+  <a href="./t7.html" data-t="t7"><span class="n">10</span>Hooks：读取与计算状态</a>
+  <a href="./t6.html" data-t="t6"><span class="n">11</span>Diff：协调子节点</a>
+  <a href="./t10.html" data-t="t10"><span class="n">12</span>flags：记录变更</a>
+  <div class="grp">阶段四 · Commit 提交</div>
+  <a href="./t11.html" data-t="t11"><span class="n">13</span>Commit：应用变更</a>
+  <div class="grp">并发延伸</div>
+  <a href="./t14.html" data-t="t14"><span class="n">14</span>Concurrent 并发渲染</a>
+  <a href="./t15.html" data-t="t15"><span class="n">15</span>两大并发 API</a>
+  <div class="grp">架构交互</div>
+  <a href="./t16.html" data-t="t16"><span class="n">16</span>三大模块协作</a>
+  <a href="./t17.html" data-t="t17"><span class="n">17</span>批量更新原理</a>
+  <a href="./t18.html" data-t="t18"><span class="n">18</span>Suspense / lazy</a>
+  <a href="./t19.html" data-t="t19"><span class="n">19</span>合成事件系统</a>
+  <div class="grp">性能优化</div>
+  <a href="./t20.html" data-t="t20"><span class="n">20</span>渲染优化底层</a>
+  <a href="./t21.html" data-t="t21"><span class="n">21</span>渲染 bug 底层解释</a>
+  <div class="grp">高级实践与新架构</div>
+  <a href="./t22.html" data-t="t22"><span class="n">22</span>SSR / Hydration / 流式</a>
+  <a href="./t23.html" data-t="t23"><span class="n">23</span>Server Components</a>
+  <a href="./t24.html" data-t="t24"><span class="n">24</span>React 19 新特性</a>
+  <a href="./t25.html" data-t="t25"><span class="n">25</span>外部状态与撕裂</a>
+  <a href="./t26.html" data-t="t26"><span class="n">26</span>React Compiler</a>
+  <a href="./t27.html" data-t="t27"><span class="n">27</span>高级模式与陷阱</a>
+  <a href="./t28.html" data-t="t28"><span class="n">28</span>性能诊断与工程化</a>
+  <div class="grp">补充专题 · 常被漏掉的核心</div>
+  <a href="./ctx.html" data-t="ctx"><span class="n">C1</span>Context 源码原理</a>
+  <a href="./ref.html" data-t="ref"><span class="n">C2</span>useRef 与 ref 体系</a>
+  <div class="grp">源码附录 · 按需查阅</div>
+  <a href="./pk.html" data-t="pk"><span class="n">A1</span>宏观包结构</a>
+  <a href="./boot.html" data-t="boot"><span class="n">A2</span>启动过程</a>
+  <a href="./obj.html" data-t="obj"><span class="n">A3</span>核心对象速查</a>
+  <a href="./source.html" data-t="source"><span class="n">A4</span>源码阅读路线</a>
+  <div class="grp">总结</div>
+  <a href="./main.html" data-t="main"><span class="n">★</span>React 更新流程总览</a>
+</aside>
+<main id="main"><section class="topic active" id="t8">
+  <div class="crumb">阶段三 · Render / 08</div>
+  <h1>8 · Fiber：可中断的工作单元</h1>
+  <div style="display:flex;flex-wrap:wrap;gap:3px;align-items:center;font-family:var(--mono);font-size:10.5px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:7px 10px;margin:6px 0 14px;overflow-x:auto"><b style="color:var(--txt2);margin-right:4px;font-family:inherit">🧭 主线</b><span data-go="t4" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">setState</span><span style="color:var(--dim)">→</span><span data-go="t9" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">Update</span><span style="color:var(--dim)">→</span><span data-go="t13" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">Lane</span><span style="color:var(--dim)">→</span><span data-go="t12" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">Scheduler</span><span style="color:var(--dim)">→</span><span data-go="t8" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:rgba(97,218,251,.22);border:1.5px solid var(--accent);color:var(--accent);font-weight:700">Render</span><span style="color:var(--dim)">→</span><span data-go="t10" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">Effect</span><span style="color:var(--dim)">→</span><span data-go="t11" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">Commit</span><span style="color:var(--dim)">→</span><span data-go="t11" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">DOM</span></div>
+  <div class="card" style="border-left:4px solid var(--accent)">
+    <b>🗺 本章路线图</b>
+    <p style="margin:8px 0 0">Fiber 既是一种<b>数据结构</b>(带指针的对象),也是一个<b>可拆分、可中断的工作单元</b>。</p>
+    <p style="margin:6px 0 0">本章包括：<b>① Fiber 字段含义 ② tag(节点类型)③ beginWork/completeWork 各干什么</b>(深度优先遍历)。</p>
+  </div>
+  <h2><span class="dot" style="background:var(--fiber)"></span>Fiber 节点字段含义</h2>
+  <pre><span class="kw">const</span> fiber = {
+  <span class="cm">// —— 身份:我是谁 ——</span>
+  tag,            <span class="cm">// 类型标记(FunctionComponent/HostComponent/HostRoot...)</span>
+  key,            <span class="cm">// 元素的 key</span>
+  type,           <span class="cm">// 元素类型(组件函数 / 'div')</span>
+  stateNode,      <span class="cm">// 关联实例:DOM 节点 / class 实例 / fiberRoot</span>
+  <span class="cm">// —— 链表指针:构成树,可暂停/恢复 ——</span>
+  return,         <span class="cm">// 父 fiber</span>
+  child,          <span class="cm">// 第一个子 fiber</span>
+  sibling,        <span class="cm">// 下一个兄弟 fiber</span>
+  index,          <span class="cm">// 在兄弟中的位置(多节点 Diff 用)</span>
+  <span class="cm">// —— 工作数据 ——</span>
+  pendingProps,   <span class="cm">// 新 props(本次待处理)</span>
+  memoizedProps,  <span class="cm">// 上次渲染用的 props</span>
+  memoizedState,  <span class="cm">// class:state / 函数:hooks 链表头</span>
+  updateQueue,    <span class="cm">// 更新队列 / effect 链表</span>
+  <span class="cm">// —— 调度 &amp; 副作用 ——</span>
+  lanes,          <span class="cm">// 本 fiber 的优先级车道</span>
+  childLanes,     <span class="cm">// 子树是否有待处理更新(bailout 用)</span>
+  flags,          <span class="cm">// 副作用标记 Placement/Update/Deletion...</span>
+  subtreeFlags,   <span class="cm">// 子树副作用汇总(18 用它替代 effectList)</span>
+  deletions,      <span class="cm">// 待删除的子 fiber 数组</span>
+  <span class="cm">// —— 双缓存 ——</span>
+  alternate,      <span class="cm">// 指向另一棵树里的自己</span>
+};</pre>
+
+  <h2><span class="dot" style="background:var(--accent)"></span>tag:Fiber 到底是「哪种」节点</h2>
+  <p><code>tag</code> 表示 Fiber 的节点类型，<code>beginWork</code> 和 <code>completeWork</code> 会据此选择处理逻辑。常见取值如下：</p>
+  <table class="simple">
+    <tr><th>tag</th><th>对应</th><th>说明</th></tr>
+    <tr><td><code>HostRoot</code>(3)</td><td>根节点</td><td>整棵树的顶,stateNode 指向 fiberRoot</td></tr>
+    <tr><td><code>FunctionComponent</code>(0)</td><td>函数组件</td><td>渲染 = 调用函数;hooks 挂 memoizedState</td></tr>
+    <tr><td><code>ClassComponent</code>(1)</td><td>类组件</td><td>stateNode 是实例;state 挂 updateQueue</td></tr>
+    <tr><td><code>HostComponent</code>(5)</td><td>原生标签(div/span)</td><td>stateNode 指向真实 DOM</td></tr>
+    <tr><td><code>HostText</code>(6)</td><td>文本节点</td><td>纯文本</td></tr>
+    <tr><td><code>Fragment</code> / <code>ContextProvider</code> / <code>SuspenseComponent</code> …</td><td>特殊节点</td><td>各有专门的 begin/complete 处理</td></tr>
+  </table>
+  <p style="font-size:13px;color:var(--dim);margin-top:8px">括号里的数字（如 <code>HostRoot(3)</code>）是 <code>tag</code> 的实际值。<code>FunctionComponent</code>、<code>HostRoot</code> 和 <code>HostComponent</code> 是 <code>ReactWorkTags.js</code> 中定义的数字常量，因此源码可以通过 <code>switch(fiber.tag)</code> 区分节点类型。</p>
+
+  <h2><span class="dot" style="background:var(--recon)"></span>工作单元:可拆分、可中断</h2>
+  <p>每个 Fiber 就是一个"工作单元"。整棵树的协调 = 循环处理一个个工作单元,循环在单元之间可被 <code>shouldYield()</code> 打断(详见<a class="xref" data-go="t14">第四层·Concurrent</a>)。</p>
+
+  <h2><span class="dot" style="background:var(--sched)"></span>beginWork 与 completeWork:各干一件事</h2>
+  <p>Render 阶段主要通过下面两个函数遍历 Fiber 树：</p>
+  <div class="grid2">
+    <div class="card" style="border-color:rgba(126,231,135,.5)">
+      <h3 style="margin-top:0;color:var(--recon)">beginWork(往下)</h3>
+      <p style="margin:6px 0"><b>输入一个 fiber → 算出它的「子节点」。</b></p>
+      <p style="font-size:13px;margin:6px 0">怎么算:如果是函数组件,就<b>调用你写的函数</b>拿到返回的 JSX;然后把新旧子节点做 Diff,生成子 fiber。</p>
+      <p style="font-size:13px;margin:6px 0 0;color:var(--dim)">产物 = 子 fiber(带着往下走)。<b>它不碰真实 DOM。</b></p>
+    </div>
+    <div class="card" style="border-color:rgba(255,123,156,.5)">
+      <h3 style="margin-top:0;color:var(--render)">completeWork(往上)</h3>
+      <p style="margin:6px 0"><b>输入一个 fiber → 为它造好「真实 DOM」。</b></p>
+      <p style="font-size:13px;margin:6px 0">怎么造:<code>document.createElement</code> 建节点,把<b>已经造好的子 DOM</b> 塞进去,设置属性。</p>
+      <p style="font-size:13px;margin:6px 0 0;color:var(--dim)">产物 = 一个离屏 DOM 节点(带着往上走)。</p>
+    </div>
+  </div>
+  <div class="callout"><b>「把新旧子节点做 Diff,生成子 fiber」到底啥意思?</b> 先分清两个东西:你 <code>return</code> 的 JSX(如 <code>&lt;h1&gt;hi&lt;/h1&gt;</code>)只是<b>这次想要的「描述」,还不是 fiber</b>;而<b>上次渲染</b>已经为它生成过对应的<b>旧子 fiber</b>(存在 current 树上,带着真实 DOM 和 state)。beginWork 拿<b>新描述</b>和<b>旧 fiber</b> 逐个对比(这就是 Diff):<br>
+  · 新旧是同一个(key+type 相同)→ <b>复用旧 fiber</b>,只改属性。例:上次 <code>&lt;h1&gt;hi&lt;/h1&gt;</code>、这次 <code>&lt;h1&gt;bye&lt;/h1&gt;</code> → 还是 h1,复用那个 h1 fiber(连同它的 DOM),只把 hi 改成 bye,打个 Update;<br>
+  · 变了(如 <code>&lt;h1&gt;</code> 变 <code>&lt;p&gt;</code>)→ 删掉旧的、新建一个;新增/减少同理。<br>
+  <b>目的:能复用就复用,别每次把 fiber 和它的 DOM/state 全部重造。</b>产物就是这次的「子 fiber」(有的复用、有的新建)。<b>「复用」具体复用了什么(stateNode/memoizedState、createWorkInProgress)→ 见 <a class="xref" data-go="t5">Render·双缓存</a>。</b></div>
+  <p>光看定义还是抽象,<b>连起来走一个最小例子</b>最清楚。渲染这个组件:</p>
+  <pre>渲染 <span class="kw">function</span> <span class="fn">App</span>(){ <span class="kw">return</span> &lt;h1&gt;hi&lt;/h1&gt; }:
+
+<span class="st">①</span> beginWork(App)      <span class="cm">// 调用 App() → 得到 &lt;h1&gt;hi&lt;/h1&gt;,生成 h1 的 fiber</span>   <span style="color:var(--recon)">往下 ↓</span>
+<span class="st">②</span> beginWork(h1)       <span class="cm">// h1 的子是文本 "hi",生成文本 fiber</span>              <span style="color:var(--recon)">往下 ↓</span>
+<span class="st">③</span> beginWork("hi")     <span class="cm">// 文本没有子节点 → 返回 null,到底了</span>            <span style="color:var(--dim)">到底</span>
+<span class="st">④</span> completeWork("hi")  <span class="cm">// 创建文本节点 "hi"</span>                          <span style="color:var(--render)">往上 ↑</span>
+<span class="st">⑤</span> completeWork(h1)    <span class="cm">// 创建 &lt;h1&gt;,把 "hi" 塞进去 → &lt;h1&gt;hi&lt;/h1&gt;</span>    <span style="color:var(--render)">往上 ↑</span>
+<span class="st">⑥</span> completeWork(App)   <span class="cm">// 函数组件没有真实 DOM,跳过</span>                  <span style="color:var(--render)">往上 ↑</span></pre>
+  <div class="callout good"><b>看懂这张表就够了:</b>beginWork 一路<b>往下</b>,把 JSX 拆成一个个 fiber;completeWork 一路<b>往上</b>,把真实 DOM 一层层造出来、嵌套好。归到根节点时,一整棵 <code>&lt;h1&gt;hi&lt;/h1&gt;</code> 的<b>离屏 DOM</b> 就建好了,commit 时再一次性挂到页面。</div>
+
+  <details style="border:1px solid var(--line);border-radius:10px;padding:4px 14px;margin:14px 0">
+    <summary style="cursor:pointer;font-weight:700;color:var(--accent);padding:8px 0">点开：beginWork / completeWork 的源码骨架（读源码时看）</summary>
+    <p style="margin-top:10px"><b>1) 谁在驱动遍历</b>——<code>performUnitOfWork</code> 调 beginWork,拿到子节点就往下;没子节点就交给 <code>completeUnitOfWork</code> 往上走(靠 <code>sibling / return</code> 指针):</p>
+    <pre><span class="kw">function</span> <span class="fn">performUnitOfWork</span>(wip){
+  <span class="kw">const</span> next = <span class="fn">beginWork</span>(wip.alternate, wip, renderLanes);
+  <span class="kw">if</span>(next === <span class="kw">null</span>) <span class="fn">completeUnitOfWork</span>(wip); <span class="cm">// 没子节点 → 往上归</span>
+  <span class="kw">else</span>        workInProgress = next;              <span class="cm">// 有子节点 → 往下递</span>
+}
+<span class="kw">function</span> <span class="fn">completeUnitOfWork</span>(wip){
+  <span class="kw">let</span> node = wip;
+  <span class="kw">do</span> {
+    <span class="fn">completeWork</span>(node.alternate, node, renderLanes);
+    <span class="kw">if</span>(node.sibling){ workInProgress = node.sibling; <span class="kw">return</span>; } <span class="cm">// 有兄弟 → 去兄弟</span>
+    node = node.return; workInProgress = node;                    <span class="cm">// 没兄弟 → 回父节点</span>
+  } <span class="kw">while</span>(node);
+}</pre>
+    <p><b>2) beginWork 先判断这个 Fiber 是否真的需要重新计算。</b>如果它的 props、state 和 context 都没有需要处理的变化，React 会直接复用上一次的 Fiber 子树，不再执行组件和 Diff。源码把这种“确认没变化后提前退出”的优化叫作 <code>bailout</code>。</p>
+    <div class="callout" style="margin:8px 0"><b>可以先把 bailout 理解成“这条分支没变，跳过”。</b>如果不能跳过，<code>beginWork</code> 才会根据 <code>tag</code> 判断 Fiber 类型：函数组件就执行函数和 Hooks，类组件就调用 <code>render</code>，原生标签就读取 <code>props.children</code>；随后通过 <code>reconcileChildren</code> 比较子节点。</div>
+    <pre><span class="kw">function</span> <span class="fn">beginWork</span>(current, wip, renderLanes){
+  <span class="kw">switch</span>(wip.tag){
+    <span class="kw">case</span> FunctionComponent: <span class="kw">return</span> <span class="fn">updateFunctionComponent</span>(…); <span class="cm">// renderWithHooks:调你的函数、跑 Hooks</span>
+    <span class="kw">case</span> ClassComponent:    <span class="kw">return</span> <span class="fn">updateClassComponent</span>(…);    <span class="cm">// 调 instance.render()</span>
+    <span class="kw">case</span> HostRoot:          <span class="kw">return</span> <span class="fn">updateHostRoot</span>(…);          <span class="cm">// processUpdateQueue 取 &lt;App/&gt;</span>
+    <span class="kw">case</span> HostComponent:     <span class="kw">return</span> <span class="fn">updateHostComponent</span>(…);     <span class="cm">// 取 props.children</span>
+  } <span class="cm">// 每个分支最后都 reconcileChildren(做 Diff)并 return wip.child</span>
+}</pre>
+    <p><b>3) completeWork 内部</b>:首次挂载建 DOM 并把子 DOM 拼进去;更新则算属性差异打 Update;最后 <code>bubbleProperties</code> 把子树副作用冒泡进 <code>subtreeFlags</code>(即<a class="xref" data-go="t10">Render·变更标记</a>的收集):</p>
+    <pre><span class="kw">function</span> <span class="fn">completeWork</span>(current, wip){
+  <span class="kw">switch</span>(wip.tag){
+    <span class="kw">case</span> HostComponent:
+      <span class="kw">if</span>(current &amp;&amp; wip.stateNode){
+        <span class="fn">updateHostComponent</span>(current, wip, …);   <span class="cm">// 更新:diffProperties 算差异,打 Update</span>
+      } <span class="kw">else</span> {
+        <span class="kw">const</span> dom = <span class="fn">createInstance</span>(type, props); <span class="cm">// 首次:建真实 DOM</span>
+        <span class="fn">appendAllChildren</span>(dom, wip);             <span class="cm">// 把已造好的子 DOM 塞进去</span>
+        <span class="fn">finalizeInitialChildren</span>(dom, type, props); <span class="cm">// 设初始属性</span>
+        wip.stateNode = dom;
+      }
+      <span class="kw">break</span>;
+  }
+  <span class="fn">bubbleProperties</span>(wip); <span class="cm">// 汇总子树 flags → subtreeFlags</span>
+}</pre>
+  </details>
+  <div class="card">
+    <h3 style="margin-top:0">互动:单步走一遍 递→归 遍历</h3>
+    <div class="demo-guide"><b>怎么操作：</b>连续点击“下一步”。绿色表示 <code>beginWork</code> 向子节点前进，粉色表示 <code>completeWork</code> 完成节点并返回父级；只需跟随当前高亮节点。</div>
+    <svg id="traverse" viewBox="0 0 640 300" style="max-width:100%;height:auto;display:block;margin:auto"></svg>
+    <div class="controls" style="justify-content:center"><button class="act" id="travStep">下一步 ▸</button><button class="act" id="travAuto">▶ 自动</button><button class="ghost" id="travReset">重置</button></div>
+    <div class="legend" style="justify-content:center"><span><i class="sw" style="background:var(--recon)"></i> 绿 = beginWork(递·往下)</span><span><i class="sw" style="background:var(--render)"></i> 粉 = completeWork(归·往上)</span></div>
+    <div class="status" id="travStatus">点「下一步」:绿色=正在往下递,粉色=正在往上归。从 HostRoot 开始。</div>
+  </div>
+  <div class="callout good"><b>Render 的执行框架：</b><code>child/sibling/return</code> 让 React 逐个处理 Fiber 工作单元；<code>beginWork</code> 向下计算，<code>completeWork</code> 向上完成。下一章看 <a class="xref" data-go="t5">双缓存</a> 如何保存 current 与 workInProgress 两个版本。</div>
+  <div class="navbtns"><button class="ghost" data-go="t12">← 7Scheduler：安排执行</button><button class="act" data-go="t5">9双缓存 Fiber 树 →</button></div>
+</section></main>
+<script src="./assets/site.js"></script>
+<script src="./assets/demos.js"></script>
+</body>
+</html>

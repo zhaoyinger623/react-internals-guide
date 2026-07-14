@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+<title>双缓存 Fiber 树 · React 原理全景</title>
+<script>
+  const embedParams = new URLSearchParams(location.search);
+  if (embedParams.get('embed') === '1') document.documentElement.classList.add('is-embed');
+  if (embedParams.get('theme') === 'light') document.documentElement.classList.add('embed-light');
+</script>
+<link rel="stylesheet" href="./assets/site.css">
+</head>
+<body data-chapter="t5">
+<aside id="side">
+  <div class="brand">⚛️ React 原理全景</div>
+  <button class="themebtn" id="themeBtn"><span class="ic">🌙</span><span id="themeLabel">切换到浅色模式</span></button>
+  <a href="./intro.html" data-t="intro"><span class="n">◎</span>如何使用本页</a>
+  <div class="grp">更新流程</div>
+  <a href="./journey.html" data-t="journey"><span class="n">★</span>一次 setState 的完整旅程</a>
+  <div class="grp">第一层 · 表层原理</div>
+  <a href="./t1.html" data-t="t1"><span class="n">1</span>组件渲染机制</a>
+  <a href="./t2.html" data-t="t2"><span class="n">2</span>虚拟 DOM 真实含义</a>
+  <a href="./t3.html" data-t="t3"><span class="n">3</span>生命周期执行顺序</a>
+  <div class="grp">第二层 · 一次更新的主线</div>
+  <a href="./t4.html" data-t="t4"><span class="n">4</span>更新的四个阶段</a>
+  <div class="grp">阶段一 · Trigger 触发</div>
+  <a href="./t9.html" data-t="t9"><span class="n">5</span>UpdateQueue：更新入队</a>
+  <div class="grp">阶段二 · Schedule 调度</div>
+  <a href="./t13.html" data-t="t13"><span class="n">6</span>Lane：选择更新</a>
+  <a href="./t12.html" data-t="t12"><span class="n">7</span>Scheduler：安排执行</a>
+  <div class="grp">阶段三 · Render 计算</div>
+  <a href="./t8.html" data-t="t8"><span class="n">8</span>Fiber：可中断工作单元</a>
+  <a href="./t5.html" data-t="t5" class="active" aria-current="page"><span class="n">9</span>双缓存 Fiber 树</a>
+  <a href="./t7.html" data-t="t7"><span class="n">10</span>Hooks：读取与计算状态</a>
+  <a href="./t6.html" data-t="t6"><span class="n">11</span>Diff：协调子节点</a>
+  <a href="./t10.html" data-t="t10"><span class="n">12</span>flags：记录变更</a>
+  <div class="grp">阶段四 · Commit 提交</div>
+  <a href="./t11.html" data-t="t11"><span class="n">13</span>Commit：应用变更</a>
+  <div class="grp">并发延伸</div>
+  <a href="./t14.html" data-t="t14"><span class="n">14</span>Concurrent 并发渲染</a>
+  <a href="./t15.html" data-t="t15"><span class="n">15</span>两大并发 API</a>
+  <div class="grp">架构交互</div>
+  <a href="./t16.html" data-t="t16"><span class="n">16</span>三大模块协作</a>
+  <a href="./t17.html" data-t="t17"><span class="n">17</span>批量更新原理</a>
+  <a href="./t18.html" data-t="t18"><span class="n">18</span>Suspense / lazy</a>
+  <a href="./t19.html" data-t="t19"><span class="n">19</span>合成事件系统</a>
+  <div class="grp">性能优化</div>
+  <a href="./t20.html" data-t="t20"><span class="n">20</span>渲染优化底层</a>
+  <a href="./t21.html" data-t="t21"><span class="n">21</span>渲染 bug 底层解释</a>
+  <div class="grp">高级实践与新架构</div>
+  <a href="./t22.html" data-t="t22"><span class="n">22</span>SSR / Hydration / 流式</a>
+  <a href="./t23.html" data-t="t23"><span class="n">23</span>Server Components</a>
+  <a href="./t24.html" data-t="t24"><span class="n">24</span>React 19 新特性</a>
+  <a href="./t25.html" data-t="t25"><span class="n">25</span>外部状态与撕裂</a>
+  <a href="./t26.html" data-t="t26"><span class="n">26</span>React Compiler</a>
+  <a href="./t27.html" data-t="t27"><span class="n">27</span>高级模式与陷阱</a>
+  <a href="./t28.html" data-t="t28"><span class="n">28</span>性能诊断与工程化</a>
+  <div class="grp">补充专题 · 常被漏掉的核心</div>
+  <a href="./ctx.html" data-t="ctx"><span class="n">C1</span>Context 源码原理</a>
+  <a href="./ref.html" data-t="ref"><span class="n">C2</span>useRef 与 ref 体系</a>
+  <div class="grp">源码附录 · 按需查阅</div>
+  <a href="./pk.html" data-t="pk"><span class="n">A1</span>宏观包结构</a>
+  <a href="./boot.html" data-t="boot"><span class="n">A2</span>启动过程</a>
+  <a href="./obj.html" data-t="obj"><span class="n">A3</span>核心对象速查</a>
+  <a href="./source.html" data-t="source"><span class="n">A4</span>源码阅读路线</a>
+  <div class="grp">总结</div>
+  <a href="./main.html" data-t="main"><span class="n">★</span>React 更新流程总览</a>
+</aside>
+<main id="main"><section class="topic active" id="t5">
+  <div class="crumb">阶段三 · Render / 09</div>
+  <h1>9 · 双缓存 Fiber 树</h1>
+  <div style="display:flex;flex-wrap:wrap;gap:3px;align-items:center;font-family:var(--mono);font-size:10.5px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:7px 10px;margin:6px 0 14px;overflow-x:auto"><b style="color:var(--txt2);margin-right:4px;font-family:inherit">🧭 主线</b><span data-go="t4" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">setState</span><span style="color:var(--dim)">→</span><span data-go="t9" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">Update</span><span style="color:var(--dim)">→</span><span data-go="t13" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">Lane</span><span style="color:var(--dim)">→</span><span data-go="t12" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">Scheduler</span><span style="color:var(--dim)">→</span><span data-go="t8" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:rgba(97,218,251,.22);border:1.5px solid var(--accent);color:var(--accent);font-weight:700">Render</span><span style="color:var(--dim)">→</span><span data-go="t10" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">Effect</span><span style="color:var(--dim)">→</span><span data-go="t11" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">Commit</span><span style="color:var(--dim)">→</span><span data-go="t11" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">DOM</span></div>
+  <div class="card" style="border-left:4px solid var(--accent)">
+    <b>🗺 本章路线图</b>
+    <p style="margin:8px 0 0">React 同时维护<b>两棵 Fiber 树</b>——current(屏幕上显示的)和 workInProgress(内存里构建的),靠 <code>alternate</code> 互指,像双缓冲。</p>
+    <p style="margin:6px 0 0">本章包括：<b>① 两棵树什么关系 ② 怎么交替切换 ③ 为什么需要它 ④「复用」到底复用了什么</b>。</p>
+  </div>
+  <p>React 同时维护<b>两棵 Fiber 树</b>。它们不是两棵毫无关系的树:<b>两棵树上「同一个位置」的节点,是同一个组件的两个版本(两个 fiber 对象),彼此用 <code>alternate</code> 指针互指</b>——就像双缓冲绘图里的「前台画面」和「后台画布」。</p>
+  <div class="callout"><b>先理解 <code>alternate</code>:</b>current 树的节点 <code>A</code> 和 WIP 树里对应的节点 <code>A'</code>,满足 <code>A.alternate === A'</code> 且 <code>A'.alternate === A</code>。它们代表<b>同一个组件</b>,只是一个是「现在屏幕上的样子」、一个是「正在算的新样子」。构建 WIP 时,React 会尽量<b>复用</b> current 节点的 alternate(已有的 fiber 对象),而不是每次都 new。</div>
+  <div class="legend">
+    <span><i class="sw" style="background:#61dafb"></i> current 树(屏幕正显示)</span>
+    <span><i class="sw" style="background:#a78bfa"></i> workInProgress 树(内存中构建)</span>
+    <span><i class="sw" style="background:#f2b84b"></i> alternate 互指(同一 fiber 的两个版本)</span>
+  </div>
+  <div class="card">
+    <div class="demo-guide"><b>怎么操作：</b>点击“下一步”逐个构建右侧 WIP 树。重点看黄色虚线如何连接同一 Fiber 的两个版本，以及最后 <code>fiberRoot.current</code> 如何从左树切到右树。</div>
+    <svg id="dblbuf" viewBox="0 0 780 300" style="width:100%;height:auto"></svg>
+    <div class="controls" style="justify-content:center"><button class="act" id="swapStep">下一步 ▸</button><button class="act" id="swapAuto">▶ 自动播放</button><button class="ghost" id="swapReset">重置</button></div>
+    <div class="status" id="swapStatus" style="text-align:center">初始:current 树(蓝)在屏幕上,fiberRoot.current 指向它;WIP 尚未构建。点「下一步」。</div>
+  </div>
+  <h3>三个关键点</h3>
+  <ul class="clean">
+    <li><b>交替:</b>每次更新,以 current 为蓝本在内存构建 workInProgress。构建完,<code>fiberRoot.current</code> 指针从旧树切到新树 —— <b>一次指针切换 = 整屏更新</b>。</li>
+    <li><b>复用:</b>WIP 节点尽量复用 current 上的 <code>alternate</code>(已有的 fiber 对象),减少创建和 GC。旧树不丢,留作下次画布。</li>
+    <li><b>为什么需要它:</b>有两棵树,才能在内存里安全构建 WIP 的同时,current 保持完整可用。<b>被中断时直接丢弃 WIP,current 不受影响</b>,用户永远看到一致画面。这正是可中断渲染的根本。</li>
+  </ul>
+
+  <h2><span class="dot" style="background:var(--accent)"></span>「复用」到底复用了什么?(createWorkInProgress)</h2>
+  <p>先以一个普通组件 Fiber 为例，把两个配对对象叫作 <b>A</b> 和 <b>B</b>。React 更新时不是一直修改 current，也不是每次创建第三个对象，而是让 A、B 轮流充当 current 和 workInProgress：</p>
+  <table class="simple">
+    <tr><th>时间</th><th>current（屏幕对应的已提交结果）</th><th>workInProgress（正在计算）</th><th>发生什么</th></tr>
+    <tr><td>首次挂载完成</td><td><b>A</b></td><td>还没有</td><td><code>A.alternate = null</code></td></tr>
+    <tr><td>第一次更新</td><td><b>A</b></td><td><b>B（首次创建）</b></td><td>A、B 通过 <code>alternate</code> 互相指向</td></tr>
+    <tr><td>第一次提交后</td><td><b>B</b></td><td>A 留作下次使用</td><td><code>root.current</code> 从 A 切到 B</td></tr>
+    <tr><td>第二次更新</td><td><b>B</b></td><td><b>A（直接复用）</b></td><td>重置 A 的临时字段，在 A 上计算新结果</td></tr>
+  </table>
+  <div class="callout"><b>因此，复用 Fiber 对象指的是复用另一棵树中的配对对象。</b>第一次更新必须创建 B；从第二次更新开始，<code>current.alternate</code> 已经存在，只需清理上次计算留下的临时字段，然后再次使用。</div>
+
+  <h3>先看真正决定“创建还是复用”的代码</h3>
+  <pre><span class="kw">function</span> <span class="fn">createWorkInProgress</span>(current, pendingProps) {
+  <span class="kw">let</span> wip = current.alternate;
+
+  <span class="kw">if</span> (wip === <span class="kw">null</span>) {
+    <span class="cm">// 第一次更新：配对 Fiber 还不存在，只创建这一次</span>
+    wip = <span class="fn">createFiber</span>(current.tag, pendingProps, current.key);
+    wip.stateNode = current.stateNode;
+    wip.alternate = current;
+    current.alternate = wip;
+  } <span class="kw">else</span> {
+    <span class="cm">// 后续更新：直接拿已有的配对 Fiber</span>
+    wip.pendingProps = pendingProps;
+    wip.flags = NoFlags;
+    wip.subtreeFlags = NoFlags;
+    wip.deletions = <span class="kw">null</span>;
+  }
+
+  <span class="kw">return</span> wip;
+}</pre>
+  <p>上面的 <code>else</code> 就是“复用对象”的真实位置：没有调用 <code>createFiber</code>，而是拿到旧的 A 或 B，清掉上次 Render 留下的 flags，再把它当作新的工作区。</p>
+
+  <h3>为什么还要从 current 复制字段</h3>
+  <p>复用的是对象外壳，但本轮计算必须以上一次提交结果为起点，所以函数后半段还会把 current 的基线数据放到 wip：</p>
+  <pre><span class="cm">// 本轮计算的起点</span>
+wip.child = current.child;
+wip.memoizedProps = current.memoizedProps;
+wip.memoizedState = current.memoizedState;
+wip.updateQueue = current.updateQueue;
+wip.lanes = current.lanes;
+wip.childLanes = current.childLanes;</pre>
+  <table class="simple">
+    <tr><th>字段</th><th>为什么先带到 wip</th><th>本轮之后会怎样</th></tr>
+    <tr><td><code>stateNode</code></td><td>继续指向同一个 DOM 节点或类组件实例</td><td>属性变化时修改该 DOM，不重新创建</td></tr>
+    <tr><td><code>memoizedState</code></td><td>以上次提交的 state / Hook 链表为计算起点</td><td>处理 update 后，wip 保存本轮算出的新状态</td></tr>
+    <tr><td><code>memoizedProps</code></td><td>用于和新传入的 <code>pendingProps</code> 比较</td><td>Render 完成后记录本轮已经使用的 props</td></tr>
+    <tr><td><code>child</code></td><td>先取得旧子树，供 Diff 判断哪些子 Fiber 可以复用</td><td>Diff 后指向本轮得到的新子 Fiber</td></tr>
+  </table>
+  <div class="callout good"><b>把“复用”拆成两层就清楚了：</b>第一层，A/B 两个 Fiber 对象轮流作为工作区，避免反复创建对象；第二层，本轮的 wip Fiber 仍指向原来的 <code>stateNode</code>，并以上次 state 为计算起点，所以 DOM 和组件状态能够延续。只有 type 或 key 不匹配时，旧 Fiber 才会删除，并挂载新的 Fiber、DOM 和 state。</div>
+
+  <div class="callout good"><b>Render 的两棵树：</b>current 保存已提交界面，workInProgress 用于本次计算；Render 被中断时不会影响 current。下一章看 <a class="xref" data-go="t7">Hooks</a> 如何在执行组件时读取并计算状态。</div>
+  <div class="navbtns"><button class="ghost" data-go="t8">← 8Fiber：可中断工作单元</button><button class="act" data-go="t7">10Hooks：读取与计算状态 →</button></div>
+</section></main>
+<script src="./assets/site.js"></script>
+<script src="./assets/demos.js"></script>
+</body>
+</html>

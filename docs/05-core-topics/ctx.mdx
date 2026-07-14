@@ -3,40 +3,6 @@ title: Context 源码原理
 description: React 原理全景中的「Context 源码原理」，从运行机制继续深入源码。
 ---
 
-<div className="tutorial-chapter">
+import { EmbeddedChapter } from '../../theme/EmbeddedChapter';
 
-补充专题 · 常被漏掉的核心 / C1
-
-**🗺 本章路线图**
-
-很多人会用 useContext,却说不清「**为什么 Provider 一变,深层组件即使被 memo 包住也更新**」。
-
-本章包括：**值栈 push/pop、定向传播(为何穿透 memo)**。
-
-很多人只会用 `useContext`,但说不清「为什么 Provider 一变,深层组件即使被 memo 包住也会更新」。这背后是**值栈 + 定向传播**两套机制。
-
-## createContext 与值栈(stack)
-
-`createContext(default)` 返回一个对象,里面有 `Provider`、`Consumer` 和一个 `_currentValue`。渲染遇到 `&lt;Provider value=x&gt;` 时,reconciler 在 **beginWork 把旧值压栈、写入新值**,在 **completeWork 弹栈还原** —— 这样嵌套的同一个 Context 的多个 Provider 才能各自作用在自己的子树范围内。
-
-```js
-// beginWork 进入 Provider(pushProvider 简化)
-push(valueStack, context._currentValue);  // 旧值压栈
-context._currentValue = newValue;         // 写入本层新值
-// completeWork 离开 Provider(popProvider)
-context._currentValue = pop(valueStack);   // 还原为上层的值
-```
-
-<div className="tutorial-visual">
-<svg viewBox="0 0 900 210" style={{ width: "100%", height: "auto" }} fontFamily="ui-monospace,monospace"><defs><marker id="cxA" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" style={{ fill: "var(--accent)" }} /></marker></defs><text x="150" y="26" textAnchor="middle" style={{ fill: "var(--dim)" }} fontSize="11">进入 Provider(push)→ 处理子树 → 离开(pop)</text> <rect x="40" y="45" width="220" height="40" rx="8" style={{ fill: "rgba(167,139,250,.16)", stroke: "var(--fiber)" }} /><text x="150" y="70" textAnchor="middle" style={{ fill: "var(--txt)" }} fontSize="11">&lt;Provider value="A"> push A</text> <rect x="70" y="95" width="220" height="40" rx="8" style={{ fill: "rgba(167,139,250,.12)", stroke: "var(--fiber)" }} /><text x="180" y="120" textAnchor="middle" style={{ fill: "var(--txt)" }} fontSize="11">&lt;Provider value="B"> push B</text> <rect x="100" y="145" width="240" height="40" rx="8" style={{ fill: "rgba(97,218,251,.14)", stroke: "var(--accent)" }} /><text x="220" y="170" textAnchor="middle" style={{ fill: "var(--txt)" }} fontSize="11">useContext → 读到最近的 "B"</text> <text x="600" y="26" textAnchor="middle" style={{ fill: "var(--dim)" }} fontSize="11">valueStack(栈顶 = 当前生效值)</text> <rect x="520" y="45" width="160" height="34" rx="6" style={{ fill: "rgba(97,218,251,.14)", stroke: "var(--accent)" }} /><text x="600" y="67" textAnchor="middle" style={{ fill: "var(--txt)" }} fontSize="11">"B" ◀ 栈顶</text> <rect x="520" y="83" width="160" height="34" rx="6" style={{ fill: "var(--panel2)", stroke: "var(--line)" }} /><text x="600" y="105" textAnchor="middle" style={{ fill: "var(--txt2)" }} fontSize="11">"A"</text> <rect x="520" y="121" width="160" height="34" rx="6" style={{ fill: "var(--panel2)", stroke: "var(--line)" }} /><text x="600" y="143" textAnchor="middle" style={{ fill: "var(--dim)" }} fontSize="11">default</text> <text x="600" y="178" textAnchor="middle" style={{ fill: "var(--dim)" }} fontSize="9.5">离开 B 时 pop → 栈顶回到 "A"</text></svg>
-</div>
-
-## 定向传播:为什么能绕过 memo / bailout
-
-组件调用 `useContext(ctx)` 时,除了读值,还会把**当前 fiber 登记到该 context 的依赖上**。当 Provider 的 value 变化(`Object.is` 判不等),reconciler 执行 `propagateContextChange`:**从 Provider 向下深度遍历子树,凡是登记了该 context 的 fiber,直接给它标记一个更新 lane** —— 即使这条路径上有组件本可以 bailout(memo/props 没变),也会因为「有 context 依赖的待更新」而**被强制往下走到消费者**。这就是「Context 变化穿透 memo」的源码真相。
-
-**性能启示(呼应[第七层·高级模式与陷阱](/04-advanced/t27)):**正因为是「Provider 一变→所有消费者全更新」,才要**拆分 Context**(把频繁变和不常变的分开)、用 `useMemo` 稳定 value、或改用 `useSyncExternalStore`/状态库做**选择性订阅**(只让真正用到那块数据的组件更新)。
-
-**本章小结：**Context 的值靠一个「值栈」在 Provider 进出时 push/pop;value 变化时 `propagateContextChange` 从 Provider 向下**定向**标记依赖该 context 的 fiber,穿透 bailout/memo。→ 下一章:[补充·useRef](/05-core-topics/ref)。
-
-</div>
+<EmbeddedChapter chapter="ctx" />

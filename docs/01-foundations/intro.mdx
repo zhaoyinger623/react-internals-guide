@@ -3,48 +3,6 @@ title: 如何使用本教程
 description: 先建立一次 React 更新的全局认知，再沿 Trigger、Schedule、Render、Commit 主线深入源码。
 ---
 
-import { ArchitectureFlow } from '../../theme/FoundationVisuals';
-import { Callout, ContentCard } from '../../theme/TutorialPrimitives';
+import { EmbeddedChapter } from '../../theme/EmbeddedChapter';
 
-<div className="tutorial-crumb">START HERE</div>
-
-<ContentCard tone="success">
-
-## React 原理全景：从表层熟练到源码级理解
-
-教程以一次 `setState` 更新为主线。每章只解决调用链中的一个问题，并在顶部标明当前位置。Fiber、Hook、Lane 和 Scheduler 不会被拆成互不相干的名词，而会放回同一次更新中解释。
-
-</ContentCard>
-
-建议先读[一次 setState 的完整旅程](/01-foundations/journey)，建立全局顺序；再从表层原理进入 UpdateQueue、Lane、Scheduler、Fiber、Diff 和 Commit。源码附录用于查包、文件和核心对象，不需要一开始就逐行阅读。
-
-## 先认识三个主要模块
-
-一次更新会依次涉及 Scheduler、Reconciler 和 Renderer。后续章节会展开各自的职责与协作边界。
-
-<ArchitectureFlow />
-
-| 模块 | 只回答什么问题 | 不负责什么 |
-| --- | --- | --- |
-| Scheduler | React 何时获得执行机会，是否应该把主线程还给浏览器 | 不读取 Update，也不遍历 Fiber |
-| Reconciler | 本轮要计算哪些更新，下一版 Fiber 树是什么 | Render 阶段不直接修改页面 |
-| Renderer | 如何把变更落到具体平台，例如浏览器 DOM | 不决定更新优先级 |
-
-<Callout>
-
-阅读源码时始终追问三件事：**当前对象保存在哪里、谁读取它、它的输出交给谁。**这样看到 `Update`、`Lane`、`Fiber` 或 `flags` 时，就不会只记住字段名。
-
-</Callout>
-
-## 推荐学习顺序
-
-1. **全局认知：**一次更新的完整旅程、组件渲染、虚拟 DOM、生命周期和四阶段。
-2. **主调用链：**UpdateQueue → Lane → Scheduler → Fiber → Hooks → Diff → flags → Commit。
-3. **并发延伸：**在主调用链清楚后，再理解 Transition、Suspense 和抢占。
-4. **源码地图：**最后定位包结构、入口文件和核心对象。
-
-<ContentCard tone="accent">
-
-不需要背完整源码。先让每个概念在调用链上拥有明确位置，再进入实现细节；否则很容易知道很多 API，却无法解释一次更新为什么这样发生。
-
-</ContentCard>
+<EmbeddedChapter chapter="intro" />

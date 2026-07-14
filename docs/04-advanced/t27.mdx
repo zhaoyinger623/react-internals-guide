@@ -3,37 +3,6 @@ title: 高级模式与陷阱
 description: React 原理全景中的「高级模式与陷阱」，从运行机制继续深入源码。
 ---
 
-<div className="tutorial-chapter">
+import { EmbeddedChapter } from '../../theme/EmbeddedChapter';
 
-第七层 · 高级实践与新架构 / 27
-
-**🗺 本章路线图**
-
-几个高级 API 与它们的常见陷阱,直接影响项目质量。
-
-本章包括：**Error Boundary、Portal、forwardRef/useImperativeHandle、StrictMode 双调用、Context 性能陷阱、useId**。
-
-## Error Boundary(错误边界)
-
-类组件通过 `getDerivedStateFromError` / `componentDidCatch` 捕获子树渲染错误,展示兜底 UI(函数组件目前无等价 Hook,需用类或库)。**注意:**它捕获不到事件处理器、异步代码、SSR 里的错误。
-
-## Portal 与 forwardRef / useImperativeHandle
-
--   **`createPortal(child, domNode)`:**把子节点渲染到**父 DOM 层级之外**(如挂到 body),但**事件仍沿 React 树冒泡**(合成事件按 fiber 树,不按真实 DOM)。适合弹窗、tooltip。
--   **`useImperativeHandle`:**配合 ref 暴露**受控的命令式接口**(如 `inputRef.current.focus()`),而不是整个 DOM。React 19 起 ref 可直接作 prop,forwardRef 不再必需。
-
-## StrictMode 双调用
-
-开发模式下 `&lt;StrictMode&gt;` 会**故意双调用**渲染函数、以及 effect 的「挂载→卸载→再挂载」。目的:**暴露不纯的渲染和缺失的 effect 清理**。如果你的组件双调用后出 bug,说明它有副作用不纯 —— 也正是 React Compiler 能否优化它的分界线。**生产环境不会双调用。**
-
-## Context 性能陷阱
-
-Context value 一变,**所有消费者都重渲染**(绕过 memo)。陷阱:把频繁变化的值和稳定的值放同一个 Provider,或每次渲染传**新对象字面量**作 value。优化:**拆分 Context**(变与不变分开)、value 用 `useMemo` 稳定、或用 `useSyncExternalStore`/状态库做**选择性订阅**。
-
-## useId
-
-`useId()` 生成**服务端/客户端一致**的唯一 id,专为解决 SSR hydration 中 id 不匹配(不能用随机数/递增计数)。用于 `aria-*`、label/input 关联等。
-
-**本章小结：**Error Boundary 捕获子树渲染错误(捕不到事件/异步);Portal 渲染到别处但事件仍沿 fiber 树;StrictMode 开发双调用暴露不纯;Context value 一变所有消费者更新,要拆分/稳定 value。→ 下一章:[第七层·性能诊断](/04-advanced/t28)。
-
-</div>
+<EmbeddedChapter chapter="t27" />

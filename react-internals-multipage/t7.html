@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+<title>Hooks：读取与计算状态 · React 原理全景</title>
+<script>
+  const embedParams = new URLSearchParams(location.search);
+  if (embedParams.get('embed') === '1') document.documentElement.classList.add('is-embed');
+  if (embedParams.get('theme') === 'light') document.documentElement.classList.add('embed-light');
+</script>
+<link rel="stylesheet" href="./assets/site.css">
+</head>
+<body data-chapter="t7">
+<aside id="side">
+  <div class="brand">⚛️ React 原理全景</div>
+  <button class="themebtn" id="themeBtn"><span class="ic">🌙</span><span id="themeLabel">切换到浅色模式</span></button>
+  <a href="./intro.html" data-t="intro"><span class="n">◎</span>如何使用本页</a>
+  <div class="grp">更新流程</div>
+  <a href="./journey.html" data-t="journey"><span class="n">★</span>一次 setState 的完整旅程</a>
+  <div class="grp">第一层 · 表层原理</div>
+  <a href="./t1.html" data-t="t1"><span class="n">1</span>组件渲染机制</a>
+  <a href="./t2.html" data-t="t2"><span class="n">2</span>虚拟 DOM 真实含义</a>
+  <a href="./t3.html" data-t="t3"><span class="n">3</span>生命周期执行顺序</a>
+  <div class="grp">第二层 · 一次更新的主线</div>
+  <a href="./t4.html" data-t="t4"><span class="n">4</span>更新的四个阶段</a>
+  <div class="grp">阶段一 · Trigger 触发</div>
+  <a href="./t9.html" data-t="t9"><span class="n">5</span>UpdateQueue：更新入队</a>
+  <div class="grp">阶段二 · Schedule 调度</div>
+  <a href="./t13.html" data-t="t13"><span class="n">6</span>Lane：选择更新</a>
+  <a href="./t12.html" data-t="t12"><span class="n">7</span>Scheduler：安排执行</a>
+  <div class="grp">阶段三 · Render 计算</div>
+  <a href="./t8.html" data-t="t8"><span class="n">8</span>Fiber：可中断工作单元</a>
+  <a href="./t5.html" data-t="t5"><span class="n">9</span>双缓存 Fiber 树</a>
+  <a href="./t7.html" data-t="t7" class="active" aria-current="page"><span class="n">10</span>Hooks：读取与计算状态</a>
+  <a href="./t6.html" data-t="t6"><span class="n">11</span>Diff：协调子节点</a>
+  <a href="./t10.html" data-t="t10"><span class="n">12</span>flags：记录变更</a>
+  <div class="grp">阶段四 · Commit 提交</div>
+  <a href="./t11.html" data-t="t11"><span class="n">13</span>Commit：应用变更</a>
+  <div class="grp">并发延伸</div>
+  <a href="./t14.html" data-t="t14"><span class="n">14</span>Concurrent 并发渲染</a>
+  <a href="./t15.html" data-t="t15"><span class="n">15</span>两大并发 API</a>
+  <div class="grp">架构交互</div>
+  <a href="./t16.html" data-t="t16"><span class="n">16</span>三大模块协作</a>
+  <a href="./t17.html" data-t="t17"><span class="n">17</span>批量更新原理</a>
+  <a href="./t18.html" data-t="t18"><span class="n">18</span>Suspense / lazy</a>
+  <a href="./t19.html" data-t="t19"><span class="n">19</span>合成事件系统</a>
+  <div class="grp">性能优化</div>
+  <a href="./t20.html" data-t="t20"><span class="n">20</span>渲染优化底层</a>
+  <a href="./t21.html" data-t="t21"><span class="n">21</span>渲染 bug 底层解释</a>
+  <div class="grp">高级实践与新架构</div>
+  <a href="./t22.html" data-t="t22"><span class="n">22</span>SSR / Hydration / 流式</a>
+  <a href="./t23.html" data-t="t23"><span class="n">23</span>Server Components</a>
+  <a href="./t24.html" data-t="t24"><span class="n">24</span>React 19 新特性</a>
+  <a href="./t25.html" data-t="t25"><span class="n">25</span>外部状态与撕裂</a>
+  <a href="./t26.html" data-t="t26"><span class="n">26</span>React Compiler</a>
+  <a href="./t27.html" data-t="t27"><span class="n">27</span>高级模式与陷阱</a>
+  <a href="./t28.html" data-t="t28"><span class="n">28</span>性能诊断与工程化</a>
+  <div class="grp">补充专题 · 常被漏掉的核心</div>
+  <a href="./ctx.html" data-t="ctx"><span class="n">C1</span>Context 源码原理</a>
+  <a href="./ref.html" data-t="ref"><span class="n">C2</span>useRef 与 ref 体系</a>
+  <div class="grp">源码附录 · 按需查阅</div>
+  <a href="./pk.html" data-t="pk"><span class="n">A1</span>宏观包结构</a>
+  <a href="./boot.html" data-t="boot"><span class="n">A2</span>启动过程</a>
+  <a href="./obj.html" data-t="obj"><span class="n">A3</span>核心对象速查</a>
+  <a href="./source.html" data-t="source"><span class="n">A4</span>源码阅读路线</a>
+  <div class="grp">总结</div>
+  <a href="./main.html" data-t="main"><span class="n">★</span>React 更新流程总览</a>
+</aside>
+<main id="main"><section class="topic active" id="t7">
+  <div class="crumb">阶段三 · Render / 10</div>
+  <h1>10 · Hooks：读取与计算状态</h1>
+  <div style="display:flex;flex-wrap:wrap;gap:3px;align-items:center;font-family:var(--mono);font-size:10.5px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:7px 10px;margin:6px 0 14px;overflow-x:auto"><b style="color:var(--txt2);margin-right:4px;font-family:inherit">🧭 主线</b><span data-go="t4" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">setState</span><span style="color:var(--dim)">→</span><span data-go="t9" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">Update</span><span style="color:var(--dim)">→</span><span data-go="t13" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">Lane</span><span style="color:var(--dim)">→</span><span data-go="t12" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">Scheduler</span><span style="color:var(--dim)">→</span><span data-go="t8" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:rgba(97,218,251,.22);border:1.5px solid var(--accent);color:var(--accent);font-weight:700">Render</span><span style="color:var(--dim)">→</span><span data-go="t10" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">Effect</span><span style="color:var(--dim)">→</span><span data-go="t11" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">Commit</span><span style="color:var(--dim)">→</span><span data-go="t11" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">DOM</span></div>
+  <p>先想清楚 Hooks 到底解决什么问题,再谈底层。你已经知道(<a class="xref" data-go="t1">第一层·组件渲染</a>):<b>函数组件每次渲染都从头到尾重新执行一遍</b>。那么——</p>
+  <div class="callout warn"><b>灵魂拷问:</b>函数一跑完,里面的局部变量就都销毁了,可为什么下次渲染时 <code>useState</code> 的 <code>count</code> <b>还在、还记得上次的值</b>?</div>
+  <p><b>答案:</b>React 把状态存在函数<b>外面</b>——存在这个组件对应的 <code>Fiber</code> 节点上。所谓 <b>Hook,就是「在 Fiber 上开一块记忆、并把它和你的每次调用对应起来」的机制</b>。整章就回答三个问题:</p>
+  <ol style="padding-left:22px;color:var(--txt2);line-height:1.95">
+    <li><b>存在哪?</b> 状态放在 Fiber 的哪个位置(下面 ①)</li>
+    <li><b>怎么对应上?</b> 重新渲染时,React 怎么知道哪个值属于哪个 Hook(② ③)</li>
+    <li><b>每种 Hook 具体存什么?</b> useState / useEffect / useMemo 各放什么(④)</li>
+  </ol>
+
+  <h2><span class="dot" style="background:var(--fiber)"></span>① 存在哪:Fiber 上的一排「储物柜」</h2>
+  <p>把 Fiber 想成一排编号的<b>储物柜</b>:你在组件里调用的<b>第 1、2、3 个 Hook,就对应 1 号、2 号、3 号柜子</b>。技术上,这排柜子是挂在 Fiber 的 <code>memoizedState</code> 字段上的一条<b>单链表</b>,每个 Hook 是一个节点,靠 <code>next</code> 串起来:</p>
+  <pre><span class="cm">// 每个 hook 节点</span>
+{
+  memoizedState,  <span class="cm">// 该 hook 存的值(state / effect / memo 值…)</span>
+  baseState,      <span class="cm">// 并发中断时的「存档起点」</span>
+  baseQueue,      <span class="cm">// 被跳过、留待下次的更新</span>
+  queue,          <span class="cm">// 更新队列(useState / useReducer)</span>
+  next,           <span class="cm">// → 下一个 hook</span>
+}
+fiber.memoizedState → hook1 → hook2 → hook3 → null</pre>
+  <svg viewBox="0 0 760 110" style="width:100%;height:auto;margin:6px 0">
+    <defs><marker id="ha" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" style="fill:var(--fiber)"/></marker></defs>
+    <g font-family="monospace" font-size="11">
+      <rect x="8" y="35" width="120" height="46" rx="10" style="fill:var(--panel2);stroke:var(--accent)" stroke-width="2"/>
+      <text x="68" y="53" text-anchor="middle" style="fill:var(--accent)" font-size="11">fiber</text>
+      <text x="68" y="70" text-anchor="middle" style="fill:var(--dim)" font-size="9.5">.memoizedState</text>
+      <g style="animation:pulse 2s infinite">
+      <rect x="175" y="35" width="150" height="46" rx="10" style="fill:var(--panel2);stroke:var(--fiber)" stroke-width="2"/>
+      <text x="250" y="52" text-anchor="middle" style="fill:var(--fiber)" font-weight="700">hook1</text>
+      <text x="250" y="70" text-anchor="middle" style="fill:var(--dim)" font-size="9.5">useState(count)=0</text></g>
+      <rect x="372" y="35" width="150" height="46" rx="10" style="fill:var(--panel2);stroke:var(--fiber)" stroke-width="2"/>
+      <text x="447" y="52" text-anchor="middle" style="fill:var(--fiber)" font-weight="700">hook2</text>
+      <text x="447" y="70" text-anchor="middle" style="fill:var(--dim)" font-size="9.5">useState(name)</text>
+      <rect x="569" y="35" width="150" height="46" rx="10" style="fill:var(--panel2);stroke:var(--fiber)" stroke-width="2"/>
+      <text x="644" y="52" text-anchor="middle" style="fill:var(--fiber)" font-weight="700">hook3</text>
+      <text x="644" y="70" text-anchor="middle" style="fill:var(--dim)" font-size="9.5">useEffect</text>
+      <line x1="130" y1="58" x2="172" y2="58" style="stroke:var(--fiber)" stroke-width="2" marker-end="url(#ha)"/>
+      <line x1="327" y1="58" x2="369" y2="58" style="stroke:var(--fiber)" stroke-width="2" marker-end="url(#ha)"/>
+      <line x1="524" y1="58" x2="566" y2="58" style="stroke:var(--fiber)" stroke-width="2" marker-end="url(#ha)"/>
+      <text x="250" y="98" text-anchor="middle" style="fill:var(--dim)" font-size="9.5">next</text>
+      <text x="447" y="98" text-anchor="middle" style="fill:var(--dim)" font-size="9.5">next</text>
+      <text x="644" y="98" text-anchor="middle" style="fill:var(--dim)" font-size="9.5">next → null</text>
+    </g>
+  </svg>
+
+  <h2><span class="dot" style="background:var(--warn)"></span>② 怎么对应上:只认「第几个」,所以不能条件调用</h2>
+  <p>存进链表了,那 React 重新渲染时怎么把值对回每个 Hook?关键点:<b>它不看 Hook 叫什么名字,只数「你调用的第几个」</b>——第 1 个调用拿 1 号柜、第 2 个拿 2 号柜……首次渲染按顺序建柜子,以后每次渲染按<b>同样的顺序</b>挨个取。</p>
+  <p>所以一旦你 <code>if(x) useState()</code> 少调了一个,后面所有 Hook 的「第几个」就<b>全部错位一格</b>,值张冠李戴。<b>铁律:每次渲染,Hook 的数量和顺序必须完全一致</b>(不能放进 if / for / return 之后)。下面这个演示把「按位置对应」画出来了:</p>
+  <div class="card">
+    <h3 style="margin-top:0">互动:顺序调用 vs 条件跳过</h3>
+    <div class="demo-guide"><b>怎么操作：</b>先点“正常顺序渲染”，观察每个 Hook 调用与右侧槽位一一对应；再点“条件跳过”，从第二个调用开始查看错位。</div>
+    <div id="hooksDemo" style="margin:10px 0"></div>
+    <div class="controls equal-buttons"><button class="act" id="hooksOk">正常顺序渲染</button><button class="warn" id="hooksBad">条件跳过第 2 个 Hook</button><button class="ghost" id="hooksReset">重置</button></div>
+    <div class="status" id="hooksStatus">对比两种情况下链表指针如何对应。</div>
+  </div>
+
+  <h2><span class="dot" style="background:var(--sched)"></span>③ 同一个 useState，为什么首次和更新走不同代码</h2>
+  <p>组件代码里始终写的是 <code>useState(initialState)</code>，但 React 内部需要处理两种不同情况：</p>
+  <div class="grid2">
+    <div class="card"><b>首次 Render：还没有 Hook 节点</b><p style="margin:7px 0 0">调用 <code>mountState</code>，创建 Hook 节点，保存初始 state 和更新队列，并把节点接到当前 Fiber 的 Hook 链表。</p></div>
+    <div class="card"><b>更新 Render：Hook 节点已经存在</b><p style="margin:7px 0 0">调用 <code>updateState</code>，按调用顺序取得对应 Hook，处理它队列中的 update，计算本轮 state。</p></div>
+  </div>
+  <p>公开的 <code>useState</code> 函数并不知道当前是首次还是更新。函数组件开始 Render 时，<code>renderWithHooks</code> 会先把当前实现表设置为 mount 版或 update 版；随后 <code>useState</code> 从这张表中调用对应函数。这张“当前实现表”就是 dispatcher。</p>
+  <div class="card">
+    <div style="text-align:center;border:1px solid var(--accent);border-radius:10px;padding:10px"><b>组件执行到 <code>useState()</code></b></div>
+    <div style="text-align:center;color:var(--dim);padding:6px">↓ 读取当前 dispatcher 中的 <code>useState</code> 实现</div>
+    <div class="grid2">
+      <div style="border:1px solid var(--recon);border-radius:10px;padding:12px"><b style="color:var(--recon)">首次 Render → mountState</b><br><span style="color:var(--txt2)">创建 Hook，保存初始值</span></div>
+      <div style="border:1px solid var(--fiber);border-radius:10px;padding:12px"><b style="color:var(--fiber)">更新 Render → updateState</b><br><span style="color:var(--txt2)">取得旧 Hook，处理更新队列</span></div>
+    </div>
+  </div>
+  <p>对应到源码，就是在执行函数组件之前选择一套实现，然后让公开 API 转发过去：</p>
+  <pre><span class="cm">// renderWithHooks:每次渲染函数组件前,按 mount/update 换 dispatcher</span>
+ReactCurrentDispatcher.current =
+  current === <span class="kw">null</span> || current.memoizedState === <span class="kw">null</span>
+    ? HooksDispatcherOnMount     <span class="cm">// 首次:mountState / mountEffect …(创建 hook)</span>
+    : HooksDispatcherOnUpdate;   <span class="cm">// 更新:updateState / updateEffect …(复用 hook)</span>
+
+<span class="cm">// useState 转发到当前 dispatcher</span>
+<span class="kw">function</span> <span class="fn">useState</span>(initial){
+  <span class="kw">return</span> resolveDispatcher().<span class="fn">useState</span>(initial);
+}</pre>
+  <div class="callout"><b>为什么组件外调用 Hook 会报错？</b>因为组件外没有正在执行的 <code>renderWithHooks</code>，也就没有可供本次 Render 使用的 Hook dispatcher。React 无法知道应该把 Hook 节点挂到哪个 Fiber。</div>
+
+  <h2><span class="dot" style="background:var(--accent)"></span>④ 各 Hook 具体存什么 · useState / useReducer</h2>
+  <p style="color:var(--dim);font-size:13.5px">前面讲的是通用机制(链表、按序对应)。现在看每种 Hook 的「柜子」里到底放了什么。</p>
+  <p><code>useState</code> 复用 <code>useReducer</code> 的更新流程，并使用内置的 state reducer（<code>(s,a)=&gt;typeof a==='function'?a(s):a</code>）。dispatch 时，update 进入该 Hook 的 <code>queue.pending</code> 环状链表（详见<a class="xref" data-go="t9">Trigger·UpdateQueue</a>）；渲染时从 <code>baseState</code> 开始依次处理 action，得到新的 <code>memoizedState</code>。</p>
+  <pre><span class="cm">// dispatchSetState 里的「提前计算」优化(eager state bailout)</span>
+<span class="kw">if</span>(fiber.lanes === NoLanes){          <span class="cm">// 队列里没有别的待处理更新时</span>
+  <span class="kw">const</span> eager = <span class="fn">reducer</span>(currentState, action); <span class="cm">// 先算出新 state</span>
+  update.hasEagerState = <span class="kw">true</span>; update.eagerState = eager;
+<span class="hl">  <span class="kw">if</span>(<span class="fn">is</span>(eager, currentState)) <span class="kw">return</span>;  <span class="cm">// 新旧相等 → 直接不调度渲染!</span></span>
+}
+scheduleUpdateOnFiber(fiber, lane);   <span class="cm">// 不相等才真正安排渲染</span></pre>
+  <div class="callout good"><b>这就是「<code>setCount(1)</code> 时 count 已经是 1 就不重渲染」的底层原因</b>:dispatch 时先用 reducer 试算,若结果和当前 state <code>Object.is</code> 相等,连渲染都不安排(注意:若是父级传下的其它更新导致重渲染,该组件仍可能渲染)。</div>
+
+  <h2><span class="dot" style="background:var(--render)"></span>④ 各 Hook 具体存什么 · useEffect(副作用)</h2>
+  <p><code>useEffect</code> 的 hook 节点里存一个 effect 对象 <code>{tag, create, destroy, deps, next}</code>,所有 effect 再单独串成一条<b>环状 effect 链表</b>挂在 fiber 上。Render 阶段对比 deps 决定是否给 fiber 打 <code>Passive</code> flag;Commit 后异步遍历这条链表执行(详见<a class="xref" data-go="t10">Render·变更标记</a>)。</p>
+
+  <h2><span class="dot" style="background:var(--recon)"></span>④ 各 Hook 具体存什么 · useMemo / useCallback(缓存)</h2>
+  <pre><span class="cm">// useMemo 简化:hook.memoizedState = [value, deps]</span>
+<span class="kw">function</span> <span class="fn">useMemo</span>(create, deps){
+  <span class="kw">const</span> hook = <span class="fn">updateWorkInProgressHook</span>();
+  <span class="kw">const</span> prev = hook.memoizedState;
+  <span class="kw">if</span>(prev !== <span class="kw">null</span> &amp;&amp; deps !== <span class="kw">null</span> &amp;&amp; <span class="fn">areHookInputsEqual</span>(deps, prev[<span class="st">1</span>]))
+    <span class="kw">return</span> prev[<span class="st">0</span>];              <span class="cm">// deps 没变 → 直接返回缓存值</span>
+  <span class="kw">const</span> next = <span class="fn">create</span>();          <span class="cm">// 变了 → 重算</span>
+  hook.memoizedState = [next, deps];
+  <span class="kw">return</span> next;
+}
+<span class="cm">// useCallback 只是把函数本身当值缓存:hook.memoizedState=[fn,deps]</span></pre>
+  <h2><span class="dot" style="background:var(--fiber)"></span>小结:每种 Hook 的柜子里放了什么</h2>
+  <table class="simple">
+    <tr><th>Hook</th><th>它的 memoizedState(柜子)里存的东西</th></tr>
+    <tr><td><code>useState</code> / <code>useReducer</code></td><td>当前 state 值 + 一个更新队列 queue</td></tr>
+    <tr><td><code>useEffect</code> / <code>useLayoutEffect</code></td><td>一个 effect 对象 {create, destroy, deps, tag}</td></tr>
+    <tr><td><code>useMemo</code></td><td>[缓存的计算结果, deps]</td></tr>
+    <tr><td><code>useCallback</code></td><td>[缓存的函数, deps]</td></tr>
+    <tr><td><code>useRef</code></td><td>一个 { current } 对象(见 <a class="xref" data-go="ref">补充·useRef</a>)</td></tr>
+    <tr><td><code>useContext</code></td><td>不占柜子(readContext 不走 hook 链表,只登记依赖)</td></tr>
+  </table>
+  <div class="callout good"><b>Render 中的状态计算完成：</b>Hook 按调用顺序挂在 Fiber 上；组件执行时，React 读取 Hook 链表并处理更新队列，得到本次状态。下一章进入 <a class="xref" data-go="t6">Diff</a>，比较组件返回的新旧子节点。</div>
+  <div class="navbtns"><button class="ghost" data-go="t5">← 9双缓存 Fiber 树</button><button class="act" data-go="t6">11Diff：协调子节点 →</button></div>
+</section></main>
+<script src="./assets/site.js"></script>
+<script src="./assets/demos.js"></script>
+</body>
+</html>

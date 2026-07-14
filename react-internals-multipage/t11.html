@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+<title>Commit：应用变更 · React 原理全景</title>
+<script>
+  const embedParams = new URLSearchParams(location.search);
+  if (embedParams.get('embed') === '1') document.documentElement.classList.add('is-embed');
+  if (embedParams.get('theme') === 'light') document.documentElement.classList.add('embed-light');
+</script>
+<link rel="stylesheet" href="./assets/site.css">
+</head>
+<body data-chapter="t11">
+<aside id="side">
+  <div class="brand">⚛️ React 原理全景</div>
+  <button class="themebtn" id="themeBtn"><span class="ic">🌙</span><span id="themeLabel">切换到浅色模式</span></button>
+  <a href="./intro.html" data-t="intro"><span class="n">◎</span>如何使用本页</a>
+  <div class="grp">更新流程</div>
+  <a href="./journey.html" data-t="journey"><span class="n">★</span>一次 setState 的完整旅程</a>
+  <div class="grp">第一层 · 表层原理</div>
+  <a href="./t1.html" data-t="t1"><span class="n">1</span>组件渲染机制</a>
+  <a href="./t2.html" data-t="t2"><span class="n">2</span>虚拟 DOM 真实含义</a>
+  <a href="./t3.html" data-t="t3"><span class="n">3</span>生命周期执行顺序</a>
+  <div class="grp">第二层 · 一次更新的主线</div>
+  <a href="./t4.html" data-t="t4"><span class="n">4</span>更新的四个阶段</a>
+  <div class="grp">阶段一 · Trigger 触发</div>
+  <a href="./t9.html" data-t="t9"><span class="n">5</span>UpdateQueue：更新入队</a>
+  <div class="grp">阶段二 · Schedule 调度</div>
+  <a href="./t13.html" data-t="t13"><span class="n">6</span>Lane：选择更新</a>
+  <a href="./t12.html" data-t="t12"><span class="n">7</span>Scheduler：安排执行</a>
+  <div class="grp">阶段三 · Render 计算</div>
+  <a href="./t8.html" data-t="t8"><span class="n">8</span>Fiber：可中断工作单元</a>
+  <a href="./t5.html" data-t="t5"><span class="n">9</span>双缓存 Fiber 树</a>
+  <a href="./t7.html" data-t="t7"><span class="n">10</span>Hooks：读取与计算状态</a>
+  <a href="./t6.html" data-t="t6"><span class="n">11</span>Diff：协调子节点</a>
+  <a href="./t10.html" data-t="t10"><span class="n">12</span>flags：记录变更</a>
+  <div class="grp">阶段四 · Commit 提交</div>
+  <a href="./t11.html" data-t="t11" class="active" aria-current="page"><span class="n">13</span>Commit：应用变更</a>
+  <div class="grp">并发延伸</div>
+  <a href="./t14.html" data-t="t14"><span class="n">14</span>Concurrent 并发渲染</a>
+  <a href="./t15.html" data-t="t15"><span class="n">15</span>两大并发 API</a>
+  <div class="grp">架构交互</div>
+  <a href="./t16.html" data-t="t16"><span class="n">16</span>三大模块协作</a>
+  <a href="./t17.html" data-t="t17"><span class="n">17</span>批量更新原理</a>
+  <a href="./t18.html" data-t="t18"><span class="n">18</span>Suspense / lazy</a>
+  <a href="./t19.html" data-t="t19"><span class="n">19</span>合成事件系统</a>
+  <div class="grp">性能优化</div>
+  <a href="./t20.html" data-t="t20"><span class="n">20</span>渲染优化底层</a>
+  <a href="./t21.html" data-t="t21"><span class="n">21</span>渲染 bug 底层解释</a>
+  <div class="grp">高级实践与新架构</div>
+  <a href="./t22.html" data-t="t22"><span class="n">22</span>SSR / Hydration / 流式</a>
+  <a href="./t23.html" data-t="t23"><span class="n">23</span>Server Components</a>
+  <a href="./t24.html" data-t="t24"><span class="n">24</span>React 19 新特性</a>
+  <a href="./t25.html" data-t="t25"><span class="n">25</span>外部状态与撕裂</a>
+  <a href="./t26.html" data-t="t26"><span class="n">26</span>React Compiler</a>
+  <a href="./t27.html" data-t="t27"><span class="n">27</span>高级模式与陷阱</a>
+  <a href="./t28.html" data-t="t28"><span class="n">28</span>性能诊断与工程化</a>
+  <div class="grp">补充专题 · 常被漏掉的核心</div>
+  <a href="./ctx.html" data-t="ctx"><span class="n">C1</span>Context 源码原理</a>
+  <a href="./ref.html" data-t="ref"><span class="n">C2</span>useRef 与 ref 体系</a>
+  <div class="grp">源码附录 · 按需查阅</div>
+  <a href="./pk.html" data-t="pk"><span class="n">A1</span>宏观包结构</a>
+  <a href="./boot.html" data-t="boot"><span class="n">A2</span>启动过程</a>
+  <a href="./obj.html" data-t="obj"><span class="n">A3</span>核心对象速查</a>
+  <a href="./source.html" data-t="source"><span class="n">A4</span>源码阅读路线</a>
+  <div class="grp">总结</div>
+  <a href="./main.html" data-t="main"><span class="n">★</span>React 更新流程总览</a>
+</aside>
+<main id="main"><section class="topic active" id="t11">
+  <div class="crumb">阶段四 · Commit / 13</div>
+  <h1>13 · Commit：应用变更</h1>
+  <div style="display:flex;flex-wrap:wrap;gap:3px;align-items:center;font-family:var(--mono);font-size:10.5px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:7px 10px;margin:6px 0 14px;overflow-x:auto"><b style="color:var(--txt2);margin-right:4px;font-family:inherit">🧭 主线</b><span data-go="t4" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">setState</span><span style="color:var(--dim)">→</span><span data-go="t9" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">Update</span><span style="color:var(--dim)">→</span><span data-go="t13" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">Lane</span><span style="color:var(--dim)">→</span><span data-go="t12" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">Scheduler</span><span style="color:var(--dim)">→</span><span data-go="t8" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">Render</span><span style="color:var(--dim)">→</span><span data-go="t10" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">Effect</span><span style="color:var(--dim)">→</span><span data-go="t11" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:rgba(97,218,251,.22);border:1.5px solid var(--accent);color:var(--accent);font-weight:700">Commit</span><span style="color:var(--dim)">→</span><span data-go="t11" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:rgba(97,218,251,.22);border:1.5px solid var(--accent);color:var(--accent);font-weight:700">DOM</span></div>
+  <div class="card" style="border-left:4px solid var(--accent)">
+    <b>🗺 本章路线图</b>
+    <p style="margin:8px 0 0">Commit 把 Render 阶段打好的 flags <b>一次性、同步</b>落到屏幕,分 BeforeMutation → Mutation → Layout 三段,<b>不可中断</b>。</p>
+    <p style="margin:6px 0 0">本章包括：<b>三段各做什么、current 指针何时切、useEffect 何时异步跑</b>。</p>
+  </div>
+  <p>Render 算完得到带 flags 的 WIP 树,Commit <b>同步、一气呵成</b>地执行,分三段:</p>
+  <div class="callout"><b>Render 时只是登记，之后才真正运行：</b>组件执行到 <code>useEffect(() =&gt; {...}, deps)</code> 或 <code>useLayoutEffect(() =&gt; {...}, deps)</code> 时，React 先把箭头函数和 deps 保存到 Fiber，并记录对应标记。<b>箭头函数里的代码此时还没有运行。</b>DOM 提交后，React 在 Layout 阶段运行 <code>useLayoutEffect</code> 保存的函数；普通 <code>useEffect</code> 保存的函数则在后续 Passive 阶段运行。</div>
+  <div class="flow">
+    <div class="flowbox"><b>1. BeforeMutation</b><p style="font-size:12px;color:var(--dim);margin:6px 0 0">修改 DOM 前读取快照，例如类组件 <code>getSnapshotBeforeUpdate</code></p></div>
+    <div class="arrow">→</div>
+    <div class="flowbox"><b>2. Mutation</b><p style="font-size:12px;color:var(--dim);margin:6px 0 0">真正改 DOM:增删改。<b>屏幕在此刻变化</b>。此段末切换 <code>current</code> 指针</p></div>
+    <div class="arrow">→</div>
+    <div class="flowbox"><b>3. Layout</b><p style="font-size:12px;color:var(--dim);margin:6px 0 0">DOM 已更新。同步执行 <code>useLayoutEffect</code> 回调、<code>DidMount/Update</code> 和 ref</p></div>
+  </div>
+  <div class="callout good"><b>Commit 三段结束后：</b>普通 <code>useEffect</code> 对应的 Passive effect 由 <code>flushPassiveEffects</code> 在后续任务中执行。通常浏览器会先绘制；某些由用户交互触发的更新中，React 也可能在绘制前刷新 effect。关键区别是：它不属于上面三段中的同步 DOM 提交流程。</div>
+  <div class="card">
+    <h3 style="margin-top:0">互动：逐步看 Commit 期间真正发生什么</h3>
+    <div class="demo-guide"><b>怎么操作：</b>每次点击“下一步”只前进一个阶段。不要只看阶段名称；同时比较下面的真实 DOM、<code>fiberRoot.current</code> 和正在运行的代码。</div>
+    <div id="cpBars" style="display:flex;gap:6px;flex-wrap:wrap;margin:10px 0"></div>
+    <div class="grid2">
+      <div style="border:1px solid var(--line);border-radius:10px;padding:12px"><b>屏幕 / 真实 DOM</b><div id="cpDom" style="margin-top:8px;font-family:var(--mono);color:var(--txt2)">&lt;h1&gt;旧标题&lt;/h1&gt;</div></div>
+      <div style="border:1px solid var(--line);border-radius:10px;padding:12px"><b>React 内部</b><div id="cpPointer" style="margin-top:8px;font-family:var(--mono);color:var(--txt2)">fiberRoot.current → 旧树</div></div>
+    </div>
+    <div id="cpCallback" class="callout" style="margin-top:10px"><b>当前动作：</b>Commit 尚未开始。</div>
+    <div class="controls equal-buttons"><button class="act" id="cpRun">下一步</button><button class="ghost" id="cpReset">重置</button></div>
+    <div class="status" id="cpStatus">从 BeforeMutation 开始，逐步前进。</div>
+  </div>
+  <p><b>current 指针为什么在 Mutation 之后、Layout 之前切?</b> 这样 <code>componentWillUnmount</code>(Mutation 中)读到的还是旧树,而 <code>componentDidMount/useLayoutEffect</code>(Layout 中)读到的已是新树。</p>
+  <h2><span class="dot" style="background:var(--render)"></span>useEffect：Render 登记，提交后执行</h2>
+  <p>Render 执行组件时，<code>useEffect</code> 会比较 deps、保存 effect 对象，并在需要执行时给 Fiber 添加 <code>Passive</code> 标记。Commit 看到该标记后确保后续会调用 <code>flushPassiveEffects</code>；真正的 effect 回调通常在同步 Commit 结束后异步执行：先清理上一次 effect，再执行本次 effect。</p>
+  <div class="callout"><code>Render：useEffect(create, deps)</code> → 保存 create/deps、打 Passive 标记<br><code>Commit：提交 DOM</code> → 收集待执行的 Passive effect<br><code>Commit 之后：flushPassiveEffects()</code> → 执行 cleanup 和 create</div>
+  <p>所以“Hooks 在 Render 阶段”与“effect 在 Commit 附近执行”并不冲突：前者指 Hook API 被组件调用并建立内部记录，后者指其中保存的副作用函数何时真正运行。</p>
+  <div class="callout warn">Commit 不可中断,是因为它直接操作真实 DOM 并触发生命周期 —— 中途停下会让用户看到<b>撕裂的、不一致的中间画面</b>,还可能重复触发副作用。</div>
+  <div class="callout good"><b>一次更新完成：</b>Commit 依次处理 DOM 变更前的快照、Mutation 和 Layout，并切换 current；普通 <code>useEffect</code> 在提交后调度。下一章再以并发渲染解释这四个阶段如何被高优先级更新影响。</div>
+  <div class="navbtns"><button class="ghost" data-go="t10">← 12flags：记录变更</button><button class="act" data-go="t14">14Concurrent 并发渲染 →</button></div>
+</section></main>
+<script src="./assets/site.js"></script>
+<script src="./assets/demos.js"></script>
+</body>
+</html>

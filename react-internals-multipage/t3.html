@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+<title>生命周期执行顺序 · React 原理全景</title>
+<script>
+  const embedParams = new URLSearchParams(location.search);
+  if (embedParams.get('embed') === '1') document.documentElement.classList.add('is-embed');
+  if (embedParams.get('theme') === 'light') document.documentElement.classList.add('embed-light');
+</script>
+<link rel="stylesheet" href="./assets/site.css">
+</head>
+<body data-chapter="t3">
+<aside id="side">
+  <div class="brand">⚛️ React 原理全景</div>
+  <button class="themebtn" id="themeBtn"><span class="ic">🌙</span><span id="themeLabel">切换到浅色模式</span></button>
+  <a href="./intro.html" data-t="intro"><span class="n">◎</span>如何使用本页</a>
+  <div class="grp">更新流程</div>
+  <a href="./journey.html" data-t="journey"><span class="n">★</span>一次 setState 的完整旅程</a>
+  <div class="grp">第一层 · 表层原理</div>
+  <a href="./t1.html" data-t="t1"><span class="n">1</span>组件渲染机制</a>
+  <a href="./t2.html" data-t="t2"><span class="n">2</span>虚拟 DOM 真实含义</a>
+  <a href="./t3.html" data-t="t3" class="active" aria-current="page"><span class="n">3</span>生命周期执行顺序</a>
+  <div class="grp">第二层 · 一次更新的主线</div>
+  <a href="./t4.html" data-t="t4"><span class="n">4</span>更新的四个阶段</a>
+  <div class="grp">阶段一 · Trigger 触发</div>
+  <a href="./t9.html" data-t="t9"><span class="n">5</span>UpdateQueue：更新入队</a>
+  <div class="grp">阶段二 · Schedule 调度</div>
+  <a href="./t13.html" data-t="t13"><span class="n">6</span>Lane：选择更新</a>
+  <a href="./t12.html" data-t="t12"><span class="n">7</span>Scheduler：安排执行</a>
+  <div class="grp">阶段三 · Render 计算</div>
+  <a href="./t8.html" data-t="t8"><span class="n">8</span>Fiber：可中断工作单元</a>
+  <a href="./t5.html" data-t="t5"><span class="n">9</span>双缓存 Fiber 树</a>
+  <a href="./t7.html" data-t="t7"><span class="n">10</span>Hooks：读取与计算状态</a>
+  <a href="./t6.html" data-t="t6"><span class="n">11</span>Diff：协调子节点</a>
+  <a href="./t10.html" data-t="t10"><span class="n">12</span>flags：记录变更</a>
+  <div class="grp">阶段四 · Commit 提交</div>
+  <a href="./t11.html" data-t="t11"><span class="n">13</span>Commit：应用变更</a>
+  <div class="grp">并发延伸</div>
+  <a href="./t14.html" data-t="t14"><span class="n">14</span>Concurrent 并发渲染</a>
+  <a href="./t15.html" data-t="t15"><span class="n">15</span>两大并发 API</a>
+  <div class="grp">架构交互</div>
+  <a href="./t16.html" data-t="t16"><span class="n">16</span>三大模块协作</a>
+  <a href="./t17.html" data-t="t17"><span class="n">17</span>批量更新原理</a>
+  <a href="./t18.html" data-t="t18"><span class="n">18</span>Suspense / lazy</a>
+  <a href="./t19.html" data-t="t19"><span class="n">19</span>合成事件系统</a>
+  <div class="grp">性能优化</div>
+  <a href="./t20.html" data-t="t20"><span class="n">20</span>渲染优化底层</a>
+  <a href="./t21.html" data-t="t21"><span class="n">21</span>渲染 bug 底层解释</a>
+  <div class="grp">高级实践与新架构</div>
+  <a href="./t22.html" data-t="t22"><span class="n">22</span>SSR / Hydration / 流式</a>
+  <a href="./t23.html" data-t="t23"><span class="n">23</span>Server Components</a>
+  <a href="./t24.html" data-t="t24"><span class="n">24</span>React 19 新特性</a>
+  <a href="./t25.html" data-t="t25"><span class="n">25</span>外部状态与撕裂</a>
+  <a href="./t26.html" data-t="t26"><span class="n">26</span>React Compiler</a>
+  <a href="./t27.html" data-t="t27"><span class="n">27</span>高级模式与陷阱</a>
+  <a href="./t28.html" data-t="t28"><span class="n">28</span>性能诊断与工程化</a>
+  <div class="grp">补充专题 · 常被漏掉的核心</div>
+  <a href="./ctx.html" data-t="ctx"><span class="n">C1</span>Context 源码原理</a>
+  <a href="./ref.html" data-t="ref"><span class="n">C2</span>useRef 与 ref 体系</a>
+  <div class="grp">源码附录 · 按需查阅</div>
+  <a href="./pk.html" data-t="pk"><span class="n">A1</span>宏观包结构</a>
+  <a href="./boot.html" data-t="boot"><span class="n">A2</span>启动过程</a>
+  <a href="./obj.html" data-t="obj"><span class="n">A3</span>核心对象速查</a>
+  <a href="./source.html" data-t="source"><span class="n">A4</span>源码阅读路线</a>
+  <div class="grp">总结</div>
+  <a href="./main.html" data-t="main"><span class="n">★</span>React 更新流程总览</a>
+</aside>
+<main id="main"><section class="topic active" id="t3">
+  <div class="crumb">第一层 · 表层原理 / 03</div>
+  <h1>3 · 生命周期完整执行顺序</h1>
+  <div style="display:flex;flex-wrap:wrap;gap:3px;align-items:center;font-family:var(--mono);font-size:10.5px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:7px 10px;margin:6px 0 14px;overflow-x:auto"><b style="color:var(--txt2);margin-right:4px;font-family:inherit">🧭 主线</b><span data-go="t4" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">setState</span><span style="color:var(--dim)">→</span><span data-go="t9" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">Update</span><span style="color:var(--dim)">→</span><span data-go="t13" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">Lane</span><span style="color:var(--dim)">→</span><span data-go="t12" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">Scheduler</span><span style="color:var(--dim)">→</span><span data-go="t8" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">Render</span><span style="color:var(--dim)">→</span><span data-go="t10" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:rgba(97,218,251,.22);border:1.5px solid var(--accent);color:var(--accent);font-weight:700">Effect</span><span style="color:var(--dim)">→</span><span data-go="t11" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:rgba(97,218,251,.22);border:1.5px solid var(--accent);color:var(--accent);font-weight:700">Commit</span><span style="color:var(--dim)">→</span><span data-go="t11" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">DOM</span></div>
+  <div class="card" style="border-left:4px solid var(--accent)">
+    <b>🗺 本章路线图</b>
+    <p style="margin:8px 0 0">生命周期不是一组需要背诵的 API，而是组件从计算到提交、再到清理的执行顺序。</p>
+    <p style="margin:6px 0 0"><b>① Render 与 Commit 的边界</b> · <b>② 类组件挂载/更新/卸载</b> · <b>③ Effect 的创建与清理</b> · <b>④ useEffect 与 useLayoutEffect 的时机</b> · <b>⑤ StrictMode 为什么会多执行一次</b>。</p>
+  </div>
+
+  <h2><span class="dot" style="background:var(--accent)"></span>先看一次更新的时间顺序</h2>
+  <div class="phase-strip">
+    <div><strong>1 · Render</strong>执行组件，计算新 JSX 和 Fiber。可以暂停或重新开始，不能修改 DOM。</div>
+    <div><strong>2 · Mutation</strong>把 Render 算好的结果真正写入 DOM，例如新增、修改或删除节点。</div>
+    <div><strong>3 · Layout</strong>DOM 已更新、浏览器尚未绘制。执行 layout effect 和类组件 DidMount/DidUpdate。</div>
+    <div><strong>4 · Passive</strong>浏览器获得绘制机会后，React 再执行普通的 <code>useEffect</code>。</div>
+  </div>
+  <div class="callout"><b>“组件渲染完成”可能指不同时间点：</b>组件函数执行完，只代表 Render 完成；DOM 修改完成发生在 Commit；用户看到画面还要等浏览器绘制；<code>useEffect</code> 通常在此后执行。</div>
+
+  <h2><span class="dot" style="background:var(--fiber)"></span>类组件：挂载、更新与卸载</h2>
+  <table class="simple">
+    <tr><th>场景</th><th>Render 阶段</th><th>Commit 阶段</th><th>常见用途</th></tr>
+    <tr><td>挂载</td><td><code>constructor</code> → <code>getDerivedStateFromProps</code> → <code>render</code></td><td>修改 DOM → <code>componentDidMount</code></td><td>初始化 state；挂载后建立订阅或读取 DOM。</td></tr>
+    <tr><td>更新</td><td><code>getDerivedStateFromProps</code> → <code>shouldComponentUpdate</code> → <code>render</code></td><td><code>getSnapshotBeforeUpdate</code> → 修改 DOM → <code>componentDidUpdate</code></td><td>决定是否更新；在 DOM 改变前保存滚动位置；提交后同步外部系统。</td></tr>
+    <tr><td>卸载</td><td>—</td><td><code>componentWillUnmount</code> → 删除 DOM</td><td>取消订阅、定时器和未完成任务。</td></tr>
+  </table>
+  <h3>为什么三个旧生命周期被标记为 UNSAFE</h3>
+  <p>旧方法都在 <b>Render 阶段</b>执行。同步渲染时代，Render 通常会紧接着 Commit，于是开发者很容易在这些方法里建立订阅、发请求或读取 DOM。但现代 React 可以暂停或放弃一次 Render，<b>调用了 will 方法，并不代表这次更新一定会提交</b>。</p>
+
+  <div class="card" style="border-left:4px solid var(--warn)">
+    <b>例子：在 <code>componentWillMount</code> 中建立订阅</b>
+    <pre><span class="fn">componentWillMount</span>() {
+  chat.<span class="fn">subscribe</span>(this.props.roomId); <span class="cm">// 有外部副作用</span>
+}</pre>
+    <div class="phase-strip">
+      <div><strong>① 开始渲染 room=A</strong>调用 willMount，建立订阅 A。</div>
+      <div><strong>② 渲染被暂停或放弃</strong>例如子组件 Suspense；A 对应的界面从未提交。</div>
+      <div><strong>③ React 重新渲染</strong>再次调用 willMount，又建立一个订阅。</div>
+      <div><strong>④ 产生泄漏</strong>第一次没有真正挂载，因此不能依赖正常卸载流程撤销那次操作。</div>
+    </div>
+    <p style="margin-bottom:0"><b>问题不在“调用了两次”，而在“副作用发生了，但对应的 Commit 可能根本不存在”。</b>把订阅放入 <code>componentDidMount</code> 后，只有节点真正提交到界面时才会建立订阅，并可由 <code>componentWillUnmount</code> 对称清理。</p>
+  </div>
+
+  <table class="simple">
+    <tr><th>旧方法</th><th>常见的不安全写法</th><th>为什么有问题</th><th>替代位置</th></tr>
+    <tr><td><code>componentWillMount</code></td><td>发请求、订阅、操作全局对象</td><td>方法执行后，组件不一定真的挂载。</td><td>初始化 state 放 <code>constructor</code>；副作用放 <code>componentDidMount</code>。</td></tr>
+    <tr><td><code>componentWillReceiveProps</code></td><td>收到新 props 就请求数据或同步 state</td><td>这组 props 对应的 Render 可能被更新的 props 取代，永远不提交。</td><td>提交后的同步放 <code>componentDidUpdate</code>；少量派生 state 使用 <code>getDerivedStateFromProps</code>，通常优先在 render 中直接计算。</td></tr>
+    <tr><td><code>componentWillUpdate</code></td><td>启动动画、操作 DOM、重建订阅</td><td>它可能针对一次最终未提交的更新提前产生副作用。</td><td>DOM 改变前读取信息用 <code>getSnapshotBeforeUpdate</code>；提交后的操作放 <code>componentDidUpdate</code>。</td></tr>
+  </table>
+  <div class="callout warn"><b>准确说法：</b>这些 API 不是因为“旧”而失效，也不是突然全部删除；React 将它们重命名为 <code>UNSAFE_componentWillMount</code>、<code>UNSAFE_componentWillReceiveProps</code> 和 <code>UNSAFE_componentWillUpdate</code>，用于兼容历史代码。<code>UNSAFE</code> 表示它们不适合承载依赖“这次更新一定会提交”的逻辑，新代码不应使用。</div>
+
+  <h2><span class="dot" style="background:var(--recon)"></span>函数组件：Effect 的完整生命周期</h2>
+  <pre><span class="fn">useEffect</span>(() =&gt; {
+  <span class="cm">// setup：连接外部系统</span>
+  <span class="kw">const</span> connection = <span class="fn">connect</span>(roomId);
+
+  <span class="kw">return</span> () =&gt; {
+    <span class="cm">// cleanup：撤销上一次 setup 做的事情</span>
+    connection.<span class="fn">disconnect</span>();
+  };
+}, [roomId]);</pre>
+  <table class="simple">
+    <tr><th>发生什么</th><th>执行顺序</th><th>读取到的值</th></tr>
+    <tr><td>首次挂载</td><td>提交界面 → 执行 setup</td><td>首次渲染的 <code>roomId</code></td></tr>
+    <tr><td><code>roomId</code> 改变</td><td>先执行上一次 cleanup → 再执行新的 setup</td><td>旧 cleanup 读取旧值；新 setup 读取新值</td></tr>
+    <tr><td>依赖没有变化</td><td>setup 和 cleanup 都不执行</td><td>—</td></tr>
+    <tr><td>组件卸载</td><td>执行最后一次 cleanup</td><td>最后一次 setup 对应的值</td></tr>
+  </table>
+  <div class="callout good"><b>依赖数组控制同步频率：</b>不传依赖数组时，每次提交后执行；传 <code>[]</code> 时只在挂载后 setup、卸载时 cleanup；传 <code>[a,b]</code> 时，任一依赖通过 <code>Object.is</code> 比较发生变化才重新同步。</div>
+
+  <h3>为什么 Effect 不能只理解为“挂载后执行”</h3>
+  <p>假设聊天室组件当前连接 <code>general</code> 房间，用户随后把 <code>roomId</code> 改成 <code>travel</code>。组件没有卸载，但旧连接必须断开，并建立新连接：</p>
+  <div class="phase-strip">
+    <div><strong>① roomId = general</strong>Effect setup：连接 general。</div>
+    <div><strong>② 用户选择 travel</strong>组件重新渲染，界面显示 travel。</div>
+    <div><strong>③ 先执行旧 cleanup</strong>断开 general，避免同时保留两个连接。</div>
+    <div><strong>④ 再执行新 setup</strong>连接 travel，使外部连接与当前 props 一致。</div>
+  </div>
+  <p>因此，一个 Effect 更适合看成一对操作：<b>setup 建立某种外部连接，cleanup 撤销这次连接</b>。依赖变化时，这一对操作会重复发生；它不只对应挂载和卸载。</p>
+  <div class="grid2">
+    <div class="card"><h3 style="margin-top:0">需要 Effect</h3><pre><span class="fn">useEffect</span>(() =&gt; {
+  <span class="kw">const</span> c = <span class="fn">connect</span>(roomId);
+  <span class="kw">return</span> () =&gt; c.<span class="fn">disconnect</span>();
+}, [roomId]);</pre><p>聊天室连接是 React 之外的系统，需要在 props 改变后重新同步。</p></div>
+    <div class="card"><h3 style="margin-top:0">不需要 Effect</h3><pre><span class="cm">// 直接由本次 props 计算</span>
+<span class="kw">const</span> total = price * quantity;</pre><p><code>total</code> 只是已有数据的计算结果，不需要先渲染一次，再通过 Effect 写回 state。</p></div>
+  </div>
+
+  <h2><span class="dot" style="background:var(--render)"></span>useEffect 与 useLayoutEffect</h2>
+  <table class="simple">
+    <tr><th></th><th>useLayoutEffect</th><th>useEffect</th></tr>
+    <tr><td>执行时机</td><td>DOM 修改后、浏览器绘制前，同步执行</td><td>提交后异步调度，通常不阻塞浏览器绘制</td></tr>
+    <tr><td>是否阻塞绘制</td><td>会；其中的状态更新也会在绘制前处理</td><td>通常不会</td></tr>
+    <tr><td>适用场景</td><td>读取布局并立即修正位置、尺寸或滚动</td><td>请求、订阅、日志以及大多数外部同步</td></tr>
+    <tr><td>清理时机</td><td>下一次 layout setup 前或卸载期间同步执行</td><td>下一次 passive setup 前或卸载时执行</td></tr>
+  </table>
+  <div class="card">
+    <h3 style="margin-top:0">互动：比较两种 Effect 的执行时机</h3>
+    <div class="demo-guide"><b>怎么操作：</b>先点“useEffect”，观察 Tooltip 是否先出现在 A、再移动到 B；重置后点“useLayoutEffect”，比较用户最终看到了几次位置变化。只需要观察上方屏幕和下方唯一的结果说明。</div>
+    <!-- stage -->
+    <div style="position:relative;height:90px;background:var(--code);border:1px solid var(--line);border-radius:10px;overflow:hidden">
+      <div style="position:absolute;top:6px;left:10px;font-size:11px;color:var(--dim);font-family:var(--mono)">🖥 屏幕</div>
+      <div style="position:absolute;top:50%;left:8%;width:2px;height:40px;transform:translateY(-50%);background:var(--dim);opacity:.35"></div>
+      <div style="position:absolute;bottom:8px;left:6%;font-size:10px;color:var(--dim)">A(初始)</div>
+      <div style="position:absolute;top:50%;right:10%;width:2px;height:40px;transform:translateY(-50%);background:var(--recon);opacity:.5"></div>
+      <div style="position:absolute;bottom:8px;right:8%;font-size:10px;color:var(--recon)">B(目标)</div>
+      <div id="lcBox" style="position:absolute;top:50%;left:8%;transform:translateY(-50%);background:var(--accent);color:#04222b;font-weight:700;font-size:11px;padding:7px 12px;border-radius:8px;transition:left .25s ease">Tooltip</div>
+    </div>
+    <div class="controls">
+      <button class="act" id="lcEffect" style="background:var(--fiber)">① 用 useEffect 定位</button>
+      <button class="act" id="lcLayout" style="background:var(--recon)">② 用 useLayoutEffect 定位</button>
+      <button class="ghost" id="lcReset">重置</button>
+    </div>
+    <div class="status" id="lcStatus">请先点击①。重点观察：Tooltip 是否在 A 短暂停留后才移动到 B。</div>
+  </div>
+  <div class="callout"><b>选择原则：</b>默认使用 <code>useEffect</code>。只有当 Effect 必须读取 DOM 布局并在浏览器绘制前同步修正界面时，才使用 <code>useLayoutEffect</code>。layout effect 中的工作会阻塞绘制，应保持简短。</div>
+
+  <h2><span class="dot" style="background:var(--sched)"></span>StrictMode 下为什么会多执行一次</h2>
+  <p>React 额外执行一次，是为了让两类原本偶发的 bug 在开发时立即出现。正确的组件应该满足：</p>
+  <ul class="clean">
+    <li><b>组件函数执行两次，结果仍相同。</b>组件不能在 Render 中修改 props、全局变量或其他外部数据。</li>
+    <li><b>Effect 可以安全地 setup → cleanup → setup。</b>cleanup 必须完整撤销上一次 setup。</li>
+  </ul>
+
+  <div class="grid2">
+    <div class="card" style="border-color:var(--warn)">
+      <h3 style="margin-top:0">检查 1：Render 是否纯净</h3>
+      <pre><span class="kw">function</span> <span class="fn">List</span>({ items }) {
+  items.<span class="fn">push</span>(<span class="st">'新项目'</span>); <span class="cm">// ❌ 修改了 props 数组</span>
+  <span class="kw">return</span> items.<span class="fn">map</span>(...);
+}</pre>
+      <p>普通执行一次时，错误可能不明显。StrictMode 连续执行两次后，“新项目”会重复出现，直接暴露 Render 修改了外部数据。</p>
+    </div>
+    <div class="card" style="border-color:var(--fiber)">
+      <h3 style="margin-top:0">检查 2：Effect 是否正确清理</h3>
+      <pre><span class="fn">useEffect</span>(() =&gt; {
+  socket.<span class="fn">connect</span>();
+  <span class="cm">// ❌ 没有 return disconnect</span>
+}, []);</pre>
+      <p>StrictMode 执行 setup → cleanup → setup。因为 cleanup 缺失，最终会保留两个连接，问题立刻可见。补上 <code>return () =&gt; socket.disconnect()</code> 后，任意时刻只保留一个连接。</p>
+    </div>
+  </div>
+
+  <div class="callout"><b>为什么模拟“建立 → 清理 → 再建立”？</b>真实应用中，用户可能进入页面、离开页面、再回来；依赖变化时 Effect 也会反复清理和建立。StrictMode 提前做一次压力测试，确认代码能承受这个过程。这项检查仅在开发环境执行，生产环境不会因此多渲染一次页面。</div>
+  <div class="callout good"><b>本章小结：</b>Render 只计算；Commit 修改 DOM。Layout Effect 在绘制前同步运行，普通 Effect 在提交后异步运行。依赖变化时先清理旧 Effect，再建立新 Effect；卸载时执行最后一次清理。下一章进入<a class="xref" data-go="t4">React 更新的四个阶段</a>。</div>
+  <div class="navbtns"><button class="ghost" data-go="t2">← 2虚拟 DOM 真实含义</button><button class="act" data-go="t4">4更新的四个阶段 →</button></div>
+</section></main>
+<script src="./assets/site.js"></script>
+<script src="./assets/demos.js"></script>
+</body>
+</html>

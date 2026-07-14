@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+<title>核心对象速查 · React 原理全景</title>
+<script>
+  const embedParams = new URLSearchParams(location.search);
+  if (embedParams.get('embed') === '1') document.documentElement.classList.add('is-embed');
+  if (embedParams.get('theme') === 'light') document.documentElement.classList.add('embed-light');
+</script>
+<link rel="stylesheet" href="./assets/site.css">
+</head>
+<body data-chapter="obj">
+<aside id="side">
+  <div class="brand">⚛️ React 原理全景</div>
+  <button class="themebtn" id="themeBtn"><span class="ic">🌙</span><span id="themeLabel">切换到浅色模式</span></button>
+  <a href="./intro.html" data-t="intro"><span class="n">◎</span>如何使用本页</a>
+  <div class="grp">更新流程</div>
+  <a href="./journey.html" data-t="journey"><span class="n">★</span>一次 setState 的完整旅程</a>
+  <div class="grp">第一层 · 表层原理</div>
+  <a href="./t1.html" data-t="t1"><span class="n">1</span>组件渲染机制</a>
+  <a href="./t2.html" data-t="t2"><span class="n">2</span>虚拟 DOM 真实含义</a>
+  <a href="./t3.html" data-t="t3"><span class="n">3</span>生命周期执行顺序</a>
+  <div class="grp">第二层 · 一次更新的主线</div>
+  <a href="./t4.html" data-t="t4"><span class="n">4</span>更新的四个阶段</a>
+  <div class="grp">阶段一 · Trigger 触发</div>
+  <a href="./t9.html" data-t="t9"><span class="n">5</span>UpdateQueue：更新入队</a>
+  <div class="grp">阶段二 · Schedule 调度</div>
+  <a href="./t13.html" data-t="t13"><span class="n">6</span>Lane：选择更新</a>
+  <a href="./t12.html" data-t="t12"><span class="n">7</span>Scheduler：安排执行</a>
+  <div class="grp">阶段三 · Render 计算</div>
+  <a href="./t8.html" data-t="t8"><span class="n">8</span>Fiber：可中断工作单元</a>
+  <a href="./t5.html" data-t="t5"><span class="n">9</span>双缓存 Fiber 树</a>
+  <a href="./t7.html" data-t="t7"><span class="n">10</span>Hooks：读取与计算状态</a>
+  <a href="./t6.html" data-t="t6"><span class="n">11</span>Diff：协调子节点</a>
+  <a href="./t10.html" data-t="t10"><span class="n">12</span>flags：记录变更</a>
+  <div class="grp">阶段四 · Commit 提交</div>
+  <a href="./t11.html" data-t="t11"><span class="n">13</span>Commit：应用变更</a>
+  <div class="grp">并发延伸</div>
+  <a href="./t14.html" data-t="t14"><span class="n">14</span>Concurrent 并发渲染</a>
+  <a href="./t15.html" data-t="t15"><span class="n">15</span>两大并发 API</a>
+  <div class="grp">架构交互</div>
+  <a href="./t16.html" data-t="t16"><span class="n">16</span>三大模块协作</a>
+  <a href="./t17.html" data-t="t17"><span class="n">17</span>批量更新原理</a>
+  <a href="./t18.html" data-t="t18"><span class="n">18</span>Suspense / lazy</a>
+  <a href="./t19.html" data-t="t19"><span class="n">19</span>合成事件系统</a>
+  <div class="grp">性能优化</div>
+  <a href="./t20.html" data-t="t20"><span class="n">20</span>渲染优化底层</a>
+  <a href="./t21.html" data-t="t21"><span class="n">21</span>渲染 bug 底层解释</a>
+  <div class="grp">高级实践与新架构</div>
+  <a href="./t22.html" data-t="t22"><span class="n">22</span>SSR / Hydration / 流式</a>
+  <a href="./t23.html" data-t="t23"><span class="n">23</span>Server Components</a>
+  <a href="./t24.html" data-t="t24"><span class="n">24</span>React 19 新特性</a>
+  <a href="./t25.html" data-t="t25"><span class="n">25</span>外部状态与撕裂</a>
+  <a href="./t26.html" data-t="t26"><span class="n">26</span>React Compiler</a>
+  <a href="./t27.html" data-t="t27"><span class="n">27</span>高级模式与陷阱</a>
+  <a href="./t28.html" data-t="t28"><span class="n">28</span>性能诊断与工程化</a>
+  <div class="grp">补充专题 · 常被漏掉的核心</div>
+  <a href="./ctx.html" data-t="ctx"><span class="n">C1</span>Context 源码原理</a>
+  <a href="./ref.html" data-t="ref"><span class="n">C2</span>useRef 与 ref 体系</a>
+  <div class="grp">源码附录 · 按需查阅</div>
+  <a href="./pk.html" data-t="pk"><span class="n">A1</span>宏观包结构</a>
+  <a href="./boot.html" data-t="boot"><span class="n">A2</span>启动过程</a>
+  <a href="./obj.html" data-t="obj" class="active" aria-current="page"><span class="n">A3</span>核心对象速查</a>
+  <a href="./source.html" data-t="source"><span class="n">A4</span>源码阅读路线</a>
+  <div class="grp">总结</div>
+  <a href="./main.html" data-t="main"><span class="n">★</span>React 更新流程总览</a>
+</aside>
+<main id="main"><section class="topic active" id="obj">
+  <div class="crumb">源码附录 / A3</div>
+  <h1>A3 · 核心对象速查</h1>
+  <p>看源码会反复遇到这几个对象。先混个脸熟,后面各章会展开。<b>把它们串起来就是一次更新的数据流</b>。</p>
+  <table class="simple">
+    <tr><th>对象</th><th>是什么</th><th>关键字段</th><th>详见</th></tr>
+    <tr><td><code>ReactElement</code></td><td>JSX 编译产物,UI 的不可变描述(虚拟 DOM 单位)</td><td><code>type</code>、<code>key</code>、<code>props</code>、<code>$$typeof</code></td><td><a class="xref" data-go="t2">第一层·虚拟DOM</a></td></tr>
+    <tr><td><code>Fiber</code></td><td>工作单元 + 组件实例载体,构成 Fiber 树</td><td><code>tag</code>、<code>return/child/sibling</code>、<code>memoizedState</code>、<code>flags</code>、<code>lanes</code>、<code>alternate</code></td><td><a class="xref" data-go="t8">Render·Fiber</a></td></tr>
+    <tr><td><code>FiberRootNode</code></td><td>整个应用的根,调度中枢</td><td><code>current</code>、<code>containerInfo</code>、<code>pendingLanes</code>、<code>finishedWork</code></td><td>0·2</td></tr>
+    <tr><td><code>Update</code></td><td>一次状态变更的描述</td><td><code>lane</code>、<code>action</code>/<code>payload</code>、<code>next</code>(环状链表)</td><td><a class="xref" data-go="t9">Trigger·UpdateQueue</a></td></tr>
+    <tr><td><code>UpdateQueue</code></td><td>挂在 Fiber 上的更新队列</td><td><code>shared.pending</code>、<code>baseState</code>、<code>baseQueue</code></td><td><a class="xref" data-go="t9">Trigger·UpdateQueue</a></td></tr>
+    <tr><td><code>Hook</code></td><td>函数组件里每个 Hook 的节点,串成链表</td><td><code>memoizedState</code>、<code>queue</code>、<code>next</code></td><td><a class="xref" data-go="t7">Render·Hooks</a></td></tr>
+    <tr><td><code>Effect</code></td><td>useEffect/Layout 的副作用节点,环状链表</td><td><code>tag</code>、<code>create</code>、<code>destroy</code>、<code>deps</code>、<code>next</code></td><td><a class="xref" data-go="t7">Render·Hooks</a>/<a class="xref" data-go="t10">Render·变更标记</a></td></tr>
+    <tr><td><code>Lane</code></td><td>优先级车道,31 位二进制掩码</td><td>位运算:<code>&amp; | -lanes</code></td><td><a class="xref" data-go="t13">Schedule·Lane</a></td></tr>
+  </table>
+  <div class="callout good"><b>对象之间的关系：</b>JSX 编译成 <code>ReactElement</code> → 更新生成带 <code>Lane</code> 的 <code>Update</code>，并进入 <code>Fiber</code> 的 <code>UpdateQueue</code> → Scheduler 安排任务 → reconciler 遍历 Fiber、处理 Hook 并生成带 <code>flags</code> 的树 → commit 提交变更。</div>
+  <div class="navbtns"><button class="ghost" data-go="boot">← A2启动过程</button><button class="act" data-go="source">A4源码阅读路线 →</button></div>
+</section></main>
+<script src="./assets/site.js"></script>
+<script src="./assets/demos.js"></script>
+</body>
+</html>

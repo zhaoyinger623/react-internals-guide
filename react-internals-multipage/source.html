@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+<title>源码阅读路线 · React 原理全景</title>
+<script>
+  const embedParams = new URLSearchParams(location.search);
+  if (embedParams.get('embed') === '1') document.documentElement.classList.add('is-embed');
+  if (embedParams.get('theme') === 'light') document.documentElement.classList.add('embed-light');
+</script>
+<link rel="stylesheet" href="./assets/site.css">
+</head>
+<body data-chapter="source">
+<aside id="side">
+  <div class="brand">⚛️ React 原理全景</div>
+  <button class="themebtn" id="themeBtn"><span class="ic">🌙</span><span id="themeLabel">切换到浅色模式</span></button>
+  <a href="./intro.html" data-t="intro"><span class="n">◎</span>如何使用本页</a>
+  <div class="grp">更新流程</div>
+  <a href="./journey.html" data-t="journey"><span class="n">★</span>一次 setState 的完整旅程</a>
+  <div class="grp">第一层 · 表层原理</div>
+  <a href="./t1.html" data-t="t1"><span class="n">1</span>组件渲染机制</a>
+  <a href="./t2.html" data-t="t2"><span class="n">2</span>虚拟 DOM 真实含义</a>
+  <a href="./t3.html" data-t="t3"><span class="n">3</span>生命周期执行顺序</a>
+  <div class="grp">第二层 · 一次更新的主线</div>
+  <a href="./t4.html" data-t="t4"><span class="n">4</span>更新的四个阶段</a>
+  <div class="grp">阶段一 · Trigger 触发</div>
+  <a href="./t9.html" data-t="t9"><span class="n">5</span>UpdateQueue：更新入队</a>
+  <div class="grp">阶段二 · Schedule 调度</div>
+  <a href="./t13.html" data-t="t13"><span class="n">6</span>Lane：选择更新</a>
+  <a href="./t12.html" data-t="t12"><span class="n">7</span>Scheduler：安排执行</a>
+  <div class="grp">阶段三 · Render 计算</div>
+  <a href="./t8.html" data-t="t8"><span class="n">8</span>Fiber：可中断工作单元</a>
+  <a href="./t5.html" data-t="t5"><span class="n">9</span>双缓存 Fiber 树</a>
+  <a href="./t7.html" data-t="t7"><span class="n">10</span>Hooks：读取与计算状态</a>
+  <a href="./t6.html" data-t="t6"><span class="n">11</span>Diff：协调子节点</a>
+  <a href="./t10.html" data-t="t10"><span class="n">12</span>flags：记录变更</a>
+  <div class="grp">阶段四 · Commit 提交</div>
+  <a href="./t11.html" data-t="t11"><span class="n">13</span>Commit：应用变更</a>
+  <div class="grp">并发延伸</div>
+  <a href="./t14.html" data-t="t14"><span class="n">14</span>Concurrent 并发渲染</a>
+  <a href="./t15.html" data-t="t15"><span class="n">15</span>两大并发 API</a>
+  <div class="grp">架构交互</div>
+  <a href="./t16.html" data-t="t16"><span class="n">16</span>三大模块协作</a>
+  <a href="./t17.html" data-t="t17"><span class="n">17</span>批量更新原理</a>
+  <a href="./t18.html" data-t="t18"><span class="n">18</span>Suspense / lazy</a>
+  <a href="./t19.html" data-t="t19"><span class="n">19</span>合成事件系统</a>
+  <div class="grp">性能优化</div>
+  <a href="./t20.html" data-t="t20"><span class="n">20</span>渲染优化底层</a>
+  <a href="./t21.html" data-t="t21"><span class="n">21</span>渲染 bug 底层解释</a>
+  <div class="grp">高级实践与新架构</div>
+  <a href="./t22.html" data-t="t22"><span class="n">22</span>SSR / Hydration / 流式</a>
+  <a href="./t23.html" data-t="t23"><span class="n">23</span>Server Components</a>
+  <a href="./t24.html" data-t="t24"><span class="n">24</span>React 19 新特性</a>
+  <a href="./t25.html" data-t="t25"><span class="n">25</span>外部状态与撕裂</a>
+  <a href="./t26.html" data-t="t26"><span class="n">26</span>React Compiler</a>
+  <a href="./t27.html" data-t="t27"><span class="n">27</span>高级模式与陷阱</a>
+  <a href="./t28.html" data-t="t28"><span class="n">28</span>性能诊断与工程化</a>
+  <div class="grp">补充专题 · 常被漏掉的核心</div>
+  <a href="./ctx.html" data-t="ctx"><span class="n">C1</span>Context 源码原理</a>
+  <a href="./ref.html" data-t="ref"><span class="n">C2</span>useRef 与 ref 体系</a>
+  <div class="grp">源码附录 · 按需查阅</div>
+  <a href="./pk.html" data-t="pk"><span class="n">A1</span>宏观包结构</a>
+  <a href="./boot.html" data-t="boot"><span class="n">A2</span>启动过程</a>
+  <a href="./obj.html" data-t="obj"><span class="n">A3</span>核心对象速查</a>
+  <a href="./source.html" data-t="source" class="active" aria-current="page"><span class="n">A4</span>源码阅读路线</a>
+  <div class="grp">总结</div>
+  <a href="./main.html" data-t="main"><span class="n">★</span>React 更新流程总览</a>
+</aside>
+<main id="main"><section class="topic active" id="source">
+  <div class="crumb">源码附录 / A4</div>
+  <h1>A4 · 源码阅读路线</h1>
+  <div class="callout good"><b>目标不是背文件，而是可以从一个 API 一路跟到 DOM 提交。</b>建议使用与教程相近的 React 18/19 主分支阅读；具体文件会演进，函数职责与调用方向比行号更可靠。打开仓库后，始终从一个可复现问题出发，例如“<code>setCount(c =&gt; c + 1)</code> 为什么不是立即改 DOM？”</div>
+
+  <h2><span class="dot" style="background:var(--sched)"></span>第一轮：只追主干，暂时跳过细枝末节</h2>
+  <p>首次阅读只允许自己追这条调用链。遇到不认识的 helper，先在旁边写下“它输入什么、输出什么”，不要立刻钻进去；否则会在位运算和 feature flag 里失去主线。</p>
+  <pre><span class="cm">// 从用户代码向内核移动：建议按此顺序全局搜索函数名</span>
+dispatchSetState / classComponentUpdater.enqueueSetState
+  → requestUpdateLane              <span class="cm">// 这次更新属于哪条优先级车道？</span>
+  → enqueueConcurrentHookUpdate    <span class="cm">// Update 如何进入队列？</span>
+  → scheduleUpdateOnFiber
+  → ensureRootIsScheduled          <span class="cm">// root 选择下一批要做的 lanes</span>
+  → performConcurrentWorkOnRoot
+  → renderRootConcurrent
+  → workLoopConcurrent
+  → performUnitOfWork              <span class="cm">// beginWork ↓ / completeWork ↑</span>
+  → commitRoot                     <span class="cm">// 唯一允许改宿主环境的总入口</span></pre>
+  <div class="callout warn"><b>不要把 Scheduler 和 React 调度混为一谈。</b><code>ensureRootIsScheduled</code> 是 React 根据 <code>lanes</code> 选择“该渲染什么”；<code>scheduleCallback</code> 才是把一个回调交给独立 scheduler，决定“何时获得 CPU”。两个层次会互相调用，但职责不同。</div>
+
+  <h2><span class="dot" style="background:var(--recon)"></span>文件地图：先知道该去哪里问问题</h2>
+  <table class="simple">
+    <tr><th>当你在问什么</th><th>优先寻找的模块/符号</th><th>读完应得到的答案</th></tr>
+    <tr><td>Hook 的 dispatch 从哪来？</td><td><code>ReactFiberHooks</code>：<code>mountState</code>、<code>dispatchSetState</code>、<code>updateReducer</code></td><td>Hook 状态如何按调用顺序存成链表，Update 如何入队、何时被消费。</td></tr>
+    <tr><td>更新如何到达 root？</td><td><code>ReactFiberWorkLoop</code>：<code>scheduleUpdateOnFiber</code>、<code>markRootUpdated</code></td><td>Fiber 上的 lane 为什么要冒泡/汇总到 root，root 为什么是调度单位。</td></tr>
+    <tr><td>React 为什么能中断？</td><td><code>ReactFiberWorkLoop</code> + <code>Scheduler</code>：<code>workLoopConcurrent</code>、<code>shouldYield</code></td><td>每个 Fiber 是一个工作单元；让出控制权后 WIP 如何保留下来。</td></tr>
+    <tr><td>组件、DOM 节点分别怎么处理？</td><td><code>ReactFiberBeginWork</code> / <code>ReactFiberCompleteWork</code></td><td>向下递阶段算 children，向上归阶段准备 host 实例并汇总 flags。</td></tr>
+    <tr><td>key 为什么影响状态与 DOM 复用？</td><td><code>ReactChildFiber</code>：<code>reconcileChildrenArray</code></td><td>“同 type + 同 key”是同一位置身份的核心判定；移动/删除如何标记。</td></tr>
+    <tr><td>DOM 到底在哪一行改？</td><td><code>ReactFiberCommitWork</code> → <code>react-dom-bindings</code> 的 HostConfig</td><td>flags 如何变成 placement/update/deletion，以及平台层如何执行 DOM 操作。</td></tr>
+  </table>
+
+  <h2><span class="dot" style="background:var(--render)"></span>第二轮：带着断点验证，而不是只看</h2>
+  <ol style="padding-left:22px;color:var(--txt2);font-size:14px;line-height:1.95">
+    <li>做一个只有 <code>useState</code>、列表 <code>key</code>、<code>useEffect</code> 的最小应用；先预测点击一次后哪些组件会执行、哪些 DOM 会变化。</li>
+    <li>在 <code>dispatchSetState</code>、<code>scheduleUpdateOnFiber</code>、<code>beginWork</code>、<code>completeWork</code>、<code>commitRoot</code> 设断点或日志。每次只验证一个问题。</li>
+    <li>记录一个对象的“身份轨迹”：同一组件的 <code>current</code> Fiber、其 <code>alternate</code>、hook queue、DOM <code>stateNode</code> 在 render 前后分别是谁。</li>
+    <li>再制造优先级冲突：输入框更新与 <code>startTransition</code> 列表更新同时发生，观察低优 WIP 被打断后仍能恢复。这时再读 Lane 和 baseQueue。</li>
+  </ol>
+  <div class="card"><h3 style="margin-top:0">每章结束后的自测</h3><p>尝试画出：<b>输入对象 → 关键数据结构变化 → 下一跳函数 → 用户看到的结果</b>。例如读完 UpdateQueue 后，应能解释连续三次 <code>setCount(c =&gt; c + 1)</code> 为什么得到 +3，以及低优先级更新被跳过后如何保留。</p></div>
+  <div class="navbtns"><button class="ghost" data-go="obj">← A3核心对象速查</button><button class="act" data-go="main">★React 更新流程总览 →</button></div>
+</section></main>
+<script src="./assets/site.js"></script>
+<script src="./assets/demos.js"></script>
+</body>
+</html>

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+<title>高级模式与陷阱 · React 原理全景</title>
+<script>
+  const embedParams = new URLSearchParams(location.search);
+  if (embedParams.get('embed') === '1') document.documentElement.classList.add('is-embed');
+  if (embedParams.get('theme') === 'light') document.documentElement.classList.add('embed-light');
+</script>
+<link rel="stylesheet" href="./assets/site.css">
+</head>
+<body data-chapter="t27">
+<aside id="side">
+  <div class="brand">⚛️ React 原理全景</div>
+  <button class="themebtn" id="themeBtn"><span class="ic">🌙</span><span id="themeLabel">切换到浅色模式</span></button>
+  <a href="./intro.html" data-t="intro"><span class="n">◎</span>如何使用本页</a>
+  <div class="grp">更新流程</div>
+  <a href="./journey.html" data-t="journey"><span class="n">★</span>一次 setState 的完整旅程</a>
+  <div class="grp">第一层 · 表层原理</div>
+  <a href="./t1.html" data-t="t1"><span class="n">1</span>组件渲染机制</a>
+  <a href="./t2.html" data-t="t2"><span class="n">2</span>虚拟 DOM 真实含义</a>
+  <a href="./t3.html" data-t="t3"><span class="n">3</span>生命周期执行顺序</a>
+  <div class="grp">第二层 · 一次更新的主线</div>
+  <a href="./t4.html" data-t="t4"><span class="n">4</span>更新的四个阶段</a>
+  <div class="grp">阶段一 · Trigger 触发</div>
+  <a href="./t9.html" data-t="t9"><span class="n">5</span>UpdateQueue：更新入队</a>
+  <div class="grp">阶段二 · Schedule 调度</div>
+  <a href="./t13.html" data-t="t13"><span class="n">6</span>Lane：选择更新</a>
+  <a href="./t12.html" data-t="t12"><span class="n">7</span>Scheduler：安排执行</a>
+  <div class="grp">阶段三 · Render 计算</div>
+  <a href="./t8.html" data-t="t8"><span class="n">8</span>Fiber：可中断工作单元</a>
+  <a href="./t5.html" data-t="t5"><span class="n">9</span>双缓存 Fiber 树</a>
+  <a href="./t7.html" data-t="t7"><span class="n">10</span>Hooks：读取与计算状态</a>
+  <a href="./t6.html" data-t="t6"><span class="n">11</span>Diff：协调子节点</a>
+  <a href="./t10.html" data-t="t10"><span class="n">12</span>flags：记录变更</a>
+  <div class="grp">阶段四 · Commit 提交</div>
+  <a href="./t11.html" data-t="t11"><span class="n">13</span>Commit：应用变更</a>
+  <div class="grp">并发延伸</div>
+  <a href="./t14.html" data-t="t14"><span class="n">14</span>Concurrent 并发渲染</a>
+  <a href="./t15.html" data-t="t15"><span class="n">15</span>两大并发 API</a>
+  <div class="grp">架构交互</div>
+  <a href="./t16.html" data-t="t16"><span class="n">16</span>三大模块协作</a>
+  <a href="./t17.html" data-t="t17"><span class="n">17</span>批量更新原理</a>
+  <a href="./t18.html" data-t="t18"><span class="n">18</span>Suspense / lazy</a>
+  <a href="./t19.html" data-t="t19"><span class="n">19</span>合成事件系统</a>
+  <div class="grp">性能优化</div>
+  <a href="./t20.html" data-t="t20"><span class="n">20</span>渲染优化底层</a>
+  <a href="./t21.html" data-t="t21"><span class="n">21</span>渲染 bug 底层解释</a>
+  <div class="grp">高级实践与新架构</div>
+  <a href="./t22.html" data-t="t22"><span class="n">22</span>SSR / Hydration / 流式</a>
+  <a href="./t23.html" data-t="t23"><span class="n">23</span>Server Components</a>
+  <a href="./t24.html" data-t="t24"><span class="n">24</span>React 19 新特性</a>
+  <a href="./t25.html" data-t="t25"><span class="n">25</span>外部状态与撕裂</a>
+  <a href="./t26.html" data-t="t26"><span class="n">26</span>React Compiler</a>
+  <a href="./t27.html" data-t="t27" class="active" aria-current="page"><span class="n">27</span>高级模式与陷阱</a>
+  <a href="./t28.html" data-t="t28"><span class="n">28</span>性能诊断与工程化</a>
+  <div class="grp">补充专题 · 常被漏掉的核心</div>
+  <a href="./ctx.html" data-t="ctx"><span class="n">C1</span>Context 源码原理</a>
+  <a href="./ref.html" data-t="ref"><span class="n">C2</span>useRef 与 ref 体系</a>
+  <div class="grp">源码附录 · 按需查阅</div>
+  <a href="./pk.html" data-t="pk"><span class="n">A1</span>宏观包结构</a>
+  <a href="./boot.html" data-t="boot"><span class="n">A2</span>启动过程</a>
+  <a href="./obj.html" data-t="obj"><span class="n">A3</span>核心对象速查</a>
+  <a href="./source.html" data-t="source"><span class="n">A4</span>源码阅读路线</a>
+  <div class="grp">总结</div>
+  <a href="./main.html" data-t="main"><span class="n">★</span>React 更新流程总览</a>
+</aside>
+<main id="main"><section class="topic active" id="t27">
+  <div class="crumb">第七层 · 高级实践与新架构 / 27</div>
+  <h1>27 · 高级模式与常见陷阱</h1>
+  <div class="card" style="border-left:4px solid var(--accent)">
+    <b>🗺 本章路线图</b>
+    <p style="margin:8px 0 0">几个高级 API 与它们的常见陷阱,直接影响项目质量。</p>
+    <p style="margin:6px 0 0">本章包括：<b>Error Boundary、Portal、forwardRef/useImperativeHandle、StrictMode 双调用、Context 性能陷阱、useId</b>。</p>
+  </div>
+
+  <h2><span class="dot" style="background:var(--render)"></span>Error Boundary(错误边界)</h2>
+  <p>类组件通过 <code>getDerivedStateFromError</code> / <code>componentDidCatch</code> 捕获子树渲染错误,展示兜底 UI(函数组件目前无等价 Hook,需用类或库)。<b>注意:</b>它捕获不到事件处理器、异步代码、SSR 里的错误。</p>
+
+  <h2><span class="dot" style="background:var(--accent)"></span>Portal 与 forwardRef / useImperativeHandle</h2>
+  <ul class="clean">
+    <li><b><code>createPortal(child, domNode)</code>:</b>把子节点渲染到<b>父 DOM 层级之外</b>(如挂到 body),但<b>事件仍沿 React 树冒泡</b>(合成事件按 fiber 树,不按真实 DOM)。适合弹窗、tooltip。</li>
+    <li><b><code>useImperativeHandle</code>:</b>配合 ref 暴露<b>受控的命令式接口</b>(如 <code>inputRef.current.focus()</code>),而不是整个 DOM。React 19 起 ref 可直接作 prop,forwardRef 不再必需。</li>
+  </ul>
+
+  <h2><span class="dot" style="background:var(--sched)"></span>StrictMode 双调用</h2>
+  <p>开发模式下 <code>&lt;StrictMode&gt;</code> 会<b>故意双调用</b>渲染函数、以及 effect 的「挂载→卸载→再挂载」。目的:<b>暴露不纯的渲染和缺失的 effect 清理</b>。如果你的组件双调用后出 bug,说明它有副作用不纯 —— 也正是 React Compiler 能否优化它的分界线。<b>生产环境不会双调用。</b></p>
+
+  <h2><span class="dot" style="background:var(--fiber)"></span>Context 性能陷阱</h2>
+  <p>Context value 一变,<b>所有消费者都重渲染</b>(绕过 memo)。陷阱:把频繁变化的值和稳定的值放同一个 Provider,或每次渲染传<b>新对象字面量</b>作 value。优化:<b>拆分 Context</b>(变与不变分开)、value 用 <code>useMemo</code> 稳定、或用 <code>useSyncExternalStore</code>/状态库做<b>选择性订阅</b>。</p>
+
+  <h2><span class="dot" style="background:var(--recon)"></span>useId</h2>
+  <p><code>useId()</code> 生成<b>服务端/客户端一致</b>的唯一 id,专为解决 SSR hydration 中 id 不匹配(不能用随机数/递增计数)。用于 <code>aria-*</code>、label/input 关联等。</p>
+  <div class="callout good"><b>本章小结：</b>Error Boundary 捕获子树渲染错误(捕不到事件/异步);Portal 渲染到别处但事件仍沿 fiber 树;StrictMode 开发双调用暴露不纯;Context value 一变所有消费者更新,要拆分/稳定 value。→ 下一章:<a class="xref" data-go="t28">第七层·性能诊断</a>。</div>
+  <div class="navbtns"><button class="ghost" data-go="t26">← 26React Compiler</button><button class="act" data-go="t28">28性能诊断与工程化 →</button></div>
+</section></main>
+<script src="./assets/site.js"></script>
+<script src="./assets/demos.js"></script>
+</body>
+</html>

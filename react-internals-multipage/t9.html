@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+<title>UpdateQueue：更新入队 · React 原理全景</title>
+<script>
+  const embedParams = new URLSearchParams(location.search);
+  if (embedParams.get('embed') === '1') document.documentElement.classList.add('is-embed');
+  if (embedParams.get('theme') === 'light') document.documentElement.classList.add('embed-light');
+</script>
+<link rel="stylesheet" href="./assets/site.css">
+</head>
+<body data-chapter="t9">
+<aside id="side">
+  <div class="brand">⚛️ React 原理全景</div>
+  <button class="themebtn" id="themeBtn"><span class="ic">🌙</span><span id="themeLabel">切换到浅色模式</span></button>
+  <a href="./intro.html" data-t="intro"><span class="n">◎</span>如何使用本页</a>
+  <div class="grp">更新流程</div>
+  <a href="./journey.html" data-t="journey"><span class="n">★</span>一次 setState 的完整旅程</a>
+  <div class="grp">第一层 · 表层原理</div>
+  <a href="./t1.html" data-t="t1"><span class="n">1</span>组件渲染机制</a>
+  <a href="./t2.html" data-t="t2"><span class="n">2</span>虚拟 DOM 真实含义</a>
+  <a href="./t3.html" data-t="t3"><span class="n">3</span>生命周期执行顺序</a>
+  <div class="grp">第二层 · 一次更新的主线</div>
+  <a href="./t4.html" data-t="t4"><span class="n">4</span>更新的四个阶段</a>
+  <div class="grp">阶段一 · Trigger 触发</div>
+  <a href="./t9.html" data-t="t9" class="active" aria-current="page"><span class="n">5</span>UpdateQueue：更新入队</a>
+  <div class="grp">阶段二 · Schedule 调度</div>
+  <a href="./t13.html" data-t="t13"><span class="n">6</span>Lane：选择更新</a>
+  <a href="./t12.html" data-t="t12"><span class="n">7</span>Scheduler：安排执行</a>
+  <div class="grp">阶段三 · Render 计算</div>
+  <a href="./t8.html" data-t="t8"><span class="n">8</span>Fiber：可中断工作单元</a>
+  <a href="./t5.html" data-t="t5"><span class="n">9</span>双缓存 Fiber 树</a>
+  <a href="./t7.html" data-t="t7"><span class="n">10</span>Hooks：读取与计算状态</a>
+  <a href="./t6.html" data-t="t6"><span class="n">11</span>Diff：协调子节点</a>
+  <a href="./t10.html" data-t="t10"><span class="n">12</span>flags：记录变更</a>
+  <div class="grp">阶段四 · Commit 提交</div>
+  <a href="./t11.html" data-t="t11"><span class="n">13</span>Commit：应用变更</a>
+  <div class="grp">并发延伸</div>
+  <a href="./t14.html" data-t="t14"><span class="n">14</span>Concurrent 并发渲染</a>
+  <a href="./t15.html" data-t="t15"><span class="n">15</span>两大并发 API</a>
+  <div class="grp">架构交互</div>
+  <a href="./t16.html" data-t="t16"><span class="n">16</span>三大模块协作</a>
+  <a href="./t17.html" data-t="t17"><span class="n">17</span>批量更新原理</a>
+  <a href="./t18.html" data-t="t18"><span class="n">18</span>Suspense / lazy</a>
+  <a href="./t19.html" data-t="t19"><span class="n">19</span>合成事件系统</a>
+  <div class="grp">性能优化</div>
+  <a href="./t20.html" data-t="t20"><span class="n">20</span>渲染优化底层</a>
+  <a href="./t21.html" data-t="t21"><span class="n">21</span>渲染 bug 底层解释</a>
+  <div class="grp">高级实践与新架构</div>
+  <a href="./t22.html" data-t="t22"><span class="n">22</span>SSR / Hydration / 流式</a>
+  <a href="./t23.html" data-t="t23"><span class="n">23</span>Server Components</a>
+  <a href="./t24.html" data-t="t24"><span class="n">24</span>React 19 新特性</a>
+  <a href="./t25.html" data-t="t25"><span class="n">25</span>外部状态与撕裂</a>
+  <a href="./t26.html" data-t="t26"><span class="n">26</span>React Compiler</a>
+  <a href="./t27.html" data-t="t27"><span class="n">27</span>高级模式与陷阱</a>
+  <a href="./t28.html" data-t="t28"><span class="n">28</span>性能诊断与工程化</a>
+  <div class="grp">补充专题 · 常被漏掉的核心</div>
+  <a href="./ctx.html" data-t="ctx"><span class="n">C1</span>Context 源码原理</a>
+  <a href="./ref.html" data-t="ref"><span class="n">C2</span>useRef 与 ref 体系</a>
+  <div class="grp">源码附录 · 按需查阅</div>
+  <a href="./pk.html" data-t="pk"><span class="n">A1</span>宏观包结构</a>
+  <a href="./boot.html" data-t="boot"><span class="n">A2</span>启动过程</a>
+  <a href="./obj.html" data-t="obj"><span class="n">A3</span>核心对象速查</a>
+  <a href="./source.html" data-t="source"><span class="n">A4</span>源码阅读路线</a>
+  <div class="grp">总结</div>
+  <a href="./main.html" data-t="main"><span class="n">★</span>React 更新流程总览</a>
+</aside>
+<main id="main"><section class="topic active" id="t9">
+  <div class="crumb">阶段一 · Trigger / 05</div>
+  <h1>5 · UpdateQueue：更新如何入队</h1>
+  <div style="display:flex;flex-wrap:wrap;gap:3px;align-items:center;font-family:var(--mono);font-size:10.5px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:7px 10px;margin:6px 0 14px;overflow-x:auto"><b style="color:var(--txt2);margin-right:4px;font-family:inherit">🧭 主线</b><span data-go="t4" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">setState</span><span style="color:var(--dim)">→</span><span data-go="t9" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:rgba(97,218,251,.22);border:1.5px solid var(--accent);color:var(--accent);font-weight:700">Update</span><span style="color:var(--dim)">→</span><span data-go="t13" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">Lane</span><span style="color:var(--dim)">→</span><span data-go="t12" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">Scheduler</span><span style="color:var(--dim)">→</span><span data-go="t8" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">Render</span><span style="color:var(--dim)">→</span><span data-go="t10" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">Effect</span><span style="color:var(--dim)">→</span><span data-go="t11" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">Commit</span><span style="color:var(--dim)">→</span><span data-go="t11" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">DOM</span></div>
+  <div class="card" style="border-left:4px solid var(--accent)">
+    <b>🗺 本章路线图</b>
+    <p style="margin:8px 0 0">一个组件 = 一个 Fiber = 一个 UpdateQueue;setState 把更新排进队列,渲染时一起 reduce 出最终 state。</p>
+    <p style="margin:6px 0 0">本章包括：<b>① update 长啥样 ② 怎么入队(环状链表)③ 怎么算(processUpdateQueue)④ baseState/baseQueue(并发存档)</b>。</p>
+  </div>
+  <p>每次状态更新都会进入对应的更新队列。不过，<b>类组件/HostRoot 与 <code>useState</code> Hook 使用的队列字段并不相同</b>。它们的共同目标都是：保存新更新、按插入顺序计算，并在跳过低优先级更新后保留重算所需的信息。</p>
+
+  <h2><span class="dot" style="background:var(--accent)"></span>① 先区分类组件队列与 Hook 队列</h2>
+  <pre><span class="cm">// 一个 Update 对象(class 组件的形态;hook 版字段略有差异)</span>
+<span class="kw">const</span> update = {
+  lane,              <span class="cm">// 本次更新的优先级车道</span>
+  payload,           <span class="cm">// setState 传的对象,或 (state)=&gt;newState</span>
+  next,              <span class="cm">// → 下一个 update(环状链表)</span>
+};</pre>
+  <div class="grid2">
+    <div class="card">
+      <h3 style="margin-top:0">类组件与 HostRoot</h3>
+      <pre>fiber.updateQueue = {
+  baseState,                  <span class="cm">// 计算的「起点」state</span>
+  firstBaseUpdate,            <span class="cm">// 基础队列的头</span>
+  lastBaseUpdate,             <span class="cm">// 同一队列的尾</span>
+  shared: { pending: null },  <span class="cm">// 新进入的环状队列</span>
+}</pre>
+      <p><code>firstBaseUpdate</code> 与 <code>lastBaseUpdate</code> 不是两个队列，而是<b>同一条单向链表的头、尾两个指针</b>。</p>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0">useState / useReducer Hook</h3>
+      <pre>hook = {
+  baseState,
+  baseQueue,                  <span class="cm">// 基础环状队列的尾指针</span>
+  queue: {
+    pending: null             <span class="cm">// 新进入的环状队列</span>
+  }
+}</pre>
+      <p>Hook 没有 <code>firstBaseUpdate/lastBaseUpdate</code>；它用一个 <code>baseQueue</code> 尾指针表示基础环状队列，队头同样是 <code>baseQueue.next</code>。</p>
+    </div>
+  </div>
+  <div class="callout"><b>为什么类组件要同时保存 first 和 last？</b>处理队列时要从 first 开始向后遍历；合并新 update 时又要快速找到 last 追加。只有 first，追加时需要遍历整条链表；同时保存 last，追加就是 O(1)。</div>
+
+  <h2><span class="dot" style="background:var(--accent)"></span>② 新 update 先进入 pending 环状链表</h2>
+  <p>下面先看类组件的 <code>shared.pending</code>；Hook 的 <code>queue.pending</code> 插入方式相同。多次更新形成环状链表，<code>pending</code> 指向最后一个节点，<code>pending.next</code> 指向第一个节点。</p>
+  <div class="callout warn"><b>先把范围说准确：</b>“pending 环转成普通链表”特指<b>类组件与 HostRoot</b>。Hook 的 <code>queue.pending</code> 也是环，但它会与同为环状的 <code>baseQueue</code> 合并，处理时仍可用“记住队头，绕一圈回到队头即结束”的方式遍历。</div>
+  <h3>为什么同一批 update 要切换两种形态</h3>
+  <p>因为这批 update 在进入 Render 前后承担的是两种完全不同的任务。可以把 <code>pending</code> 看成<b>收件箱</b>，把基础队列看成 Render 的<b>工作清单</b>：</p>
+  <table class="simple">
+    <tr><th>所处阶段</th><th>主要操作</th><th>适合的形态</th><th>为什么</th></tr>
+    <tr><td><b>事件发生时：收集</b></td><td>不断把新 update 追加到末尾</td><td>尾指针表示的环</td><td>只存 <code>pending</code> 一个指针，就能用 <code>pending</code> 找队尾、用 <code>pending.next</code> 找队头；每次追加都是 O(1)。此时不需要遍历或计算 state。</td></tr>
+    <tr><td><b>Render 开始后：处理</b></td><td>从最早的 update 向后计算，并把跳过的 update 保存成新的基础队列</td><td>类组件使用普通单链表</td><td>从 <code>firstBaseUpdate</code> 一路走到 <code>null</code> 即结束；同时用 <code>lastBaseUpdate</code> 快速追加，适合顺序消费和重建基础队列。</td></tr>
+  </table>
+  <div class="card">
+    <h3 style="margin-top:0">环转普通链表时，具体只发生四件事</h3>
+    <ol style="margin-bottom:0">
+      <li><b>先保存队尾：</b><code>last = shared.pending</code>，例如得到 u3。</li>
+      <li><b>在断环前保存队头：</b><code>first = last.next</code>，因此仍能找到 u1。</li>
+      <li><b>断开队尾到队头的回边：</b><code>last.next = null</code>，于是 <code>u1 → u2 → u3 → u1</code> 变为 <code>u1 → u2 → u3 → null</code>。</li>
+      <li><b>接入工作清单：</b>把 <code>first/last</code> 追加到类组件基础队列的 <code>firstBaseUpdate/lastBaseUpdate</code> 后面。</li>
+    </ol>
+  </div>
+  <div class="callout good"><b>为什么一定要先读 <code>last.next</code> 再断环？</b>因为外部只保存了队尾 <code>last</code>，队头藏在 <code>last.next</code> 中。如果先执行 <code>last.next = null</code>，就会丢失队头入口，无法找到 u1。正确顺序是“先取队头，再断开回边”。</div>
+  <p>所以，环并不是“计算 update 更方便”，普通链表也不是“入队更快”。React 是在每个阶段选择更适合当下操作的表示：<b>环负责高频收集和整批移交，普通链表负责有明确终点的顺序计算。</b></p>
+  <h3>为什么收集阶段选择尾指针环</h3>
+  <p>pending 可能连续插入很多次，但一轮 Render 通常只需接管这个入口。环状结构让收集阶段只保存一个 <code>pending</code> 指针，却能同时 O(1) 找到队尾和队头：</p>
+  <table class="simple">
+    <tr><th>结构</th><th>如何找队头</th><th>如何找队尾</th><th>尾部插入</th><th>需要几个外部指针</th></tr>
+    <tr><td>普通单链表，只存 head</td><td><code>head</code></td><td>必须从头遍历</td><td>O(n)</td><td>1</td></tr>
+    <tr><td>普通单链表，存 head + tail</td><td><code>head</code></td><td><code>tail</code></td><td>O(1)</td><td>2</td></tr>
+    <tr><td><b>环状单链表，只存 tail</b></td><td><code>tail.next</code></td><td><code>tail</code></td><td>O(1)</td><td><b>1</b></td></tr>
+  </table>
+  <div class="callout good"><b>环的收益发生在入队阶段：</b>假设 Render 前来了 100 个 update，React 会做 100 次 O(1) 入队；Render 接管时只做一次 O(1) 的断环。总成本仍是 O(n)，但不会出现“第 1 次找 0 个节点、第 2 次找 1 个节点……第 100 次找 99 个节点”的反复尾部遍历。</div>
+  <div class="callout"><b><code>null</code> 终点为什么适合类组件的处理过程？</b><code>processUpdateQueue</code> 不只是读取旧队列，还会在遇到低优先级 update 后构造一条新的基础队列。普通链表可以用 <code>update !== null</code> 控制遍历，并用新的 first/last 指针逐个追加需要保留的节点；无需额外保存“绕一圈后的停止哨兵”。</div>
+  <p style="font-size:13px;color:var(--dim)">普通的 head + tail 双指针链表也能实现 O(1) 入队；环状链表不是唯一方案。React 的选择是用一个尾指针同时编码头和尾，并让 Hook 的 pending 环与 baseQueue 环可以通过少量指针修改完成合并。</p>
+  <div class="card">
+    <h3 style="margin-top:0">连续插入 u1、u2、u3 后，指针怎样变化</h3>
+    <svg viewBox="0 0 900 430" style="width:100%;height:auto" role="img" aria-labelledby="uqRingTitle uqRingDesc">
+      <title id="uqRingTitle">UpdateQueue 环状链表插入过程</title>
+      <desc id="uqRingDesc">pending 始终指向最后插入的 update，pending.next 始终指向第一个 update。</desc>
+      <defs>
+        <marker id="uqArrow" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" style="fill:var(--accent)"/></marker>
+        <marker id="uqPendingArrow" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" style="fill:var(--sched)"/></marker>
+      </defs>
+
+      <g font-family="ui-monospace,monospace">
+        <text x="20" y="28" style="fill:var(--strong)" font-size="13" font-weight="700">① 插入 u1：第一个节点自己指向自己</text>
+        <rect x="365" y="48" width="120" height="48" rx="10" style="fill:var(--panel2);stroke:var(--accent)" stroke-width="2"/>
+        <text x="425" y="78" text-anchor="middle" style="fill:var(--txt)" font-size="13">u1</text>
+        <path d="M485,72 C555,72 555,120 425,120 C335,120 335,92 363,78" fill="none" style="stroke:var(--accent)" stroke-width="2" marker-end="url(#uqArrow)"/>
+        <text x="515" y="112" style="fill:var(--dim)" font-size="10.5">u1.next → u1</text>
+        <path d="M235,72 L360,72" fill="none" style="stroke:var(--sched)" stroke-width="2" marker-end="url(#uqPendingArrow)"/>
+        <text x="80" y="77" style="fill:var(--sched)" font-size="11.5">pending → u1</text>
+
+        <line x1="20" y1="145" x2="880" y2="145" style="stroke:var(--line)"/>
+        <text x="20" y="172" style="fill:var(--strong)" font-size="13" font-weight="700">② 插入 u2：把 u2 接到尾部，pending 改指 u2</text>
+        <rect x="245" y="195" width="120" height="48" rx="10" style="fill:var(--panel2);stroke:var(--accent)" stroke-width="2"/>
+        <text x="305" y="225" text-anchor="middle" style="fill:var(--txt)" font-size="13">u1 · 队头</text>
+        <rect x="535" y="195" width="120" height="48" rx="10" style="fill:var(--panel2);stroke:var(--sched)" stroke-width="2"/>
+        <text x="595" y="225" text-anchor="middle" style="fill:var(--txt)" font-size="13">u2 · 队尾</text>
+        <path d="M365,219 L530,219" fill="none" style="stroke:var(--accent)" stroke-width="2" marker-end="url(#uqArrow)"/>
+        <text x="447" y="210" text-anchor="middle" style="fill:var(--dim)" font-size="10.5">u1.next</text>
+        <path d="M595,245 C595,280 305,280 305,247" fill="none" style="stroke:var(--accent)" stroke-width="2" marker-end="url(#uqArrow)"/>
+        <text x="450" y="274" text-anchor="middle" style="fill:var(--dim)" font-size="10.5">u2.next → u1（回到队头）</text>
+        <path d="M700,184 L650,204" fill="none" style="stroke:var(--sched)" stroke-width="2" marker-end="url(#uqPendingArrow)"/>
+        <text x="706" y="177" style="fill:var(--sched)" font-size="11.5">pending → u2</text>
+
+        <line x1="20" y1="300" x2="880" y2="300" style="stroke:var(--line)"/>
+        <text x="20" y="327" style="fill:var(--strong)" font-size="13" font-weight="700">③ 插入 u3：只改尾部的两条指向</text>
+        <rect x="135" y="350" width="120" height="48" rx="10" style="fill:var(--panel2);stroke:var(--accent)" stroke-width="2"/>
+        <text x="195" y="380" text-anchor="middle" style="fill:var(--txt)" font-size="13">u1 · 队头</text>
+        <rect x="390" y="350" width="120" height="48" rx="10" style="fill:var(--panel2);stroke:var(--accent)" stroke-width="2"/>
+        <text x="450" y="380" text-anchor="middle" style="fill:var(--txt)" font-size="13">u2</text>
+        <rect x="645" y="350" width="120" height="48" rx="10" style="fill:var(--panel2);stroke:var(--sched)" stroke-width="2"/>
+        <text x="705" y="380" text-anchor="middle" style="fill:var(--txt)" font-size="13">u3 · 队尾</text>
+        <path d="M255,374 L385,374 M510,374 L640,374" fill="none" style="stroke:var(--accent)" stroke-width="2" marker-end="url(#uqArrow)"/>
+        <path d="M705,400 C705,425 195,425 195,402" fill="none" style="stroke:var(--accent)" stroke-width="2" marker-end="url(#uqArrow)"/>
+        <text x="450" y="422" text-anchor="middle" style="fill:var(--dim)" font-size="10.5">u3.next → u1（环闭合）</text>
+        <path d="M805,338 L760,358" fill="none" style="stroke:var(--sched)" stroke-width="2" marker-end="url(#uqPendingArrow)"/>
+        <text x="770" y="327" style="fill:var(--sched)" font-size="11.5">pending → u3</text>
+      </g>
+    </svg>
+    <div class="callout good" style="margin-bottom:0"><b>最终只要记住两个入口：</b><code>pending</code> 是队尾 u3；<code>pending.next</code> 是队头 u1。遍历从 u1 开始，依次经过 u2、u3，再回到 u1 时结束。</div>
+  </div>
+  <pre><span class="kw">function</span> <span class="fn">enqueueUpdate</span>(fiber, update){
+  <span class="kw">const</span> queue = fiber.updateQueue.shared;
+  <span class="kw">const</span> pending = queue.pending;
+  <span class="kw">if</span>(pending === <span class="kw">null</span>) update.next = update;    <span class="cm">// 第一个:自己成环</span>
+  <span class="kw">else</span> { update.next = pending.next;             <span class="cm">// 新节点接到头前</span>
+         pending.next = update; }
+<span class="hl">  queue.pending = update;   <span class="cm">// pending 永远指向「最后进来的」</span></span>
+}</pre>
+  <div class="callout"><b>把源码代入“插入 u3”：</b><br>
+    进入函数前：<code>pending = u2</code>，<code>pending.next = u1</code>。<br>
+    ① <code>u3.next = pending.next</code>，所以 <code>u3.next = u1</code>；<br>
+    ② <code>pending.next = u3</code>，所以 <code>u2.next = u3</code>；<br>
+    ③ <code>queue.pending = u3</code>，队尾指针从 u2 移到 u3。<br>
+    旧的 <code>u1.next = u2</code> 不需要修改，最终得到 <code>u1 → u2 → u3 → u1</code>。
+  </div>
+
+  <h3><code>pending</code> 还划出了一批更新的边界</h3>
+  <p><code>shared.pending</code> 不只是“指向队尾”。它还代表<b>尚未被 Render 接管的整批新更新</b>。Render 开始处理类组件队列时，会先取走这个指针并把 <code>shared.pending</code> 清空：</p>
+  <pre><span class="cm">// Render 开始：把当前 pending 整批交给本轮计算</span>
+<span class="kw">const</span> lastPending = queue.shared.pending;  <span class="cm">// u3（队尾）</span>
+queue.shared.pending = <span class="kw">null</span>;              <span class="cm">// pending 槽位重新空出来</span>
+
+<span class="kw">const</span> firstPending = lastPending.next;      <span class="cm">// u1（队头）</span>
+lastPending.next = <span class="kw">null</span>;                  <span class="cm">// u1 → u2 → u3 → null</span>
+
+<span class="cm">// 再把 firstPending...lastPending 接到基础队列尾部</span></pre>
+  <div class="flow">
+    <div class="flowbox" style="text-align:left"><b>Render 接管前</b><p style="font-size:12.5px"><code>shared.pending → u3</code><br><code>u1 → u2 → u3 → u1</code></p></div>
+    <div class="arrow">→</div>
+    <div class="flowbox" style="text-align:left"><b>取走并清空 pending</b><p style="font-size:12.5px">本轮持有 <code>u1～u3</code><br><code>shared.pending = null</code></p></div>
+    <div class="arrow">→</div>
+    <div class="flowbox" style="text-align:left"><b>之后又收到 u4</b><p style="font-size:12.5px"><code>u4.next = u4</code><br><code>shared.pending → u4</code></p></div>
+  </div>
+  <div class="callout good"><b>这就是“批次边界”：</b>React 只交换一个 <code>pending</code> 指针，就把 u1～u3 整批交给当前处理流程；之后到来的 u4 会在空出来的 <code>pending</code> 中重新成环，不会破坏已经拆出的链表。如果本轮处理结束前又发现了这批更新，React 可以继续把它接进来；否则由后续工作处理。</div>
+
+  <h3>Hook 为什么也保留环：两个队列可以 O(1) 拼接</h3>
+  <p>Hook 的 <code>baseQueue</code> 和 <code>queue.pending</code> 都是“尾指针 + 环”。假设旧基础队列是 <code>b1 → b2 → b1</code>，新 pending 是 <code>p1 → p2 → p1</code>。React 已经同时拿到了两个队尾，因此只要交换两条连接：</p>
+  <pre><span class="kw">const</span> baseFirst = baseLast.next;        <span class="cm">// b1</span>
+<span class="kw">const</span> pendingFirst = pendingLast.next;  <span class="cm">// p1</span>
+
+baseLast.next = pendingFirst;               <span class="cm">// b2 → p1</span>
+pendingLast.next = baseFirst;               <span class="cm">// p2 → b1，重新闭环</span>
+baseQueue = pendingLast;                     <span class="cm">// 新队尾是 p2</span></pre>
+  <div class="callout"><b>合并后：</b><code>b1 → b2 → p1 → p2 → b1</code>。旧更新仍在前，新更新仍在后；无论两个环里各有多少节点，合并都不需要遍历，所以仍是 O(1)。这比“环能少存一个指针”更重要：<b>它让 React 能快速接管、拼接和保留整批更新。</b></div>
+
+  <h2><span class="dot" style="background:var(--recon)"></span>③ pending 与基础队列按什么顺序执行</h2>
+  <p><code>pending</code> 是“渲染开始前新收到的更新”，基础队列是“本次必须从哪里继续计算”。开始处理类组件队列时，React 会先把 pending 环拆开并追加到基础队列末尾，然后从头按插入顺序遍历。</p>
+  <div class="card">
+    <div class="flow">
+      <div class="flowbox" style="text-align:left"><b>渲染开始前</b><p style="font-size:12.5px">基础队列：<code>b1 → b2</code><br>pending 环：<code>p1 → p2 → p1</code></p></div>
+      <div class="arrow">→</div>
+      <div class="flowbox" style="text-align:left"><b>拆开 pending 环</b><p style="font-size:12.5px"><code>p2.next = null</code><br>得到 <code>p1 → p2</code></p></div>
+      <div class="arrow">→</div>
+      <div class="flowbox" style="text-align:left"><b>追加到基础队列</b><p style="font-size:12.5px"><code>b1 → b2 → p1 → p2</code></p></div>
+      <div class="arrow">→</div>
+      <div class="flowbox" style="text-align:left"><b>从 first 开始计算</b><p style="font-size:12.5px">执行顺序固定为：<br><code>b1、b2、p1、p2</code></p></div>
+    </div>
+  </div>
+  <table class="simple">
+    <tr><th>字段</th><th>处理前</th><th>处理过程中</th><th>处理后</th></tr>
+    <tr><td><code>shared.pending</code></td><td>保存刚进入的环状 update</td><td>环被拆开并接到基础队列末尾</td><td>清空为 <code>null</code>；之后新来的 update 会形成下一批 pending</td></tr>
+    <tr><td><code>firstBaseUpdate</code></td><td>指向基础队列第一个节点</td><td>从这里开始按 <code>next</code> 遍历</td><td>若没有跳过更新则为 <code>null</code>；否则指向新基础队列的第一个节点</td></tr>
+    <tr><td><code>lastBaseUpdate</code></td><td>指向基础队列最后一个节点</td><td>用于 O(1) 追加 pending</td><td>若没有跳过更新则为 <code>null</code>；否则指向新基础队列的最后一个节点</td></tr>
+  </table>
+  <div class="callout"><b>Hook 的顺序相同，只是链表形态不同：</b><code>hook.baseQueue</code> 和 <code>queue.pending</code> 都用尾指针表示环状链表。Render 开始时，React 先把 pending 环接到旧 baseQueue 环的末尾，再从 <code>baseQueue.next</code>（队头）按插入顺序处理。没有旧 baseQueue 时，pending 直接成为本次基础队列。</div>
+
+  <h2><span class="dot" style="background:var(--sched)"></span>④ 渲染时怎么算:从 baseState 逐个 reduce(processUpdateQueue)</h2>
+  <p>渲染时 React 调用一个叫 <code>processUpdateQueue</code> 的函数来算最终 state:<b>从 <code>baseState</code>(起点值)出发,按顺序把队列里每个 update 应用一遍</b>(像滚雪球),得到本次的 <code>memoizedState</code>。这就是「多次 setState 被合并成一次结果」:</p>
+  <pre><span class="cm">// processUpdateQueue 概念:从 baseState 开始,依次 apply 每个 update</span>
+<span class="kw">let</span> newState = queue.baseState;
+<span class="kw">for</span>(<span class="kw">const</span> u <span class="kw">of</span> 队列里的 update){
+  newState = <span class="fn">reduce</span>(newState, u);   <span class="cm">// u 是对象则合并;是函数则 u(newState)</span>
+}
+fiber.memoizedState = newState;      <span class="cm">// 得到本次最终 state</span></pre>
+  <p>所以 <code>setCount(c=&gt;c+1)</code> 连写三次会累加(每个 update 拿到前一个的结果),而 <code>setCount(count+1)</code> 连写三次只 +1(闭包里 count 是同一个旧值)。</p>
+
+  <h2><span class="dot" style="background:var(--fiber)"></span>⑤ 为什么需要 baseState 和基础队列</h2>
+  <p>先不要记字段名。只看同一个 <code>count</code> 按顺序收到的三次更新：</p>
+  <div class="callout">
+    <code>u1: c =&gt; c + 1</code>（高优） → <code>u2: c =&gt; c + 10</code>（低优） → <code>u3: c =&gt; c * 2</code>（高优）
+  </div>
+  <p>初始值是 <code>0</code>。React 先处理高优更新时，会按原顺序走一遍：</p>
+  <ol>
+    <li><b>执行 u1：</b><code>0 + 1 = 1</code>。</li>
+    <li><b>暂时跳过 u2：</b>它是低优更新。这一刻的值 <code>1</code> 被记为 <code>baseState</code>，意思是“下次补算要从这里开始”。</li>
+    <li><b>执行 u3：</b><code>1 × 2 = 2</code>，所以本次可以先显示 <code>2</code>。</li>
+  </ol>
+  <p>问题是：以后补算 u2 时，不能只算 <code>1 + 10 = 11</code>。原始顺序是 <code>u2 → u3</code>，所以还要再算一次 u3，最终才是 <code>(1 + 10) × 2 = 22</code>。</p>
+  <div class="callout warn"><b>基础队列就是“下次必须重放的那一段顺序”。</b>从第一个被跳过的 u2 开始，React 保存 <code>[u2, u3]</code>。u3 本次虽然已经执行，仍要留一份副本，保证下次能恢复原来的计算顺序。</div>
+  <p>下面把这两次 Render 展开。先看数值如何变化，再对应 <code>baseState</code> 和基础队列：</p>
+  <div class="card">
+    <b>📽 一步步看:初始 <code>state = 0</code>,队列里三个 update</b>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 12px;font-family:var(--mono);font-size:12px">
+      <span style="padding:4px 10px;border:1px solid var(--line);border-radius:8px">u1: c=&gt;c+1 <span style="font-family:var(--mono);font-size:10.5px;padding:1px 7px;border-radius:20px;border:1px solid var(--warn);color:var(--warn)">高优</span></span>
+      <span style="padding:4px 10px;border:1px solid var(--line);border-radius:8px">u2: c=&gt;c+10 <span style="font-family:var(--mono);font-size:10.5px;padding:1px 7px;border-radius:20px;border:1px solid var(--fiber);color:var(--fiber)">低优</span></span>
+      <span style="padding:4px 10px;border:1px solid var(--line);border-radius:8px">u3: c=&gt;c*2 <span style="font-family:var(--mono);font-size:10.5px;padding:1px 7px;border-radius:20px;border:1px solid var(--warn);color:var(--warn)">高优</span></span>
+    </div>
+    <div style="font-weight:700;color:var(--accent);font-size:13px;margin-top:4px">▼ 本次渲染(renderLanes = 高优)</div>
+<div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;border:1px solid var(--line);border-left:4px solid var(--recon);border-radius:10px;padding:10px 12px;margin:8px 0;background:var(--panel2)"><span style="font-family:var(--mono);font-weight:700;font-size:12.5px">① u1: c=&gt;c+1</span><span style="font-family:var(--mono);font-size:10.5px;padding:1px 7px;border-radius:20px;border:1px solid var(--warn);color:var(--warn)">高优</span><span style="color:var(--recon);font-weight:700;font-size:12.5px">应用</span><span style="margin-left:auto;font-family:var(--mono);font-size:12px">state <b>0 → 1</b></span><span style="font-family:var(--mono);font-size:11px;color:var(--dim);width:100%;text-align:right">baseState=0 · baseQueue=[]</span></div><div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;border:1px solid var(--line);border-left:4px solid var(--fiber);border-radius:10px;padding:10px 12px;margin:8px 0;background:var(--panel2)"><span style="font-family:var(--mono);font-weight:700;font-size:12.5px">② u2: c=&gt;c+10</span><span style="font-family:var(--mono);font-size:10.5px;padding:1px 7px;border-radius:20px;border:1px solid var(--fiber);color:var(--fiber)">低优</span><span style="color:var(--fiber);font-weight:700;font-size:12.5px">跳过 ✋</span><span style="margin-left:auto;font-family:var(--mono);font-size:12px">state <b>1</b>(不变)</span><span style="font-family:var(--mono);font-size:11px;color:var(--dim);width:100%;text-align:right">⚠ 第一次跳过 → baseState=<b>1</b> · baseQueue=[<b>u2</b>]</span></div><div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;border:1px solid var(--line);border-left:4px solid var(--recon);border-radius:10px;padding:10px 12px;margin:8px 0;background:var(--panel2)"><span style="font-family:var(--mono);font-weight:700;font-size:12.5px">③ u3: c=&gt;c*2</span><span style="font-family:var(--mono);font-size:10.5px;padding:1px 7px;border-radius:20px;border:1px solid var(--warn);color:var(--warn)">高优</span><span style="color:var(--recon);font-weight:700;font-size:12.5px">应用 + 也要存档</span><span style="margin-left:auto;font-family:var(--mono);font-size:12px">state <b>1 → 2</b></span><span style="font-family:var(--mono);font-size:11px;color:var(--dim);width:100%;text-align:right">前面跳过了,u3 也进 → baseQueue=[u2, <b>u3</b>]</span></div>
+    <div style="text-align:center;font-family:var(--mono);font-size:13px;background:rgba(97,218,251,.12);border:1px solid var(--accent);border-radius:8px;padding:8px;margin:8px 0"><b style="color:var(--accent)">本次屏幕显示 state = 2</b></div>
+    <div style="font-weight:700;color:var(--sched);font-size:13px;margin-top:12px">▼ 下次渲染(轮到低优)——从存档点重放</div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-family:var(--mono);font-size:13px;margin:8px 0">
+      <span style="padding:6px 10px;border:1px solid var(--line);border-radius:8px">从 baseState=<b>1</b> 出发</span>
+      <span style="color:var(--dim)">→ 重放 baseQueue</span>
+      <span style="padding:6px 10px;border:1px solid var(--fiber);border-radius:8px;color:var(--fiber)">u2:+10</span>
+      <span style="color:var(--dim)">→ 11 →</span>
+      <span style="padding:6px 10px;border:1px solid var(--fiber);border-radius:8px;color:var(--fiber)">u3:*2</span>
+      <span style="color:var(--dim)">→</span>
+      <span style="padding:6px 12px;border-radius:8px;background:var(--recon);color:#04351a;font-weight:800">= 22 ✅</span>
+    </div>
+    <p style="font-size:12.5px;color:var(--txt2);margin:6px 0 0"><b>(1 + 10) × 2 = 22</b>,最终 state 正确。屏幕先显示 2(高优先给用户看),真正的最终值 22 由下次低优渲染补上。</p>
+  </div>
+  <div class="callout good"><b>现在再记定义：</b><code>baseState</code> 是第一次跳过更新时已经算出的 state；基础队列是从该更新开始、下次需要按顺序重放的 update。这里分别是 <code>1</code> 和 <code>[u2, u3]</code>。</div>
+  <p><b>为什么 u3 的副本使用 <code>NoLane</code>？</b>因为 u3 已经通过了本次的优先级检查。下次重放时，它必须跟在 u2 后面执行，不能再因 Lane 不匹配而被跳过；<code>NoLane</code> 在这里表示“这个副本重放时直接执行”。</p>
+  <div class="callout"><b>“无关的更新”要分情况：</b>另一个 <code>useState</code> 有自己的队列，不会混进来；但同一个 state 队列里的后续 update 都要保留顺序。React 不会猜测两个更新函数在业务语义上是否互不影响。</div>
+  <p>源码中，<code>isSubsetOfLanes(renderLanes, update.lane)</code> 决定本次是否跳过 update。类组件用 <code>firstBaseUpdate/lastBaseUpdate</code> 保存这段基础队列；State Hook 用 <code>hook.baseQueue</code> 保存。</p>
+  <div class="card">
+    <h3 style="margin-top:0">互动:shared.pending 环状链表 + 优先级跳过</h3>
+    <div class="demo-guide"><b>怎么操作：</b>按“高优 → 低优 → 高优”加入三个 update。点击①，观察第 3 个高优 update 本次执行但仍留下副本；再点击②，观察基础队列按原顺序重放后清空。</div>
+    <div id="uqBox" style="margin:10px 0"></div>
+    <div class="controls">
+      <button class="act" id="uqAdd">enqueue 一个 update</button>
+      <button class="act" id="uqAddLow" style="background:var(--fiber);color:#fff">enqueue 一个低优 update</button>
+      <button class="act" id="uqProcess" style="background:var(--recon);color:#04222b">① 高优 Render</button>
+      <button class="act" id="uqProcessLow" style="background:var(--sched);color:#04222b">② 低优 Render：重放基础队列</button>
+      <button class="ghost" id="uqReset">重置</button>
+    </div>
+    <div class="status" id="uqStatus">建议依次加入“高优 → 低优 → 高优”，再点击①和②。</div>
+  </div>
+  <div class="callout good"><b>Trigger 阶段完成：</b><code>setState</code> 产生 update，并将它放入更新队列。下一步进入 Schedule：由 <a class="xref" data-go="t13">Lane</a> 标记和选择更新优先级。</div>
+  <div class="navbtns"><button class="ghost" data-go="t4">← 4更新的四个阶段</button><button class="act" data-go="t13">6Lane：选择更新 →</button></div>
+</section></main>
+<script src="./assets/site.js"></script>
+<script src="./assets/demos.js"></script>
+</body>
+</html>

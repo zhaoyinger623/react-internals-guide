@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+<title>性能诊断与工程化 · React 原理全景</title>
+<script>
+  const embedParams = new URLSearchParams(location.search);
+  if (embedParams.get('embed') === '1') document.documentElement.classList.add('is-embed');
+  if (embedParams.get('theme') === 'light') document.documentElement.classList.add('embed-light');
+</script>
+<link rel="stylesheet" href="./assets/site.css">
+</head>
+<body data-chapter="t28">
+<aside id="side">
+  <div class="brand">⚛️ React 原理全景</div>
+  <button class="themebtn" id="themeBtn"><span class="ic">🌙</span><span id="themeLabel">切换到浅色模式</span></button>
+  <a href="./intro.html" data-t="intro"><span class="n">◎</span>如何使用本页</a>
+  <div class="grp">更新流程</div>
+  <a href="./journey.html" data-t="journey"><span class="n">★</span>一次 setState 的完整旅程</a>
+  <div class="grp">第一层 · 表层原理</div>
+  <a href="./t1.html" data-t="t1"><span class="n">1</span>组件渲染机制</a>
+  <a href="./t2.html" data-t="t2"><span class="n">2</span>虚拟 DOM 真实含义</a>
+  <a href="./t3.html" data-t="t3"><span class="n">3</span>生命周期执行顺序</a>
+  <div class="grp">第二层 · 一次更新的主线</div>
+  <a href="./t4.html" data-t="t4"><span class="n">4</span>更新的四个阶段</a>
+  <div class="grp">阶段一 · Trigger 触发</div>
+  <a href="./t9.html" data-t="t9"><span class="n">5</span>UpdateQueue：更新入队</a>
+  <div class="grp">阶段二 · Schedule 调度</div>
+  <a href="./t13.html" data-t="t13"><span class="n">6</span>Lane：选择更新</a>
+  <a href="./t12.html" data-t="t12"><span class="n">7</span>Scheduler：安排执行</a>
+  <div class="grp">阶段三 · Render 计算</div>
+  <a href="./t8.html" data-t="t8"><span class="n">8</span>Fiber：可中断工作单元</a>
+  <a href="./t5.html" data-t="t5"><span class="n">9</span>双缓存 Fiber 树</a>
+  <a href="./t7.html" data-t="t7"><span class="n">10</span>Hooks：读取与计算状态</a>
+  <a href="./t6.html" data-t="t6"><span class="n">11</span>Diff：协调子节点</a>
+  <a href="./t10.html" data-t="t10"><span class="n">12</span>flags：记录变更</a>
+  <div class="grp">阶段四 · Commit 提交</div>
+  <a href="./t11.html" data-t="t11"><span class="n">13</span>Commit：应用变更</a>
+  <div class="grp">并发延伸</div>
+  <a href="./t14.html" data-t="t14"><span class="n">14</span>Concurrent 并发渲染</a>
+  <a href="./t15.html" data-t="t15"><span class="n">15</span>两大并发 API</a>
+  <div class="grp">架构交互</div>
+  <a href="./t16.html" data-t="t16"><span class="n">16</span>三大模块协作</a>
+  <a href="./t17.html" data-t="t17"><span class="n">17</span>批量更新原理</a>
+  <a href="./t18.html" data-t="t18"><span class="n">18</span>Suspense / lazy</a>
+  <a href="./t19.html" data-t="t19"><span class="n">19</span>合成事件系统</a>
+  <div class="grp">性能优化</div>
+  <a href="./t20.html" data-t="t20"><span class="n">20</span>渲染优化底层</a>
+  <a href="./t21.html" data-t="t21"><span class="n">21</span>渲染 bug 底层解释</a>
+  <div class="grp">高级实践与新架构</div>
+  <a href="./t22.html" data-t="t22"><span class="n">22</span>SSR / Hydration / 流式</a>
+  <a href="./t23.html" data-t="t23"><span class="n">23</span>Server Components</a>
+  <a href="./t24.html" data-t="t24"><span class="n">24</span>React 19 新特性</a>
+  <a href="./t25.html" data-t="t25"><span class="n">25</span>外部状态与撕裂</a>
+  <a href="./t26.html" data-t="t26"><span class="n">26</span>React Compiler</a>
+  <a href="./t27.html" data-t="t27"><span class="n">27</span>高级模式与陷阱</a>
+  <a href="./t28.html" data-t="t28" class="active" aria-current="page"><span class="n">28</span>性能诊断与工程化</a>
+  <div class="grp">补充专题 · 常被漏掉的核心</div>
+  <a href="./ctx.html" data-t="ctx"><span class="n">C1</span>Context 源码原理</a>
+  <a href="./ref.html" data-t="ref"><span class="n">C2</span>useRef 与 ref 体系</a>
+  <div class="grp">源码附录 · 按需查阅</div>
+  <a href="./pk.html" data-t="pk"><span class="n">A1</span>宏观包结构</a>
+  <a href="./boot.html" data-t="boot"><span class="n">A2</span>启动过程</a>
+  <a href="./obj.html" data-t="obj"><span class="n">A3</span>核心对象速查</a>
+  <a href="./source.html" data-t="source"><span class="n">A4</span>源码阅读路线</a>
+  <div class="grp">总结</div>
+  <a href="./main.html" data-t="main"><span class="n">★</span>React 更新流程总览</a>
+</aside>
+<main id="main"><section class="topic active" id="t28">
+  <div class="crumb">第七层 · 高级实践与新架构 / 28</div>
+  <h1>28 · 性能诊断与工程化</h1>
+  <div class="card" style="border-left:4px solid var(--accent)">
+    <b>🗺 本章路线图</b>
+    <p style="margin:8px 0 0"><b>本节内容：</b>使用 Profiler 和 Web 性能指标定位渲染与交互问题。</p>
+    <p style="margin:6px 0 0">本章包括：<b>DevTools Profiler、Web 指标(LCP/INP/CLS)、内存泄漏与 effect 清理、Suspense 数据获取</b>。</p>
+  </div>
+
+  <h2><span class="dot" style="background:var(--accent)"></span>用 React DevTools Profiler 定位问题</h2>
+  <ul class="clean">
+    <li><b>Profiler 面板:</b>录制一次交互,看每个组件的渲染次数、耗时、<b>为什么渲染</b>(props/state/hooks 变化)。开「Highlight updates」直观看到哪些组件在无谓重渲染。</li>
+    <li><b><code>&lt;Profiler&gt;</code> API:</b>代码里包住子树,<code>onRender</code> 回调拿到 <code>actualDuration</code> 等指标,做自动化性能监控。</li>
+  </ul>
+  <pre>&lt;Profiler id=<span class="st">"list"</span> onRender={(id, phase, actualDuration) =&gt; {
+  <span class="fn">log</span>(id, phase, actualDuration);   <span class="cm">// phase: mount | update</span>
+}}&gt;
+  &lt;List/&gt;
+&lt;/Profiler&gt;</pre>
+
+  <h2><span class="dot" style="background:var(--recon)"></span>核心 Web 指标与 React 的关系</h2>
+  <table class="simple">
+    <tr><th>指标</th><th>含义</th><th>React 抓手</th></tr>
+    <tr><td>LCP</td><td>最大内容绘制</td><td>SSR/流式、代码分割、图片优化</td></tr>
+    <tr><td>INP</td><td>交互到下一次绘制</td><td>并发(useTransition)、避免长任务、时间切片</td></tr>
+    <tr><td>CLS</td><td>布局偏移</td><td>占位尺寸、避免 hydration 后跳动</td></tr>
+  </table>
+
+  <h2><span class="dot" style="background:var(--warn)"></span>常见内存泄漏与 effect 清理</h2>
+  <ul class="clean">
+    <li>订阅/定时器/事件监听未在 effect 返回函数里清理 → 组件卸载后仍持有引用。</li>
+    <li>异步请求返回时组件已卸载仍 setState → 用 <code>AbortController</code> 或忽略标志。</li>
+    <li>闭包捕获旧值(stale closure)→ 依赖数组写全、或用 ref/函数式更新。</li>
+  </ul>
+
+  <h2><span class="dot" style="background:var(--sched)"></span>Suspense 做数据获取</h2>
+  <p>配合支持 Suspense 的数据层(RSC、React Query、Relay 等),组件用 <code>use()</code> 或库的 hook「读」数据,未就绪自动挂起显示 fallback,<b>把 loading 状态从组件内 <code>if(loading)</code> 上移到声明式的 <code>&lt;Suspense&gt;</code> 边界</b>,配合并发做「避免 loading 闪烁」。</p>
+  <div class="callout good"><b>这一层的知识关系：</b>内部更新机制是基础；SSR、RSC 和并发涉及运行位置与执行时机；Profiler 和 Web 指标用于验证性能判断；最后再根据场景选择 Context 或外部 store、CSR 或 SSR/RSC、手动记忆化或 Compiler。</div>
+  <div class="callout good"><b>本章小结：</b>用 Profiler 看谁在无谓重渲染;INP 靠并发/切片优化;effect 没清理订阅/定时器会泄漏;Suspense 把 loading 从组件内上移到声明式边界。→ 补充专题:<a class="xref" data-go="ctx">Context 源码</a>。</div>
+  <div class="navbtns"><button class="ghost" data-go="t27">← 27高级模式与陷阱</button><button class="act" data-go="ctx">C1Context 源码原理 →</button></div>
+</section></main>
+<script src="./assets/site.js"></script>
+<script src="./assets/demos.js"></script>
+</body>
+</html>

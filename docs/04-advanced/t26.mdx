@@ -3,40 +3,6 @@ title: React Compiler
 description: React 原理全景中的「React Compiler」，从运行机制继续深入源码。
 ---
 
-<div className="tutorial-chapter">
+import { EmbeddedChapter } from '../../theme/EmbeddedChapter';
 
-第七层 · 高级实践与新架构 / 26
-
-**🗺 本章路线图**
-
-React Compiler 在**编译期**自动插入记忆化,让你几乎不用手写 memo/useMemo/useCallback。
-
-本章包括：**它做什么、为什么依赖「组件是纯的」、对手动 memo 的影响**。
-
-手动 `useMemo/useCallback/memo` 心智负担重、容易写错或漏写。**React Compiler**(原 React Forget)是一个**编译期**工具,自动分析组件、在构建时插入等价的记忆化代码,让你**几乎不再需要手写** memo 系列。
-
-## 它做什么
-
--   静态分析每个组件的渲染逻辑,识别哪些值依赖哪些输入。
--   自动缓存组件内的计算结果与子元素,只有真正依赖变化时才重算/重渲染 —— 相当于**自动、细粒度的 useMemo**。
--   产出仍是标准 React 代码,运行时不变,只是「记忆化」被编译器包办。
-
-```js
-// 你写(无任何 memo):
-function TodoList({todos, filter}){
-  const visible = todos.filter(t => match(t, filter));
-  return <List items={visible}/>;
-}
-// 编译器自动产出 ≈ 用缓存包住 visible 和 <List>,
-// 仅当 todos 或 filter 变化时才重算,等价于全自动 useMemo。
-```
-
-## 前提:遵守 React 规则
-
-编译器能安全优化的**前提是你的组件是「纯」的**、遵守 Hooks 规则、不在渲染中产生副作用。这也是为什么 `StrictMode` 双调用、ESLint 规则如此重要 —— 它们帮你写出编译器能优化的代码。它是**渐进采用**的:可整项目、也可按文件开启。
-
-**趋势判断:**未来 `useMemo/useCallback` 会从「性能必备」退化为「少数手动兜底」。但**理解它们的原理依然重要** —— 你得知道编译器在替你做什么、什么情况下它会放弃优化。
-
-**本章小结：**编译器静态分析、自动缓存计算与子元素 = 全自动 useMemo;前提是组件纯、守 Hooks 规则(所以 StrictMode/ESLint 重要);未来手写 memo 退为兜底。→ 下一章:[第七层·高级模式与陷阱](/04-advanced/t27)。
-
-</div>
+<EmbeddedChapter chapter="t26" />

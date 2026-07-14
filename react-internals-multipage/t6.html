@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+<title>Diff：协调子节点 · React 原理全景</title>
+<script>
+  const embedParams = new URLSearchParams(location.search);
+  if (embedParams.get('embed') === '1') document.documentElement.classList.add('is-embed');
+  if (embedParams.get('theme') === 'light') document.documentElement.classList.add('embed-light');
+</script>
+<link rel="stylesheet" href="./assets/site.css">
+</head>
+<body data-chapter="t6">
+<aside id="side">
+  <div class="brand">⚛️ React 原理全景</div>
+  <button class="themebtn" id="themeBtn"><span class="ic">🌙</span><span id="themeLabel">切换到浅色模式</span></button>
+  <a href="./intro.html" data-t="intro"><span class="n">◎</span>如何使用本页</a>
+  <div class="grp">更新流程</div>
+  <a href="./journey.html" data-t="journey"><span class="n">★</span>一次 setState 的完整旅程</a>
+  <div class="grp">第一层 · 表层原理</div>
+  <a href="./t1.html" data-t="t1"><span class="n">1</span>组件渲染机制</a>
+  <a href="./t2.html" data-t="t2"><span class="n">2</span>虚拟 DOM 真实含义</a>
+  <a href="./t3.html" data-t="t3"><span class="n">3</span>生命周期执行顺序</a>
+  <div class="grp">第二层 · 一次更新的主线</div>
+  <a href="./t4.html" data-t="t4"><span class="n">4</span>更新的四个阶段</a>
+  <div class="grp">阶段一 · Trigger 触发</div>
+  <a href="./t9.html" data-t="t9"><span class="n">5</span>UpdateQueue：更新入队</a>
+  <div class="grp">阶段二 · Schedule 调度</div>
+  <a href="./t13.html" data-t="t13"><span class="n">6</span>Lane：选择更新</a>
+  <a href="./t12.html" data-t="t12"><span class="n">7</span>Scheduler：安排执行</a>
+  <div class="grp">阶段三 · Render 计算</div>
+  <a href="./t8.html" data-t="t8"><span class="n">8</span>Fiber：可中断工作单元</a>
+  <a href="./t5.html" data-t="t5"><span class="n">9</span>双缓存 Fiber 树</a>
+  <a href="./t7.html" data-t="t7"><span class="n">10</span>Hooks：读取与计算状态</a>
+  <a href="./t6.html" data-t="t6" class="active" aria-current="page"><span class="n">11</span>Diff：协调子节点</a>
+  <a href="./t10.html" data-t="t10"><span class="n">12</span>flags：记录变更</a>
+  <div class="grp">阶段四 · Commit 提交</div>
+  <a href="./t11.html" data-t="t11"><span class="n">13</span>Commit：应用变更</a>
+  <div class="grp">并发延伸</div>
+  <a href="./t14.html" data-t="t14"><span class="n">14</span>Concurrent 并发渲染</a>
+  <a href="./t15.html" data-t="t15"><span class="n">15</span>两大并发 API</a>
+  <div class="grp">架构交互</div>
+  <a href="./t16.html" data-t="t16"><span class="n">16</span>三大模块协作</a>
+  <a href="./t17.html" data-t="t17"><span class="n">17</span>批量更新原理</a>
+  <a href="./t18.html" data-t="t18"><span class="n">18</span>Suspense / lazy</a>
+  <a href="./t19.html" data-t="t19"><span class="n">19</span>合成事件系统</a>
+  <div class="grp">性能优化</div>
+  <a href="./t20.html" data-t="t20"><span class="n">20</span>渲染优化底层</a>
+  <a href="./t21.html" data-t="t21"><span class="n">21</span>渲染 bug 底层解释</a>
+  <div class="grp">高级实践与新架构</div>
+  <a href="./t22.html" data-t="t22"><span class="n">22</span>SSR / Hydration / 流式</a>
+  <a href="./t23.html" data-t="t23"><span class="n">23</span>Server Components</a>
+  <a href="./t24.html" data-t="t24"><span class="n">24</span>React 19 新特性</a>
+  <a href="./t25.html" data-t="t25"><span class="n">25</span>外部状态与撕裂</a>
+  <a href="./t26.html" data-t="t26"><span class="n">26</span>React Compiler</a>
+  <a href="./t27.html" data-t="t27"><span class="n">27</span>高级模式与陷阱</a>
+  <a href="./t28.html" data-t="t28"><span class="n">28</span>性能诊断与工程化</a>
+  <div class="grp">补充专题 · 常被漏掉的核心</div>
+  <a href="./ctx.html" data-t="ctx"><span class="n">C1</span>Context 源码原理</a>
+  <a href="./ref.html" data-t="ref"><span class="n">C2</span>useRef 与 ref 体系</a>
+  <div class="grp">源码附录 · 按需查阅</div>
+  <a href="./pk.html" data-t="pk"><span class="n">A1</span>宏观包结构</a>
+  <a href="./boot.html" data-t="boot"><span class="n">A2</span>启动过程</a>
+  <a href="./obj.html" data-t="obj"><span class="n">A3</span>核心对象速查</a>
+  <a href="./source.html" data-t="source"><span class="n">A4</span>源码阅读路线</a>
+  <div class="grp">总结</div>
+  <a href="./main.html" data-t="main"><span class="n">★</span>React 更新流程总览</a>
+</aside>
+<main id="main"><section class="topic active" id="t6">
+  <div class="crumb">阶段三 · Render / 11</div>
+  <h1>11 · Diff：协调子节点</h1>
+  <div style="display:flex;flex-wrap:wrap;gap:3px;align-items:center;font-family:var(--mono);font-size:10.5px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:7px 10px;margin:6px 0 14px;overflow-x:auto"><b style="color:var(--txt2);margin-right:4px;font-family:inherit">🧭 主线</b><span data-go="t4" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">setState</span><span style="color:var(--dim)">→</span><span data-go="t9" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">Update</span><span style="color:var(--dim)">→</span><span data-go="t13" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">Lane</span><span style="color:var(--dim)">→</span><span data-go="t12" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">Scheduler</span><span style="color:var(--dim)">→</span><span data-go="t8" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:rgba(97,218,251,.22);border:1.5px solid var(--accent);color:var(--accent);font-weight:700">Render</span><span style="color:var(--dim)">→</span><span data-go="t10" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">Effect</span><span style="color:var(--dim)">→</span><span data-go="t11" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">Commit</span><span style="color:var(--dim)">→</span><span data-go="t11" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">DOM</span></div>
+  <div class="card" style="border-left:4px solid var(--accent)">
+    <b>🗺 本章路线图</b>
+    <p style="margin:8px 0 0">Diff 就是「拿<b>新描述</b>去更新/复用<b>旧 fiber</b>」;靠三大假设把最优算法的 O(n³) 砍到 <b>O(n)</b>。</p>
+    <p style="margin:6px 0 0">本章包括：<b>三大假设 → 单节点 Diff → 多节点两轮遍历 → lastPlacedIndex 移动判断 → index 当 key 为何出 bug</b>。</p>
+  </div>
+  <p>对比两棵任意树的最优算法是 <b>O(n³)</b>(n 是节点数)——对上千节点的页面完全不可用。React 放弃「找到最优最少操作」,转而基于三条<b>符合前端实际情况的假设(启发式策略)</b>,把复杂度砍到 <b>O(n)</b>。理解这三条假设,就理解了 React Diff 的一切行为(包括各种「诡异」的复用/重建)。</p>
+
+  <h2><span class="dot" style="background:var(--sched)"></span>三大假设(Diff 的地基,务必吃透)</h2>
+  <div class="grid2">
+    <div class="card">
+      <h3 style="margin-top:0">🧮 算法复杂度优化</h3>
+      <p style="font-size:13px;color:var(--txt2);margin:6px 0 10px">React 通过三大启发式假设,把 Diff 从理论上的 <b>O(n³)</b> 降到 <b>O(n)</b>——用线性时间复杂度实现高效的虚拟 DOM 比对。</p>
+      <svg viewBox="0 0 420 280" style="width:100%;height:auto" font-family="ui-monospace,monospace">
+        <text x="18" y="140" transform="rotate(-90 18 140)" text-anchor="middle" style="fill:var(--dim)" font-size="11">相对计算量</text>
+        <line x1="60" y1="30" x2="60" y2="240" style="stroke:var(--line)" stroke-width="1.5"/>
+        <line x1="60" y1="240" x2="405" y2="240" style="stroke:var(--line)" stroke-width="1.5"/>
+        <line x1="60" y1="45" x2="405" y2="45" style="stroke:var(--line)" stroke-width="1" stroke-dasharray="3 4" opacity=".5"/>
+        <text x="54" y="49" text-anchor="end" style="fill:var(--dim)" font-size="9">O(n³)</text>
+        <text x="54" y="244" text-anchor="end" style="fill:var(--dim)" font-size="9">0</text>
+        <rect x="110" y="45" width="90" height="195" rx="4" style="fill:rgba(255,107,107,.5);stroke:var(--warn)" stroke-width="1.5"/>
+        <text x="155" y="258" text-anchor="middle" style="fill:var(--txt2)" font-size="10">理论算法 O(n³)</text>
+        <rect x="270" y="233" width="90" height="7" rx="3" style="fill:var(--recon);stroke:var(--recon)" stroke-width="1.5"/>
+        <text x="315" y="258" text-anchor="middle" style="fill:var(--txt2)" font-size="10">React Diff O(n)</text>
+        <text x="315" y="224" text-anchor="middle" style="fill:var(--recon)" font-size="9" font-weight="700">≈ 一根线</text>
+      </svg>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0">💡 三大核心假设</h3>
+<div style="display:flex;gap:12px;align-items:flex-start;margin:14px 0"><span style="display:inline-flex;width:30px;height:30px;border-radius:50%;background:rgba(126,231,135,.22);color:var(--recon);align-items:center;justify-content:center;font-weight:800;font-family:var(--mono);font-size:14px;flex:0 0 auto">1</span><div><b>跨层级节点移动极少发生</b><div style="font-size:12.5px;color:var(--dim);margin-top:3px">只在同一父容器的直接子节点范围内做 Diff(跨层就删了重建)</div></div></div>
+<div style="display:flex;gap:12px;align-items:flex-start;margin:14px 0"><span style="display:inline-flex;width:30px;height:30px;border-radius:50%;background:rgba(126,231,135,.22);color:var(--recon);align-items:center;justify-content:center;font-weight:800;font-family:var(--mono);font-size:14px;flex:0 0 auto">2</span><div><b>不同 type 的节点生成不同的树</b><div style="font-size:12.5px;color:var(--dim);margin-top:3px">type 不同则跳过子树比对,直接卸载旧的、重建新的</div></div></div>
+<div style="display:flex;gap:12px;align-items:flex-start;margin:14px 0"><span style="display:inline-flex;width:30px;height:30px;border-radius:50%;background:rgba(126,231,135,.22);color:var(--recon);align-items:center;justify-content:center;font-weight:800;font-family:var(--mono);font-size:14px;flex:0 0 auto">3</span><div><b>同层子节点用 key 标识稳定身份</b><div style="font-size:12.5px;color:var(--dim);margin-top:3px">通过 key 建立「节点 ↔ 数据」的稳定关联,才能移动复用</div></div></div>
+    </div>
+  </div>
+  <p style="font-size:13px;color:var(--dim);margin-top:6px">下面逐条展开(每条都有代码示例 + 实战陷阱):</p>
+
+  <h3 class="asm"><span class="asm-n" style="background:var(--accent)">①</span>只比同层级,不跨层移动 <span class="asm-en">Tree Diff</span></h3>
+  <p>React <b>只在同一层级、同一父节点下</b>对比新旧节点,<b>绝不跨层级比较或移动</b>。如果一个节点在更新后「换了父亲/换了层级」,React 不会去「找到它并搬过去」,而是:<b>在旧位置删除它、在新位置重新创建</b>。</p>
+  <pre><span class="cm">// 更新前                    更新后(把 A 从顶层挪进 B 里)</span>
+&lt;div&gt;&lt;A/&gt;&lt;B/&gt;&lt;/div&gt;           &lt;div&gt;&lt;B&gt;&lt;A/&gt;&lt;/B&gt;&lt;/div&gt;
+<span class="cm">// React 不会「移动」A,而是:删掉顶层的 A、在 B 里新建一个 A</span>
+<span class="cm">// → A 的 state 丢失、DOM 重建。所以:别用跨层级移动来做动画/结构变化</span></pre>
+  <div class="callout">为什么敢这么假设?因为 Web UI 里<b>跨层级移动节点极少见</b>。为了这种罕见情况做「全树查找匹配」不划算,直接删了重建,换来 O(n) 的同层遍历。</div>
+
+  <h3 class="asm"><span class="asm-n" style="background:var(--render)">②</span>type 不同,整棵子树直接换掉 <span class="asm-en">Component Diff</span></h3>
+  <p>对比同一位置的新旧节点时,只要 <b>type 不一样</b>(<code>div</code>→<code>span</code>、组件 <code>Foo</code>→<code>Bar</code>),React <b>立即认定整棵子树都变了</b>:<b>卸载旧子树(触发 unmount / componentWillUnmount、清理 effect)、从零构建新子树</b>,不再深入对比里面的子节点。只有 <b>type 相同</b>,才保留该节点、只更新变化的属性,并继续 Diff 它的孩子。</p>
+  <pre><span class="cm">// type 相同 → 复用节点,只 patch 属性,继续 diff 子树</span>
+&lt;div className="a"&gt;  →  &lt;div className="b"&gt;   ✅ 复用 div,只改 class
+
+<span class="cm">// type 不同 → 整棵子树销毁重建(哪怕内部长得几乎一样)</span>
+&lt;div&gt;<span class="cm">…大量子节点…</span>&lt;/div&gt;  →  &lt;section&gt;<span class="cm">…相同子节点…</span>&lt;/section&gt;
+<span class="cm">// div≠section → 里面的子节点全部卸载重建,state/DOM 全丢</span></pre>
+  <div class="callout warn"><b>实战陷阱:</b>条件渲染时若外层 type 变了(如 <code>{cond ? &lt;div&gt;… : &lt;section&gt;…}</code>),里面组件会被<b>卸载重挂载</b>、state 丢失。想保留状态,就保持 type 一致(用同一标签 + 条件改属性),或用 key 控制。</div>
+
+  <h3 class="asm"><span class="asm-n" style="background:var(--sched)">③</span>用 key 给同层子节点一个稳定「身份证」 <span class="asm-en">Element Diff</span></h3>
+  <p>对<b>同层的一组子节点</b>(列表),React 靠 <code>key</code> 判断「新旧两轮里,哪个是同一个节点」。有稳定 key,即使节点在列表里<b>换了位置</b>,React 也能认出它、<b>移动并复用</b>(保留 state 和 DOM),而不是重建。没有 key(或用会变的 index),React 只能<b>按位置</b>硬匹配,顺序一变就全判错。</p>
+  <pre><span class="cm">// 有稳定 key:React 认得出 b 只是移到了前面 → 移动复用</span>
+[a,b,c]  →  [b,a,c]     key=id:只移动,不重建 ✅
+
+<span class="cm">// 无 key / index 当 key:按位置比 → 以为 位置0 从 a 变成了 b …全部误判</span></pre>
+  <div class="callout good"><b>三项前提：</b>① <b>只看同层</b>(跨层就删了重建)→ ② <b>type 变就整棵换</b>(type 同才复用)→ ③ <b>同层列表靠 key 认身份</b>(有稳定 key 才能移动复用)。下面「单节点 / 多节点 Diff」就是这三条假设的具体落地。</div>
+
+  <h2><span class="dot" style="background:var(--recon)"></span>单节点 Diff(reconcileSingleElement)</h2>
+  <p>更新后只有<b>一个</b>子节点(<code>&lt;div&gt;{x}&lt;/div&gt;</code>)时,React 拿这个新元素去和<b>旧的一串子 fiber</b>逐个比:</p>
+  <pre><span class="kw">function</span> <span class="fn">reconcileSingleElement</span>(returnFiber, currentFirstChild, element){
+  <span class="kw">let</span> child = currentFirstChild;
+  <span class="kw">while</span>(child !== <span class="kw">null</span>){
+    <span class="kw">if</span>(child.key === element.key){          <span class="cm">// ① 先比 key</span>
+      <span class="kw">if</span>(child.type === element.type){        <span class="cm">// ② key 同,再比 type</span>
+        <span class="fn">deleteRemainingChildren</span>(returnFiber, child.sibling); <span class="cm">// 其余兄弟全删</span>
+        <span class="kw">const</span> existing = <span class="fn">useFiber</span>(child, element.props); <span class="cm">// ★复用!</span>
+        <span class="kw">return</span> existing;
+      }
+      <span class="fn">deleteRemainingChildren</span>(returnFiber, child); <span class="cm">// key 同 type 不同 → 从它起全删</span>
+      <span class="kw">break</span>;
+    } <span class="kw">else</span> {
+      <span class="fn">deleteChild</span>(returnFiber, child);        <span class="cm">// key 不同 → 删这一个,继续看兄弟</span>
+    }
+    child = child.sibling;
+  }
+  <span class="kw">return</span> <span class="fn">createFiberFromElement</span>(element);    <span class="cm">// 没匹配到 → 新建</span>
+}</pre>
+  <div class="callout">注意顺序:<b>key 相同但 type 不同</b>时,不仅删自己,还 <code>deleteRemainingChildren</code> 把后面兄弟一起删(因为 key 唯一,后面不可能再有同 key 的);<b>key 不同</b>只删当前继续找。这正是假设 ②③ 的落地。</div>
+
+  <h2><span class="dot" style="background:var(--sched)"></span>多节点 Diff:两轮遍历(reconcileChildrenArray)</h2>
+  <p><b>先不要看源码，固定一个例子：</b>旧列表是 <code>[A, B, C, D]</code>，新列表是 <code>[A, C, E, B]</code>。字母就是稳定的 key，元素 type 都相同。</p>
+  <div class="card">
+    <h3 style="margin-top:0">第一轮：只比较同一个下标，直到第一次对不上</h3>
+    <table class="simple">
+      <tr><th>新下标</th><th>旧节点</th><th>新节点</th><th>结果</th></tr>
+      <tr><td>0</td><td>A</td><td>A</td><td>key/type 相同，复用 A；继续</td></tr>
+      <tr><td>1</td><td>B</td><td>C</td><td>key 不同，<b>第一轮立即停止</b></td></tr>
+    </table>
+    <p><b>停止时的现场：</b>A 已处理；旧节点还剩 <code>[B,C,D]</code>；新节点还剩 <code>[C,E,B]</code>。React 不会继续拿旧 C 和新 E 做同位比较，而是转入第二轮。</p>
+  </div>
+  <div class="card">
+    <h3 style="margin-top:0">第二轮：旧节点建 Map，新节点按 key 查找</h3>
+    <p>先把剩余旧节点建成：<code>{ B → oldB, C → oldC, D → oldD }</code>。</p>
+    <table class="simple">
+      <tr><th>依次处理的新节点</th><th>去 Map 查找</th><th>React 做什么</th><th>Map 剩余</th></tr>
+      <tr><td>C</td><td>找到 oldC</td><td>复用 C；从 Map 删除 C</td><td>B、D</td></tr>
+      <tr><td>E</td><td>找不到</td><td>创建新 Fiber E，并标记 Placement</td><td>B、D</td></tr>
+      <tr><td>B</td><td>找到 oldB</td><td>复用 B；根据旧位置判断是否移动</td><td>D</td></tr>
+      <tr><td>新数组结束</td><td>Map 仍有 D</td><td>旧 D 没被使用，标记删除</td><td>空</td></tr>
+    </table>
+  </div>
+  <div class="callout good"><b>两轮不是把整棵列表重复比较两遍。</b>第一轮只快速吃掉开头连续对得上的部分；一旦错位，第二轮只处理“双方剩下的部分”，用 Map 避免反复扫描旧列表。</div>
+  <p>更新后是<b>一个数组</b>子节点(列表)时最复杂。React 用<b>两轮遍历</b>(不是 Vue 的严格双端 Diff,但吸收了同类思想):</p>
+  <ul class="clean">
+    <li><b>第一轮:</b>新旧数组从左到右同位置比较,key+type 相同就复用,一旦不同<b>立即跳出</b>。这一轮吃掉最常见的「尾部追加 / 只改内容不换位」。</li>
+    <li><b>第二轮:</b>把剩余旧节点存进 <code>Map(key → fiber)</code>,遍历剩余新节点用 key 去 Map 里捞。捞到 = <b>复用</b>(可能要移动);捞不到 = <b>新建</b>;最后 Map 里没被捞走的 = <b>删除</b>。</li>
+  </ul>
+  <pre><span class="cm">// reconcileChildrenArray 骨架(极简)</span>
+<span class="kw">let</span> lastPlacedIndex = 0, newIdx = 0, oldFiber = currentFirstChild;
+<span class="cm">// —— 第一轮:同位比较 ——</span>
+<span class="kw">for</span>(; oldFiber !== <span class="kw">null</span> &amp;&amp; newIdx &lt; newChildren.length; newIdx++){
+  <span class="kw">const</span> newFiber = <span class="fn">updateSlot</span>(oldFiber, newChildren[newIdx]); <span class="cm">// key 不同则返回 null</span>
+  <span class="kw">if</span>(newFiber === <span class="kw">null</span>) <span class="kw">break</span>;                <span class="cm">// ★一旦对不上,跳出第一轮</span>
+  lastPlacedIndex = <span class="fn">placeChild</span>(newFiber, lastPlacedIndex, newIdx);
+  oldFiber = oldFiber.sibling;
+}
+<span class="kw">if</span>(newIdx === newChildren.length){ <span class="fn">deleteRemainingChildren</span>(oldFiber); <span class="kw">return</span>; } <span class="cm">// 新的排完 → 旧的剩下全删</span>
+<span class="kw">if</span>(oldFiber === <span class="kw">null</span>){ <span class="cm">/* 旧的用完 → 剩下新的全部新建 */</span> }
+<span class="cm">// —— 第二轮:剩余旧节点建 Map,新节点来捞 ——</span>
+<span class="kw">const</span> existingChildren = <span class="fn">mapRemainingChildren</span>(oldFiber);  <span class="cm">// key → fiber</span>
+<span class="kw">for</span>(; newIdx &lt; newChildren.length; newIdx++){
+  <span class="kw">const</span> newFiber = <span class="fn">updateFromMap</span>(existingChildren, newChildren[newIdx]);
+  lastPlacedIndex = <span class="fn">placeChild</span>(newFiber, lastPlacedIndex, newIdx);
+  <span class="kw">if</span>(newFiber.alternate) existingChildren.<span class="fn">delete</span>(newFiber.key); <span class="cm">// 捞走的从 Map 移除</span>
+}
+existingChildren.<span class="fn">forEach</span>(c =&gt; <span class="fn">deleteChild</span>(c));  <span class="cm">// Map 里剩的 = 删除</span></pre>
+  <div class="card">
+    <h3 style="margin-top:0">📊 两轮遍历流程总览</h3>
+    <svg viewBox="0 0 1000 300" style="width:100%;height:auto" font-family="ui-monospace,monospace">
+      <defs><marker id="dfArr" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" style="fill:var(--accent)"/></marker></defs>
+      <rect x="20" y="30" width="300" height="230" rx="12" style="fill:rgba(126,231,135,.10);stroke:var(--recon)" stroke-width="1.5"/>
+      <text x="170" y="55" text-anchor="middle" style="fill:var(--recon)" font-size="13" font-weight="700">第一轮:从左到右同位比较</text>
+      <rect x="45" y="75" width="250" height="40" rx="7" style="fill:var(--panel);stroke:var(--line)"/><text x="170" y="100" text-anchor="middle" style="fill:var(--txt)" font-size="11.5">新旧同位置:key+type 相同?</text>
+      <rect x="45" y="130" width="250" height="40" rx="7" style="fill:rgba(97,218,251,.14);stroke:var(--accent)"/><text x="170" y="155" text-anchor="middle" style="fill:var(--txt)" font-size="11.5">相同 → 复用旧 fiber(改 props)</text>
+      <rect x="45" y="185" width="250" height="50" rx="7" style="fill:rgba(255,123,156,.14);stroke:var(--render)"/><text x="170" y="206" text-anchor="middle" style="fill:var(--txt)" font-size="11.5">一旦不同 → 立即跳出第一轮</text><text x="170" y="223" text-anchor="middle" style="fill:var(--dim)" font-size="10">(覆盖最常见的"尾部追加")</text>
+      <line x1="325" y1="145" x2="375" y2="145" style="stroke:var(--accent)" stroke-width="2.5" marker-end="url(#dfArr)"/>
+      <text x="350" y="135" text-anchor="middle" style="fill:var(--dim)" font-size="10">还有剩余</text>
+      <rect x="380" y="30" width="600" height="230" rx="12" style="fill:rgba(242,184,75,.10);stroke:var(--sched)" stroke-width="1.5"/>
+      <text x="680" y="55" text-anchor="middle" style="fill:var(--sched)" font-size="13" font-weight="700">第二轮:剩余旧节点建 Map(key→fiber)</text>
+      <rect x="405" y="75" width="550" height="36" rx="7" style="fill:var(--panel);stroke:var(--line)"/><text x="680" y="98" text-anchor="middle" style="fill:var(--txt)" font-size="11.5">遍历剩余新节点,用 key 去 Map 里捞</text>
+      <rect x="405" y="123" width="175" height="55" rx="7" style="fill:rgba(97,218,251,.14);stroke:var(--accent)"/><text x="492" y="145" text-anchor="middle" style="fill:var(--txt)" font-size="11">捞到 → 复用/移动</text><text x="492" y="162" text-anchor="middle" style="fill:var(--dim)" font-size="9.5">lastPlacedIndex 判是否右移</text>
+      <rect x="592" y="123" width="175" height="55" rx="7" style="fill:rgba(126,231,135,.14);stroke:var(--recon)"/><text x="680" y="150" text-anchor="middle" style="fill:var(--txt)" font-size="11">捞不到 → 新建</text>
+      <rect x="779" y="123" width="175" height="55" rx="7" style="fill:rgba(255,123,156,.14);stroke:var(--render)"/><text x="866" y="145" text-anchor="middle" style="fill:var(--txt)" font-size="11">Map 里剩下的</text><text x="866" y="162" text-anchor="middle" style="fill:var(--dim)" font-size="9.5">→ 删除</text>
+      <rect x="405" y="190" width="550" height="45" rx="7" style="fill:none;stroke:var(--line)" stroke-dasharray="4 4"/><text x="680" y="217" text-anchor="middle" style="fill:var(--dim)" font-size="11">key 稳定 = 身份稳定 → 能"移动"而非"重建";index 当 key 会让身份错乱</text>
+    </svg>
+  </div>
+
+  <h2><span class="dot" style="background:var(--fiber)"></span>lastPlacedIndex:决定「移动还是不动」的灵魂</h2>
+  <p><code>lastPlacedIndex</code> 记录“目前已处理的可复用节点中，旧位置最靠右的下标”。每处理一个新节点，<code>placeChild</code> 用它判断该节点是否需要移动：</p>
+  <pre><span class="kw">function</span> <span class="fn">placeChild</span>(newFiber, lastPlacedIndex, newIndex){
+  newFiber.index = newIndex;
+  <span class="kw">const</span> current = newFiber.alternate;      <span class="cm">// 复用的旧 fiber(新建则为 null)</span>
+  <span class="kw">if</span>(current !== <span class="kw">null</span>){
+    <span class="kw">const</span> oldIndex = current.index;        <span class="cm">// 它在旧列表里的原位置</span>
+<span class="hl">    <span class="kw">if</span>(oldIndex &lt; lastPlacedIndex){         <span class="cm">// ★原来在左边,现在要在右边 → 得移动</span></span>
+      newFiber.flags |= Placement;         <span class="cm">// 标记「移动」</span>
+      <span class="kw">return</span> lastPlacedIndex;
+    } <span class="kw">else</span> {
+      <span class="kw">return</span> oldIndex;                     <span class="cm">// 原来就靠右 → 不用动,抬高基准线</span>
+    }
+  } <span class="kw">else</span> {
+    newFiber.flags |= Placement;           <span class="cm">// 新建也是 Placement(插入)</span>
+    <span class="kw">return</span> lastPlacedIndex;
+  }
+}</pre>
+  <p>要点：<b>只有当一个可复用节点「原来的位置比基准线还靠左」时,才判定它要移动</b>;否则不动、并把基准线抬到它的位置。这是一种<b>单向(只往右)</b>的贪心,不做 Vue 那种双端对比。</p>
+
+  <div class="card">
+    <h3 style="margin-top:0">互动:lastPlacedIndex 追踪器(逐步看谁要移动)</h3>
+    <div class="demo-guide"><b>怎么操作：</b>先选择一种新顺序，再点“下一步”。每一步只看两个数字：当前节点的 <code>oldIndex</code> 与 <code>lastPlacedIndex</code>；前者更小时，该节点会标记为移动。</div>
+    <div class="controls">
+      <button class="act ghost" data-dt="D,A,B,C">尾→首:D,A,B,C</button>
+      <button class="act ghost" data-dt="B,C,D,A">首→尾:B,C,D,A</button>
+      <button class="act ghost" data-dt="A,B,C,D,E">尾部追加:A,B,C,D,E</button>
+      <button class="act ghost" data-dt="A,C,B,D">相邻换:A,C,B,D</button>
+    </div>
+    <div id="dtOld" style="margin:8px 0"></div>
+    <div id="dtNew" style="margin:8px 0"></div>
+    <div class="controls"><button class="act" id="dtStep">下一步 ▸</button><button class="act" id="dtAuto">▶ 自动</button><button class="ghost" id="dtReset">重置</button></div>
+    <div class="status" id="dtStatus">选一个变换,然后单步执行。</div>
+  </div>
+
+  <div class="callout warn"><b>惊人但真实的结论:把最后一个元素移到最前(D,A,B,C)会让 A、B、C 三个都被标记移动(3 次 DOM 移动);而把第一个移到最后(B,C,D,A)只移动 A 一个。</b> 因为 lastPlacedIndex 是「只往右」的贪心——它对「向后移动」友好、对「向前移动」很贵。所以做<b>列表头部插入 / 逆序</b>这类操作时,即使 key 正确,也可能产生大量 DOM 移动。这是 React Diff 一个真实的性能特性。</div>
+  <div class="callout"><b>React 18 优化点:</b>Diff 算法本身自 16 起就稳定(仍是上面这套两轮 + lastPlacedIndex)。18 的性能收益来自 Concurrent(把大 Diff 切片摊到多帧、可中断)+ 自动批处理(减少 Diff 次数),<b>不是改了 Diff 算法</b>。</div>
+  <div class="card">
+    <h3 style="margin-top:0">📊 多节点 Diff 两轮遍历流程</h3>
+    <svg viewBox="0 0 1000 300" style="width:100%;height:auto" font-family="ui-monospace,monospace">
+      <defs><marker id="dfArr" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" style="fill:var(--accent)"/></marker></defs>
+      <!-- round 1 -->
+      <rect x="20" y="30" width="300" height="230" rx="12" style="fill:rgba(126,231,135,.10);stroke:var(--recon)" stroke-width="1.5"/>
+      <text x="170" y="55" text-anchor="middle" style="fill:var(--recon)" font-size="13" font-weight="700">第一轮:从左到右同位比较</text>
+      <rect x="45" y="75" width="250" height="40" rx="7" style="fill:var(--panel);stroke:var(--line)"/><text x="170" y="100" text-anchor="middle" style="fill:var(--txt)" font-size="11.5">新旧同位置:key+type 相同?</text>
+      <rect x="45" y="130" width="250" height="40" rx="7" style="fill:rgba(97,218,251,.14);stroke:var(--accent)"/><text x="170" y="155" text-anchor="middle" style="fill:var(--txt)" font-size="11.5">相同 → 复用旧 fiber(改 props)</text>
+      <rect x="45" y="185" width="250" height="50" rx="7" style="fill:rgba(255,123,156,.14);stroke:var(--render)"/><text x="170" y="206" text-anchor="middle" style="fill:var(--txt)" font-size="11.5">一旦不同 → 立即跳出第一轮</text><text x="170" y="223" text-anchor="middle" style="fill:var(--dim)" font-size="10">(覆盖最常见的"尾部追加")</text>
+      <!-- arrow -->
+      <line x1="325" y1="145" x2="375" y2="145" style="stroke:var(--accent)" stroke-width="2.5" marker-end="url(#dfArr)"/>
+      <text x="350" y="135" text-anchor="middle" style="fill:var(--dim)" font-size="10">还有剩余</text>
+      <!-- round 2 -->
+      <rect x="380" y="30" width="600" height="230" rx="12" style="fill:rgba(242,184,75,.10);stroke:var(--sched)" stroke-width="1.5"/>
+      <text x="680" y="55" text-anchor="middle" style="fill:var(--sched)" font-size="13" font-weight="700">第二轮:剩余旧节点建 Map(key→fiber)</text>
+      <rect x="405" y="75" width="550" height="36" rx="7" style="fill:var(--panel);stroke:var(--line)"/><text x="680" y="98" text-anchor="middle" style="fill:var(--txt)" font-size="11.5">遍历剩余新节点,用 key 去 Map 里捞</text>
+      <rect x="405" y="123" width="175" height="55" rx="7" style="fill:rgba(97,218,251,.14);stroke:var(--accent)"/><text x="492" y="145" text-anchor="middle" style="fill:var(--txt)" font-size="11">捞到 → 移动复用</text><text x="492" y="162" text-anchor="middle" style="fill:var(--dim)" font-size="9.5">lastPlacedIndex 判是否右移</text>
+      <rect x="592" y="123" width="175" height="55" rx="7" style="fill:rgba(126,231,135,.14);stroke:var(--recon)"/><text x="680" y="150" text-anchor="middle" style="fill:var(--txt)" font-size="11">捞不到 → 新建</text>
+      <rect x="779" y="123" width="175" height="55" rx="7" style="fill:rgba(255,123,156,.14);stroke:var(--render)"/><text x="866" y="145" text-anchor="middle" style="fill:var(--txt)" font-size="11">Map 里剩下的</text><text x="866" y="162" text-anchor="middle" style="fill:var(--dim)" font-size="9.5">→ 删除</text>
+      <rect x="405" y="190" width="550" height="45" rx="7" style="fill:none;stroke:var(--line)" stroke-dasharray="4 4"/><text x="680" y="217" text-anchor="middle" style="fill:var(--dim)" font-size="11">key 稳定 = 身份稳定 → 能"移动"而非"重建";index 当 key 会让身份错乱</text>
+    </svg>
+  </div>
+  <div class="callout"><b>React 18 优化点:</b>Diff 本身稳定,18 的性能收益主要来自 Concurrent(可中断把大 Diff 摊到多帧)+ 自动批处理减少 Diff 次数,而非改 Diff 算法本身。</div>
+
+  <h2><span class="dot" style="background:var(--warn)"></span>用 index 当 key 为什么出 bug(底层)</h2>
+  <p>key 是节点的"身份证",Diff 靠它判断"这还是不是原来那个"。用数组 <code>index</code> 当 key:列表<b>头部插入</b>或<b>重排</b>时,同一个真实节点的 index 变了 → React 误判成"不同节点",把 <b>state / DOM 错配</b>到相邻项上(比如输入框内容串位),还可能退化成全量重建。</p>
+  <div class="card">
+    <h3 style="margin-top:0">互动:index key vs id key 在头部插入时的差异</h3>
+    <div class="demo-guide"><b>怎么操作：</b>先保留 index key 点击“头部插入”，观察输入状态落到了哪个数据项；重置后切换为稳定 id，再执行一次进行对比。</div>
+    <div id="keyDemo" style="margin:10px 0"></div>
+    <div class="controls">
+      <button class="act" id="keyInsert">在头部插入一项</button>
+      <label style="font-size:12px;color:var(--dim);display:flex;align-items:center;gap:5px"><input type="radio" name="keymode" value="index" checked> 用 index 当 key</label>
+      <label style="font-size:12px;color:var(--dim);display:flex;align-items:center;gap:5px"><input type="radio" name="keymode" value="id"> 用稳定 id 当 key</label>
+      <button class="ghost" id="keyReset">重置</button>
+    </div>
+    <div class="status" id="keyStatus">每项有一个"输入框状态"(彩色)。头部插入后看状态是否错位。</div>
+  </div>
+  <div class="callout good"><b>Render 的子节点协调完成：</b>Diff 决定哪些旧 Fiber 可以复用，哪些需要移动、插入或删除。下一章看 <a class="xref" data-go="t10">变更标记</a> 如何把这些决定记录下来，交给 Commit。</div>
+  <div class="navbtns"><button class="ghost" data-go="t7">← 10Hooks：读取与计算状态</button><button class="act" data-go="t10">12flags：记录变更 →</button></div>
+</section></main>
+<script src="./assets/site.js"></script>
+<script src="./assets/demos.js"></script>
+</body>
+</html>

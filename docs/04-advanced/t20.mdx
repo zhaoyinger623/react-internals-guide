@@ -3,45 +3,6 @@ title: 渲染优化底层
 description: React 原理全景中的「渲染优化底层」，从运行机制继续深入源码。
 ---
 
-<div className="tutorial-chapter">
+import { EmbeddedChapter } from '../../theme/EmbeddedChapter';
 
-第六层 · 性能优化 / 20
-
-**🧭 主线**setState→Update→Lane→Scheduler→Render→Effect→Commit→DOM
-
-**🗺 本章路线图**
-
-**本节内容：**识别可以触发 bailout 的条件，减少不必要的组件执行和 DOM 操作。
-
-本章包括：**① bailout 触发条件 ② memo 浅比较底层 ③ 怎么做到精准局部更新**。
-
-## bailout:满足条件就不渲染
-
-beginWork 里,若同时满足以下条件,React 走 `bailoutOnAlreadyFinishedWork`,**跳过该 fiber 的重渲染,直接复用旧子树**:
-
--   `oldProps === newProps`(引用相等)且 context 未变;
--   该 fiber 没有自己的待处理更新(`!includesSomeLane(renderLanes, fiber.lanes)`);
--   若连 `childLanes` 也没有待更新 → **整棵子树都跳过**(这就是精准局部更新的关键:childLanes 让 React 知道子树里哪还有活)。
-
-## memo 的浅比较
-
-```js
-function shallowEqual(objA, objB){
-  if(is(objA, objB)) return true;
-  const keysA=keys(objA), keysB=keys(objB);
-  if(keysA.length !== keysB.length) return false;
-  for(const k of keysA)              // 只比第一层
-    if(!is(objA[k], objB[k])) return false;
-  return true;
-}
-```
-
-只比 props 第一层。所以传**新建的对象/数组/函数**(每次渲染引用都变)会让 memo 失效 —— 这正是要配 `useMemo/useCallback` 稳定引用的原因。深层嵌套对象浅比较也测不出,需自定义 `areEqual`。
-
-## 如何做到精准局部更新
-
-state 定义得越靠近使用它的组件,重渲染范围越小(状态下放)。配合 `childLanes` 的 bailout,只有"从 root 到发生更新的 fiber"这条路径 + 其必要子树会被 beginWork,兄弟子树整体跳过。
-
-**本章小结：**bailout = props 引用没变 + 无自身更新 + context 没变 → 复用旧子树,`childLanes` 为 0 还能整棵跳过;memo 只浅比较第一层,传新建对象/函数会失效,要配 useMemo/useCallback。→ 下一章:[第六层·渲染 bug](/04-advanced/t21)。
-
-</div>
+<EmbeddedChapter chapter="t20" />

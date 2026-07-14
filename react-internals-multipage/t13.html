@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+<title>Lane：选择更新 · React 原理全景</title>
+<script>
+  const embedParams = new URLSearchParams(location.search);
+  if (embedParams.get('embed') === '1') document.documentElement.classList.add('is-embed');
+  if (embedParams.get('theme') === 'light') document.documentElement.classList.add('embed-light');
+</script>
+<link rel="stylesheet" href="./assets/site.css">
+</head>
+<body data-chapter="t13">
+<aside id="side">
+  <div class="brand">⚛️ React 原理全景</div>
+  <button class="themebtn" id="themeBtn"><span class="ic">🌙</span><span id="themeLabel">切换到浅色模式</span></button>
+  <a href="./intro.html" data-t="intro"><span class="n">◎</span>如何使用本页</a>
+  <div class="grp">更新流程</div>
+  <a href="./journey.html" data-t="journey"><span class="n">★</span>一次 setState 的完整旅程</a>
+  <div class="grp">第一层 · 表层原理</div>
+  <a href="./t1.html" data-t="t1"><span class="n">1</span>组件渲染机制</a>
+  <a href="./t2.html" data-t="t2"><span class="n">2</span>虚拟 DOM 真实含义</a>
+  <a href="./t3.html" data-t="t3"><span class="n">3</span>生命周期执行顺序</a>
+  <div class="grp">第二层 · 一次更新的主线</div>
+  <a href="./t4.html" data-t="t4"><span class="n">4</span>更新的四个阶段</a>
+  <div class="grp">阶段一 · Trigger 触发</div>
+  <a href="./t9.html" data-t="t9"><span class="n">5</span>UpdateQueue：更新入队</a>
+  <div class="grp">阶段二 · Schedule 调度</div>
+  <a href="./t13.html" data-t="t13" class="active" aria-current="page"><span class="n">6</span>Lane：选择更新</a>
+  <a href="./t12.html" data-t="t12"><span class="n">7</span>Scheduler：安排执行</a>
+  <div class="grp">阶段三 · Render 计算</div>
+  <a href="./t8.html" data-t="t8"><span class="n">8</span>Fiber：可中断工作单元</a>
+  <a href="./t5.html" data-t="t5"><span class="n">9</span>双缓存 Fiber 树</a>
+  <a href="./t7.html" data-t="t7"><span class="n">10</span>Hooks：读取与计算状态</a>
+  <a href="./t6.html" data-t="t6"><span class="n">11</span>Diff：协调子节点</a>
+  <a href="./t10.html" data-t="t10"><span class="n">12</span>flags：记录变更</a>
+  <div class="grp">阶段四 · Commit 提交</div>
+  <a href="./t11.html" data-t="t11"><span class="n">13</span>Commit：应用变更</a>
+  <div class="grp">并发延伸</div>
+  <a href="./t14.html" data-t="t14"><span class="n">14</span>Concurrent 并发渲染</a>
+  <a href="./t15.html" data-t="t15"><span class="n">15</span>两大并发 API</a>
+  <div class="grp">架构交互</div>
+  <a href="./t16.html" data-t="t16"><span class="n">16</span>三大模块协作</a>
+  <a href="./t17.html" data-t="t17"><span class="n">17</span>批量更新原理</a>
+  <a href="./t18.html" data-t="t18"><span class="n">18</span>Suspense / lazy</a>
+  <a href="./t19.html" data-t="t19"><span class="n">19</span>合成事件系统</a>
+  <div class="grp">性能优化</div>
+  <a href="./t20.html" data-t="t20"><span class="n">20</span>渲染优化底层</a>
+  <a href="./t21.html" data-t="t21"><span class="n">21</span>渲染 bug 底层解释</a>
+  <div class="grp">高级实践与新架构</div>
+  <a href="./t22.html" data-t="t22"><span class="n">22</span>SSR / Hydration / 流式</a>
+  <a href="./t23.html" data-t="t23"><span class="n">23</span>Server Components</a>
+  <a href="./t24.html" data-t="t24"><span class="n">24</span>React 19 新特性</a>
+  <a href="./t25.html" data-t="t25"><span class="n">25</span>外部状态与撕裂</a>
+  <a href="./t26.html" data-t="t26"><span class="n">26</span>React Compiler</a>
+  <a href="./t27.html" data-t="t27"><span class="n">27</span>高级模式与陷阱</a>
+  <a href="./t28.html" data-t="t28"><span class="n">28</span>性能诊断与工程化</a>
+  <div class="grp">补充专题 · 常被漏掉的核心</div>
+  <a href="./ctx.html" data-t="ctx"><span class="n">C1</span>Context 源码原理</a>
+  <a href="./ref.html" data-t="ref"><span class="n">C2</span>useRef 与 ref 体系</a>
+  <div class="grp">源码附录 · 按需查阅</div>
+  <a href="./pk.html" data-t="pk"><span class="n">A1</span>宏观包结构</a>
+  <a href="./boot.html" data-t="boot"><span class="n">A2</span>启动过程</a>
+  <a href="./obj.html" data-t="obj"><span class="n">A3</span>核心对象速查</a>
+  <a href="./source.html" data-t="source"><span class="n">A4</span>源码阅读路线</a>
+  <div class="grp">总结</div>
+  <a href="./main.html" data-t="main"><span class="n">★</span>React 更新流程总览</a>
+</aside>
+<main id="main"><section class="topic active" id="t13">
+  <div class="crumb">阶段二 · Schedule / 06</div>
+  <h1>6 · Lane：选择本次更新</h1>
+  <div style="display:flex;flex-wrap:wrap;gap:3px;align-items:center;font-family:var(--mono);font-size:10.5px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:7px 10px;margin:6px 0 14px;overflow-x:auto"><b style="color:var(--txt2);margin-right:4px;font-family:inherit">🧭 主线</b><span data-go="t4" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">setState</span><span style="color:var(--dim)">→</span><span data-go="t9" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">Update</span><span style="color:var(--dim)">→</span><span data-go="t13" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:rgba(97,218,251,.22);border:1.5px solid var(--accent);color:var(--accent);font-weight:700">Lane</span><span style="color:var(--dim)">→</span><span data-go="t12" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">Scheduler</span><span style="color:var(--dim)">→</span><span data-go="t8" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">Render</span><span style="color:var(--dim)">→</span><span data-go="t10" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">Effect</span><span style="color:var(--dim)">→</span><span data-go="t11" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">Commit</span><span style="color:var(--dim)">→</span><span data-go="t11" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">DOM</span></div>
+  <div class="card" style="border-left:4px solid var(--accent)">
+    <b>这一章建立 Lane 的完整工作模型</b>
+    <p style="margin:8px 0 0">Lane 不只是“高、中、低”标签。它把每个 update 的优先级编码成二进制位，让 React 能在多种更新同时存在时，选择一批工作、跳过暂时不做的更新，并在之后按原顺序补算。</p>
+    <p style="margin:6px 0 0"><b>阅读顺序：</b>为什么需要 → Lane/Lanes 是什么 → 如何分配与传播 → root 如何选一批 Lanes → Render 如何处理 → 挂起、唤醒、过期和提交后怎样变化。</p>
+  </div>
+  <h2><span class="dot" style="background:var(--accent)"></span>先回答：React 为什么需要 Lane</h2>
+  <p>同一个 root 上可以同时存在不同来源、不同紧急程度的更新。例如用户正在输入文字，页面还要重新筛选一个大列表：</p>
+  <div class="phase-strip">
+    <div><strong>输入框更新</strong>用户正在等待反馈，应尽快显示。</div>
+    <div><strong>列表筛选更新</strong>计算量大，可以放进 <code>startTransition</code> 延后处理。</div>
+  </div>
+  <p>如果 React 只用普通 FIFO 队列，就只有两个不理想的选择：严格按顺序执行，可能让大列表阻塞输入；或者粗暴地把低优更新挪走，又容易破坏同一 state 队列的计算顺序。Lane 的作用是：<b>保留 update 的原始队列顺序，同时额外标记“这一轮要不要处理它”。</b></p>
+  <div class="callout good"><b>核心模型：</b>UpdateQueue 保存“更新按什么顺序发生”；Lane 决定“本轮选择其中哪些更新”；baseQueue 保存“本轮跳过、以后必须按原顺序重放的更新”。三者配合，React 才能既优先响应紧急工作，又不算错最终 state。</div>
+
+  <h2><span class="dot" style="background:var(--fiber)"></span>Lane、Lanes 与 renderLanes 分别是什么</h2>
+  <table class="simple">
+    <tr><th>名称</th><th>含义</th><th>典型位置</th></tr>
+    <tr><td><code>Lane</code></td><td>一个二进制位，通常表示一个 update 所属的优先级通道</td><td><code>update.lane</code></td></tr>
+    <tr><td><code>Lanes</code></td><td>多个 Lane 按位 OR 得到的集合，不是一种新的优先级</td><td><code>fiber.lanes</code>、<code>root.pendingLanes</code></td></tr>
+    <tr><td><code>renderLanes</code></td><td>当前 Render 选择处理的 Lane 集合，可能只有一个 bit，也可能包含多个</td><td>Render 工作循环与 update 队列处理函数的参数</td></tr>
+  </table>
+  <div class="callout"><b>Lane 不是线程、任务或 state。</b>它本质上是数字中的一个 bit。React 用位运算快速完成“加入集合、判断是否包含、合并、移除和寻找最高优先级组”。</div>
+
+  <h2><span class="dot" style="background:var(--accent)"></span>第一步：创建 update 时分配 Lane</h2>
+  <p>调用 <code>setState</code> 后，React 创建 update，并通过 <code>requestUpdateLane()</code> 根据当前上下文决定它属于哪类 Lane。常见来源如下：</p>
+  <table class="simple">
+    <tr><th>更新来源</th><th>常见 Lane</th><th>含义</th></tr>
+    <tr><td>点击、键盘输入等离散交互</td><td><code>SyncLane</code></td><td>用户正在等待结果，通常需要尽快处理</td></tr>
+    <tr><td>连续输入，例如拖动、滚动</td><td><code>InputContinuousLane</code></td><td>紧急程度较高，但可以与离散同步更新区分</td></tr>
+    <tr><td>普通更新</td><td><code>DefaultLane</code></td><td>常规优先级工作</td></tr>
+    <tr><td><code>startTransition</code> 内的更新</td><td>某个 <code>TransitionLane</code></td><td>允许等待、暂停或被更紧急工作抢占</td></tr>
+    <tr><td>Suspense 数据恢复后的重试</td><td>某个 <code>RetryLane</code></td><td>重新尝试之前挂起的边界</td></tr>
+  </table>
+  <div class="callout"><b>一次更新链的起点：</b>事件/Transition 上下文 → <code>requestUpdateLane()</code> → <code>update.lane</code> → update 进入 UpdateQueue。Lane 只描述这条更新如何被调度，不改变它在队列中的先后位置。</div>
+
+  <h2><span class="dot" style="background:var(--fiber)"></span>第二步：Lane 从更新节点传播到 root</h2>
+  <p>只有 Button 知道自己更新还不够，负责调度的是根节点。React 必须沿 Fiber 的 <code>return</code> 指针向父级走，让 root 知道“Button 这条分支有一个 Sync 更新”。源码把这个向上传递过程叫作冒泡。</p>
+
+  <div class="card">
+    <b>Button 产生 Sync 更新后，各层分别记录什么</b>
+    <div style="max-width:560px;margin:6px auto;font-family:var(--mono);font-size:12.5px">
+      <div style="border:1px solid var(--accent);background:rgba(97,218,251,.12);border-radius:8px;padding:8px 12px"><b>Root</b>：<code>pendingLanes |= Sync</code><br><span style="color:var(--dim)">整棵应用待处理的 Lane 中有 Sync</span></div>
+      <div style="text-align:center;color:var(--sched);margin:3px 0">↑ 沿 return 指针向父级登记</div>
+      <div style="border:1px solid var(--line);background:var(--panel2);border-radius:8px;padding:8px 12px"><b>App</b>：<code>childLanes |= Sync</code><br><span style="color:var(--dim)">App 自己没更新，但它的子树中有</span></div>
+      <div style="text-align:center;color:var(--sched);margin:3px 0">↑</div>
+      <div style="border:1px solid var(--line);background:var(--panel2);border-radius:8px;padding:8px 12px"><b>Main</b>：<code>childLanes |= Sync</code><br><span style="color:var(--dim)">Main 自己没更新，但它的子树中有</span></div>
+      <div style="text-align:center;color:var(--sched);margin:3px 0">↑</div>
+      <div style="border:1px solid var(--warn);background:rgba(255,107,107,.1);border-radius:8px;padding:8px 12px"><b>Button</b>：<code>lanes |= Sync</code><br><span style="color:var(--warn)">更新就发生在 Button 自己身上</span></div>
+    </div>
+    <p style="margin:8px 0 0"><b>三个字段不要混：</b><code>Button.lanes</code> 表示“我自己有更新”；<code>Main/App.childLanes</code> 表示“我的后代有更新”；<code>root.pendingLanes</code> 表示“整棵应用还有哪些 Lane 没处理”。</p>
+  </div>
+  <div class="callout good"><b>为什么祖先要记录 childLanes？</b>Render 从 root 往下走时，可以据此找到 Button 所在的分支。某个分支的 <code>childLanes</code> 不包含本次 Lane，就说明下面没有相关更新，整棵子树可以跳过。</div>
+
+  <h2><span class="dot" style="background:var(--sched)"></span>root 不只保存 pendingLanes</h2>
+  <p>更新到达 root 后，会进入多个 Lane 集合中的一种状态。理解这些字段，才能看懂 <code>getNextLanes</code> 为什么有时选择、有时跳过某些工作：</p>
+  <table class="simple">
+    <tr><th>root 字段</th><th>表示什么</th><th>什么时候变化</th></tr>
+    <tr><td><code>pendingLanes</code></td><td>已经到达 root、但还没有全部完成的 Lane</td><td>新 update 到来时加入；成功提交并确认完成后移除</td></tr>
+    <tr><td><code>suspendedLanes</code></td><td>本次尝试时因数据等原因挂起的 Lane</td><td>Render 遇到 Suspense 后标记</td></tr>
+    <tr><td><code>pingedLanes</code></td><td>之前挂起，但依赖的数据已经就绪，可以重试的 Lane</td><td>Promise resolve 后由 ping 标记</td></tr>
+    <tr><td><code>expiredLanes</code></td><td>等待太久、需要防止继续饿死的 Lane</td><td>超过过期时间后标记，后续提高完成紧迫性</td></tr>
+    <tr><td><code>entangledLanes</code></td><td>与其他 Lane 有共同完成关系的 Lane</td><td>相关更新不应独立提交中间状态时建立关联</td></tr>
+  </table>
+
+  <h2><span class="dot" style="background:var(--recon)"></span>第三步：getNextLanes 选择下一批工作</h2>
+  <p><code>getNextLanes(root)</code> 的目标不是“永远取最高的一个 bit”，而是从 root 的各种 Lane 状态中选出<b>下一批值得执行、能够执行，并且适合一起执行的工作</b>。可以按下面的顺序理解：</p>
+  <ol>
+    <li><b>没有 pending 工作：</b>返回 <code>NoLanes</code>。</li>
+    <li><b>先考虑非 Idle 工作：</b>普通交互和页面更新完成前，不急着处理 Idle。</li>
+    <li><b>优先选择未挂起的 Lane：</b>从 <code>pendingLanes</code> 中排除仍在 suspended 且尚未 ping 的部分。</li>
+    <li><b>没有新鲜可执行工作时，再看 pinged：</b>数据已经就绪的挂起任务可以重试。</li>
+    <li><b>从候选中取最高优先级组：</b>得到的可能是一组 Lane，而不一定只有一个 bit。</li>
+    <li><b>与正在进行的 WIP 比较：</b>新 Lane 没有更高优先级时，React 通常继续已有工作，避免白白丢掉进度。</li>
+    <li><b>计算共同完成关系：</b>进入 Render 时再纳入需要一起处理的 entangled Lane。</li>
+  </ol>
+  <div class="callout good"><b>“选最高优先级”不等于“只选一个 Lane”。</b>React 先用最高 bit 判断当前属于哪个优先级组，再返回这个组中适合共同处理的 Lanes；之后还可能考虑 entanglement 或特殊同步刷新。</div>
+  <h3>哪些 Lane 会一起处理</h3>
+  <table class="simple">
+    <tr><th>情况</th><th>选择结果</th><th>设计目的</th></tr>
+    <tr><td>同一优先级组中的多个 Lane</td><td>可以作为一批选择</td><td>减少重复遍历，并保持同组工作的协调</td></tr>
+    <tr><td>高优 Lane 与普通低优 Lane 同时等待</td><td>通常先处理高优组</td><td>避免低优大任务延迟用户输入等紧急反馈</td></tr>
+    <tr><td>彼此 entangled 的 Lane</td><td>有效 Render 范围会纳入关联 Lane</td><td>避免提交这些更新之间不该出现的中间状态</td></tr>
+    <tr><td>特殊强制同步刷新</td><td>可以把指定的额外 Lane 一起同步刷新</td><td>满足历史导航、滚动恢复等必须同步完成的宿主场景</td></tr>
+  </table>
+  <h3>一个完整选择示例</h3>
+  <p>假设大列表的 Transition 仍在等待，此时用户又输入一个字符，root 变成：</p>
+  <div class="callout"><code>root.pendingLanes = Sync | Transition</code><br><code>renderLanes = Sync</code><br><b>本次 Render：</b>先处理 Sync update；Transition update 留在基础队列与 root 的 pendingLanes 中，之后再处理。</div>
+  <p>这里分开不是因为一次 Render 技术上只能处理一个 Lane，而是一次调度决策：假设 Sync 只需 2ms，Transition 的大列表需要 80ms；若总是合并，用户可能要等完整计算结束才看到输入结果。若两个 Lane 因共同完成关系被 entangle，或进入特殊强制刷新路径，React 也能够让它们处于同一批有效 Render 范围。</p>
+
+  <h2><span class="dot" style="background:var(--warn)"></span>第四步：Render 用 Lanes 筛选 update 与子树</h2>
+  <p>Render 遍历 update 队列时，不是比较“它是不是唯一被选中的 Lane”，而是检查 <code>update.lane</code> 是否属于 <code>renderLanes</code> 这个集合：</p>
+  <pre><span class="kw">if</span> (<span class="fn">isSubsetOfLanes</span>(renderLanes, update.lane)) {
+  state = <span class="fn">applyUpdate</span>(state, update); <span class="cm">// 本轮包含它：执行</span>
+} <span class="kw">else</span> {
+  <span class="fn">cloneToBaseQueue</span>(update);          <span class="cm">// 本轮不包含：保留以后重放</span>
+}</pre>
+  <div class="callout"><b>因此一次处理多个 Lane 时不需要另一套算法：</b><code>renderLanes</code> 中有几个 bit，就能匹配几类 update。Sync 与 Transition 若都在集合中，两类 update 都通过检查；若集合里只有 Sync，Transition 就被跳过并保留。</div>
+  <p>Lane 还用于跳过整棵子树。若某个 Fiber 自己的 <code>lanes</code> 和后代的 <code>childLanes</code> 都不与本轮有效 Lanes 相交，<code>beginWork</code> 可以直接 bailout，不再执行该分支的组件和 Diff。</p>
+  <div class="callout warn">Lane 只负责表达“这轮包含哪些更新”以及它们的优先级关系。Lane 本身不会暂停 JavaScript，也不会保存或丢弃 WIP；取消旧任务、决定续算还是重算，属于下一章 <a class="xref" data-go="t12">Scheduler</a> 与 Fiber 工作循环的配合。</div>
+
+  <h2><span class="dot" style="background:var(--sched)"></span>二进制位到底怎样表示一组 Lane</h2>
+  <p>先只用 4 位演示。每一种 Lane 独占一位；<code>1</code> 表示“集合中有这种 Lane”，<code>0</code> 表示“没有”。</p>
+  <table class="simple">
+    <tr><th>Lane</th><th>二进制</th><th>读法</th></tr>
+    <tr><td><code>SyncLane</code></td><td><code>0001</code></td><td>第 1 位是 1</td></tr>
+    <tr><td><code>DefaultLane</code></td><td><code>0100</code></td><td>第 3 位是 1</td></tr>
+    <tr><td><code>TransitionLane</code></td><td><code>1000</code></td><td>第 4 位是 1</td></tr>
+  </table>
+  <h3>操作一：用 OR 把 Lane 加进 pendingLanes</h3>
+  <p>root 已经等待一个 Transition，又来了一个 Sync。逐位执行 OR：任意一边是 <code>1</code>，结果就是 <code>1</code>。</p>
+  <pre>  1000   <span class="cm">// Transition</span>
+| 0001   <span class="cm">// Sync</span>
+------
+  1001   <span class="cm">// pendingLanes：两种更新都还没处理</span></pre>
+  <p>因此 <code>root.pendingLanes = 1001</code> 不是一种新优先级，而是一个集合：里面同时有 Sync 和 Transition。</p>
+  <h3>操作二：用 AND 判断本轮是否包含某个 update</h3>
+  <p>假设本轮只选择 Sync，所以 <code>renderLanes = 0001</code>：</p>
+  <pre>  0001   <span class="cm">// renderLanes</span>
+&amp; 0001   <span class="cm">// Sync update.lane</span>
+------
+  0001   <span class="cm">// 非 0：本轮处理 Sync update</span>
+
+  0001   <span class="cm">// renderLanes</span>
+&amp; 1000   <span class="cm">// Transition update.lane</span>
+------
+  0000   <span class="cm">// 等于 0：本轮跳过 Transition update</span></pre>
+  <h3>操作三：从集合中取出最高优先级</h3>
+  <p>React 把更低的二进制位定义为更高优先级，因此 <code>getHighestPriorityLane(1001)</code> 会取出最右侧的 <code>1</code>，得到 <code>0001</code>，也就是 Sync。源码常见写法是 <code>lanes &amp; -lanes</code>；现阶段只需记住它的结果是“保留最右侧的 1”。</p>
+  <pre><span class="kw">const</span> nextLane = pendingLanes &amp; -pendingLanes;
+<span class="cm">// pendingLanes = 1001 → nextLane = 0001 → SyncLane</span></pre>
+  <div class="callout good"><b>三个运算对应三个问题：</b><code>|</code> 把 Lane 加入集合；<code>&amp;</code> 判断集合是否包含某 Lane；<code>lanes &amp; -lanes</code> 取出最高优先级 Lane。真实源码位数更多，但读法完全相同。</div>
+
+  <div class="card">
+    <h3 style="margin-top:0">互动:位掩码合并与最高优筛选</h3>
+    <div class="demo-guide"><b>怎么操作：</b>加入至少两种 Lane。先看二进制位如何合并到 <code>pendingLanes</code>，再看 React 从中选出的最高优先级 Lane。</div>
+    <div id="laneBox" style="margin:10px 0"></div>
+    <div class="controls">
+      <button class="act" id="laneSync" style="background:var(--warn);color:#fff">加 SyncLane</button>
+      <button class="act" id="laneInput" style="background:var(--sched);color:#04222b">加 InputContinuous</button>
+      <button class="act" id="laneDefault">加 DefaultLane</button>
+      <button class="act" id="laneTrans" style="background:var(--fiber);color:#fff">加 TransitionLane</button>
+      <button class="ghost" id="laneReset">重置</button>
+    </div>
+    <div class="status" id="laneStatus">加入不同 lane,看 pendingLanes 掩码和被选中的最高优 lane。</div>
+  </div>
+  <div class="callout good"><b>Schedule 的第一步完成：</b>Lane 让 React 知道“本次选择哪些更新”。下一章进入 <a class="xref" data-go="t12">Scheduler</a>，继续看这些更新何时获得执行机会。</div>
+  <div class="navbtns"><button class="ghost" data-go="t9">← 5UpdateQueue：更新入队</button><button class="act" data-go="t12">7Scheduler：安排执行 →</button></div>
+</section></main>
+<script src="./assets/site.js"></script>
+<script src="./assets/demos.js"></script>
+</body>
+</html>

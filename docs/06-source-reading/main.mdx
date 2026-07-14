@@ -3,26 +3,6 @@ title: React 更新流程总览
 description: React 原理全景中的「React 更新流程总览」，从运行机制继续深入源码。
 ---
 
-<div className="tutorial-chapter">
+import { EmbeddedChapter } from '../../theme/EmbeddedChapter';
 
-FINAL · 更新流程总览
-
-下面按执行顺序汇总前文涉及的主要步骤。遇到具体问题时，可以从对应步骤返回相关章节：
-
-```js
-用户触发更新
-  1  生成 Update 对象 + 分配 Lane(据事件类型)          → 更新主线·四个阶段/Schedule·Lane/第五层·合成事件
-  2  Update 进 Fiber.updateQueue.shared.pending 环状链表  → Trigger·UpdateQueue
-  3  Lane 逐层冒泡,root 收集 pendingLanes                → Schedule·Lane
-  4  Scheduler 据 Lane 建任务、入最小堆                    → Schedule·Scheduler
-  5  MessageChannel 时间切片,可中断/可抢占               → Schedule·Scheduler/第四层·Concurrent
-  6  Render: beginWork 执行 Hooks/算 state/Diff/生成 WIP  → Render·Diff/Render·Hooks/Render·Fiber
-  7  completeWork 打 Effect 标记、收集副作用(subtreeFlags)→ Render·Fiber/Render·变更标记
-  8  若被高优抢占 → 丢弃 WIP,未执行 Update 迁移 baseQueue → Trigger·UpdateQueue/第四层·Concurrent
-  9  任务恢复继续渲染,整棵树计算完成                       → 第四层·Concurrent
-  10 Commit: 一次性 DOM 落地 + 执行副作用 + 切 current     → Render·变更标记/Commit·提交阶段
-```
-
-**流程概括：**更新带着 Lane 进队列 → Scheduler 切片调度 → Reconciler 可中断地算出带标记的 WIP 树 → Commit 同步落屏。**Scheduler 管何时,Reconciler 管什么,Renderer 管怎么落地。**
-
-</div>
+<EmbeddedChapter chapter="main" />

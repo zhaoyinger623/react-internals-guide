@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+<title>flags：记录变更 · React 原理全景</title>
+<script>
+  const embedParams = new URLSearchParams(location.search);
+  if (embedParams.get('embed') === '1') document.documentElement.classList.add('is-embed');
+  if (embedParams.get('theme') === 'light') document.documentElement.classList.add('embed-light');
+</script>
+<link rel="stylesheet" href="./assets/site.css">
+</head>
+<body data-chapter="t10">
+<aside id="side">
+  <div class="brand">⚛️ React 原理全景</div>
+  <button class="themebtn" id="themeBtn"><span class="ic">🌙</span><span id="themeLabel">切换到浅色模式</span></button>
+  <a href="./intro.html" data-t="intro"><span class="n">◎</span>如何使用本页</a>
+  <div class="grp">更新流程</div>
+  <a href="./journey.html" data-t="journey"><span class="n">★</span>一次 setState 的完整旅程</a>
+  <div class="grp">第一层 · 表层原理</div>
+  <a href="./t1.html" data-t="t1"><span class="n">1</span>组件渲染机制</a>
+  <a href="./t2.html" data-t="t2"><span class="n">2</span>虚拟 DOM 真实含义</a>
+  <a href="./t3.html" data-t="t3"><span class="n">3</span>生命周期执行顺序</a>
+  <div class="grp">第二层 · 一次更新的主线</div>
+  <a href="./t4.html" data-t="t4"><span class="n">4</span>更新的四个阶段</a>
+  <div class="grp">阶段一 · Trigger 触发</div>
+  <a href="./t9.html" data-t="t9"><span class="n">5</span>UpdateQueue：更新入队</a>
+  <div class="grp">阶段二 · Schedule 调度</div>
+  <a href="./t13.html" data-t="t13"><span class="n">6</span>Lane：选择更新</a>
+  <a href="./t12.html" data-t="t12"><span class="n">7</span>Scheduler：安排执行</a>
+  <div class="grp">阶段三 · Render 计算</div>
+  <a href="./t8.html" data-t="t8"><span class="n">8</span>Fiber：可中断工作单元</a>
+  <a href="./t5.html" data-t="t5"><span class="n">9</span>双缓存 Fiber 树</a>
+  <a href="./t7.html" data-t="t7"><span class="n">10</span>Hooks：读取与计算状态</a>
+  <a href="./t6.html" data-t="t6"><span class="n">11</span>Diff：协调子节点</a>
+  <a href="./t10.html" data-t="t10" class="active" aria-current="page"><span class="n">12</span>flags：记录变更</a>
+  <div class="grp">阶段四 · Commit 提交</div>
+  <a href="./t11.html" data-t="t11"><span class="n">13</span>Commit：应用变更</a>
+  <div class="grp">并发延伸</div>
+  <a href="./t14.html" data-t="t14"><span class="n">14</span>Concurrent 并发渲染</a>
+  <a href="./t15.html" data-t="t15"><span class="n">15</span>两大并发 API</a>
+  <div class="grp">架构交互</div>
+  <a href="./t16.html" data-t="t16"><span class="n">16</span>三大模块协作</a>
+  <a href="./t17.html" data-t="t17"><span class="n">17</span>批量更新原理</a>
+  <a href="./t18.html" data-t="t18"><span class="n">18</span>Suspense / lazy</a>
+  <a href="./t19.html" data-t="t19"><span class="n">19</span>合成事件系统</a>
+  <div class="grp">性能优化</div>
+  <a href="./t20.html" data-t="t20"><span class="n">20</span>渲染优化底层</a>
+  <a href="./t21.html" data-t="t21"><span class="n">21</span>渲染 bug 底层解释</a>
+  <div class="grp">高级实践与新架构</div>
+  <a href="./t22.html" data-t="t22"><span class="n">22</span>SSR / Hydration / 流式</a>
+  <a href="./t23.html" data-t="t23"><span class="n">23</span>Server Components</a>
+  <a href="./t24.html" data-t="t24"><span class="n">24</span>React 19 新特性</a>
+  <a href="./t25.html" data-t="t25"><span class="n">25</span>外部状态与撕裂</a>
+  <a href="./t26.html" data-t="t26"><span class="n">26</span>React Compiler</a>
+  <a href="./t27.html" data-t="t27"><span class="n">27</span>高级模式与陷阱</a>
+  <a href="./t28.html" data-t="t28"><span class="n">28</span>性能诊断与工程化</a>
+  <div class="grp">补充专题 · 常被漏掉的核心</div>
+  <a href="./ctx.html" data-t="ctx"><span class="n">C1</span>Context 源码原理</a>
+  <a href="./ref.html" data-t="ref"><span class="n">C2</span>useRef 与 ref 体系</a>
+  <div class="grp">源码附录 · 按需查阅</div>
+  <a href="./pk.html" data-t="pk"><span class="n">A1</span>宏观包结构</a>
+  <a href="./boot.html" data-t="boot"><span class="n">A2</span>启动过程</a>
+  <a href="./obj.html" data-t="obj"><span class="n">A3</span>核心对象速查</a>
+  <a href="./source.html" data-t="source"><span class="n">A4</span>源码阅读路线</a>
+  <div class="grp">总结</div>
+  <a href="./main.html" data-t="main"><span class="n">★</span>React 更新流程总览</a>
+</aside>
+<main id="main"><section class="topic active" id="t10">
+  <div class="crumb">阶段三 · Render / 12</div>
+  <h1>12 · flags：记录 Render 的变更</h1>
+  <div style="display:flex;flex-wrap:wrap;gap:3px;align-items:center;font-family:var(--mono);font-size:10.5px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:7px 10px;margin:6px 0 14px;overflow-x:auto"><b style="color:var(--txt2);margin-right:4px;font-family:inherit">🧭 主线</b><span data-go="t4" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">setState</span><span style="color:var(--dim)">→</span><span data-go="t9" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">Update</span><span style="color:var(--dim)">→</span><span data-go="t13" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">Lane</span><span style="color:var(--dim)">→</span><span data-go="t12" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">Scheduler</span><span style="color:var(--dim)">→</span><span data-go="t8" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">Render</span><span style="color:var(--dim)">→</span><span data-go="t10" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:rgba(97,218,251,.22);border:1.5px solid var(--accent);color:var(--accent);font-weight:700">Effect</span><span style="color:var(--dim)">→</span><span data-go="t11" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">Commit</span><span style="color:var(--dim)">→</span><span data-go="t11" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">DOM</span></div>
+  <div class="card" style="border-left:4px solid var(--accent)">
+    <b>🗺 本章路线图(先建立脉络,再看细节)</b>
+    <p style="margin:8px 0 0">「副作用(effect)」= 组件在纯计算之外要对外界做的事:<b>改真实 DOM、跑 useEffect、更新 ref</b>。</p>
+    <p style="margin:6px 0 0"><b>核心结论：</b>Render 阶段在 Fiber 上设置 flags，记录之后需要执行的操作；Commit 阶段读取这些 flags，并修改 DOM 或执行相关副作用。</p>
+    <p style="margin:6px 0 0"><b>为什么分两步:</b>Render 可中断、可丢弃重来,<b>不能真去动 DOM</b>;所以先把「要做的事」攒成标记,等 Commit 一次性做完。</p>
+    <p style="margin:6px 0 0">本章回答三个问题:<b>① 有哪些标记? ② 标记记在哪、Commit 怎么高效找到它们? ③ 什么时候执行?</b>(第 ③ 步的执行细节在下一章 <a class="xref" data-go="t11">Commit·提交阶段</a>)</p>
+  </div>
+
+  <h2><span class="dot" style="background:var(--accent)"></span>先回答：一个“有变化的 Fiber”怎么产生</h2>
+  <p>不是拿 <code>baseState</code> 直接做 Diff。一次组件更新在 Render 阶段内部按下面顺序发生：</p>
+  <div class="card">
+    <ol>
+      <li><b>先算 state：</b><code>processUpdateQueue</code> 从旧 state 出发处理本轮 update，得到新的 <code>memoizedState</code>。<code>baseState</code> 只在有 update 被跳过时作为未来重算起点。</li>
+      <li><b>再执行组件：</b>组件使用新 state/props 返回新的 React Element，例如从 <code>&lt;h1&gt;0&lt;/h1&gt;</code> 变成 <code>&lt;h1&gt;1&lt;/h1&gt;</code>。</li>
+      <li><b>再做子节点 Diff：</b><code>reconcileChildren</code> 比较旧子 Fiber 与新 React Element，决定复用、新建、移动或删除哪些 WIP Fiber。</li>
+      <li><b>再比较 DOM 属性：</b><code>completeWork</code> 比较宿主 Fiber 的旧 props 与新 props，发现文本、className、style 等差异。</li>
+      <li><b>最后留下 flags：</b>新增/移动产生 Placement，删除产生 Deletion，属性/文本变化产生 Update；effect deps 变化产生 Passive 或 Layout 相关标记。</li>
+    </ol>
+  </div>
+  <div class="callout good"><b>因此答案是：</b>state 由 UpdateQueue 计算；新 JSX 由组件执行产生；Fiber 结构变化由 Diff 发现；DOM 属性变化由 completeWork 发现。它们不是同一步，但都发生在 Render 阶段，并最终把操作记录到 WIP Fiber。</div>
+
+  <h2><span class="dot" style="background:var(--render)"></span>① flags 是 Render 留给 Commit 的操作清单</h2>
+  <p>Render 发现具体变化后，在对应 WIP Fiber 的 <code>flags</code> 中记录“Commit 应该执行什么”：</p>
+  <table class="simple">
+    <tr><th>标记(flag)</th><th>含义</th><th>Commit 何时处理</th></tr>
+    <tr><td><code>Placement</code></td><td>新增 / 移动节点(insertBefore/appendChild)</td><td>Mutation</td></tr>
+    <tr><td><code>Update</code></td><td>属性/文本变更(updateProperties)</td><td>Mutation</td></tr>
+    <tr><td><code>Deletion</code></td><td>删除节点(18 存在 <code>父.deletions</code> 数组里)</td><td>Mutation</td></tr>
+    <tr><td><code>Passive</code></td><td>有 useEffect 要执行</td><td>Commit 后异步</td></tr>
+    <tr><td><code>Layout</code>(LayoutMask)</td><td>有 useLayoutEffect / DidMount/Update</td><td>Layout</td></tr>
+    <tr><td><code>Ref</code></td><td>需要更新 ref</td><td>Layout</td></tr>
+  </table>
+  <div class="callout"><b>effect 中再次 setState 会怎样？</b>执行 <code>useEffect/useLayoutEffect</code> 本身不会自动产生 update；只有 effect 回调内部主动调用 setState 才会。<code>useLayoutEffect</code> 的回调在 Commit 的 Layout 阶段同步执行；<code>useEffect</code> 的回调在 Passive 刷新时执行。setState 会创建一个全新的 update、分配 Lane、进入队列并重新安排 root，随后开启下一轮 Render。React 不会在当前 Diff 中途直接修改 state。</div>
+  <pre>本轮 Render → 本轮 Commit
+                 ↓ effect 回调调用 setState
+新 update 入队 → Lane → Schedule → 下一轮 Render → 下一轮 Commit</pre>
+  <p><b>防止无限循环：</b>如果 effect 每次执行都无条件 setState，下一轮 Render 又让该 effect 再次执行，就会不断产生更新。依赖数组和条件判断的作用之一，就是让这个闭环在状态同步完成后停止。</p>
+
+  <h2><span class="dot" style="background:var(--recon)"></span>② 标记记在哪、怎么高效找到:位运算 + subtreeFlags</h2>
+  <p><b>先搞清楚「打在哪」:</b>每个 fiber 就是一个对象,它身上有个字段叫 <code>flags</code>(一个数字)。Render 阶段 React 每发现一个 fiber 有变化,就在<b>它自己的 flags 上记一笔</b>——「我要被插入」记 Placement、「我属性变了」记 Update。<b>标记是每个 fiber 各自带的,不是全局一张表。</b></p>
+  <div class="card">
+    <p style="margin:0 0 10px;color:var(--txt2)">例子：<code>h1</code> 文本变化，<code>ul</code> 中新增一个 <code>li</code>。先看叶子自己的 <code>flags</code>，再从下往上汇总 <code>subtreeFlags</code>：</p>
+    <div style="max-width:760px;margin:auto;font-family:var(--mono);font-size:12px">
+      <div style="border:2px solid var(--accent);border-radius:10px;padding:10px;text-align:center"><b>HostRoot</b><br><code>subtreeFlags = Update | Placement</code></div>
+      <div style="text-align:center;color:var(--sched);padding:5px">↑ App 汇报：我的子树中有 Update 和 Placement</div>
+      <div style="border:2px solid var(--accent);border-radius:10px;padding:10px;text-align:center"><b>App</b><br><code>flags = NoFlags</code><br><code>subtreeFlags = Update | Placement</code></div>
+      <div class="grid2" style="margin-top:8px">
+        <div>
+          <div style="text-align:center;color:var(--sched);padding:5px">↑ h1 汇报 Update</div>
+          <div style="border:2px solid var(--sched);border-radius:10px;padding:10px;text-align:center"><b>h1（文本变化）</b><br><code>flags = Update</code><br><code>subtreeFlags = NoFlags</code></div>
+        </div>
+        <div>
+          <div style="text-align:center;color:var(--sched);padding:5px">↑ ul 汇报 Placement</div>
+          <div style="border:2px solid var(--line);border-radius:10px;padding:10px;text-align:center"><b>ul</b><br><code>flags = NoFlags</code><br><code>subtreeFlags = Placement</code></div>
+          <div style="text-align:center;color:var(--sched);padding:5px">↑ li 汇报 Placement</div>
+          <div style="border:2px solid var(--recon);border-radius:10px;padding:10px;text-align:center"><b>li（新增）</b><br><code>flags = Placement</code><br><code>subtreeFlags = NoFlags</code></div>
+        </div>
+      </div>
+    </div>
+    <p style="margin:12px 0 0;color:var(--txt2)"><b>读取方法：</b><code>flags</code> 只写“我自己要做什么”；<code>subtreeFlags</code> 只写“我的后代中有什么操作”。<code>completeWork</code> 从叶子向父级返回时完成汇总，Commit 据此跳过没有变更的分支。</p>
+  </div>
+  <p><b>flags 是位掩码(bitmask)</b>:一个整数就能同时携带多个标记,用位运算叠加和检查,比数组/字符串快得多:</p>
+  <pre><span class="cm">// 每个标记占二进制的一位</span>
+Placement = <span class="st">0b0000010</span>;  Update = <span class="st">0b0000100</span>;  Passive = <span class="st">0b0001000</span>; …
+fiber.flags |= Placement;       <span class="cm">// 叠加一个标记</span>
+fiber.flags |= Update;          <span class="cm">// 再叠加一个(现在同时带两个)</span>
+<span class="kw">if</span>(fiber.flags &amp; Update){ … }   <span class="cm">// 检查是否带某标记</span></pre>
+  <h3>subtreeFlags 不是另一份操作，它只是父节点的“目录”</h3>
+  <p>假设 App 有两个子分支：Header 没变化，List 中有一个新增 li。</p>
+  <pre>Header.flags = NoFlags
+Header.subtreeFlags = NoFlags
+
+li.flags = Placement
+List.subtreeFlags = Placement
+App.subtreeFlags = Placement</pre>
+  <p><code>completeWork</code> 从子节点返回父节点时，执行近似计算：</p>
+  <pre>parent.subtreeFlags |= child.flags;
+parent.subtreeFlags |= child.subtreeFlags;</pre>
+  <p>Commit 从 App 往下检查时：</p>
+  <ol>
+    <li>看到 <code>Header.subtreeFlags === NoFlags</code> 且 Header 自己也没有相关 flag，直接跳过整个 Header 分支。</li>
+    <li>看到 <code>List.subtreeFlags</code> 含 Placement，进入 List。</li>
+    <li>最终找到 <code>li.flags = Placement</code>，执行插入 DOM。</li>
+  </ol>
+  <div class="callout"><b>关键区别：</b><code>li.flags</code> 是“请插入我”；<code>List.subtreeFlags</code> 是“我的后代里有人需要处理”。Commit 最终执行的是具体 Fiber 自己的 flags，subtreeFlags 只用于导航和剪枝。</div>
+  <div class="card">
+    <h3 style="margin-top:0">互动:据 flags 在 Commit 执行 DOM 操作</h3>
+    <div class="demo-guide"><b>怎么操作：</b>左侧是 Render 产生的 flags，右侧是提交前的 DOM。点击 Commit 后，对照每个 flag 查看右侧发生的实际变化。</div>
+    <div class="grid2">
+      <div><h3 style="font-size:14px">变更清单(Render 阶段打的 flags)</h3><div id="commitList"></div></div>
+      <div><h3 style="font-size:14px">🖥 屏幕(真实 DOM)</h3><div id="screen" style="background:var(--code);border:1px solid var(--line);border-radius:8px;min-height:150px;padding:12px;font-family:var(--mono);font-size:13px"></div></div>
+    </div>
+    <div class="controls"><button class="act" id="commitRun">✔ 提交(Commit)</button><button class="ghost" id="commitReset">重置</button></div>
+    <div class="status" id="commitStatus">等待提交。</div>
+  </div>
+  <div class="callout good"><b>Render 阶段完成：</b>React 已得到新的 workInProgress 树，并用 <code>flags</code> 记录需要执行的 DOM 与 Effect 操作。下一章进入 <a class="xref" data-go="t11">Commit</a>，应用这些变更。</div>
+  <div class="navbtns"><button class="ghost" data-go="t6">← 11Diff：协调子节点</button><button class="act" data-go="t11">13Commit：应用变更 →</button></div>
+</section></main>
+<script src="./assets/site.js"></script>
+<script src="./assets/demos.js"></script>
+</body>
+</html>

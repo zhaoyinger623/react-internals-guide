@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+<title>三大模块协作 · React 原理全景</title>
+<script>
+  const embedParams = new URLSearchParams(location.search);
+  if (embedParams.get('embed') === '1') document.documentElement.classList.add('is-embed');
+  if (embedParams.get('theme') === 'light') document.documentElement.classList.add('embed-light');
+</script>
+<link rel="stylesheet" href="./assets/site.css">
+</head>
+<body data-chapter="t16">
+<aside id="side">
+  <div class="brand">⚛️ React 原理全景</div>
+  <button class="themebtn" id="themeBtn"><span class="ic">🌙</span><span id="themeLabel">切换到浅色模式</span></button>
+  <a href="./intro.html" data-t="intro"><span class="n">◎</span>如何使用本页</a>
+  <div class="grp">更新流程</div>
+  <a href="./journey.html" data-t="journey"><span class="n">★</span>一次 setState 的完整旅程</a>
+  <div class="grp">第一层 · 表层原理</div>
+  <a href="./t1.html" data-t="t1"><span class="n">1</span>组件渲染机制</a>
+  <a href="./t2.html" data-t="t2"><span class="n">2</span>虚拟 DOM 真实含义</a>
+  <a href="./t3.html" data-t="t3"><span class="n">3</span>生命周期执行顺序</a>
+  <div class="grp">第二层 · 一次更新的主线</div>
+  <a href="./t4.html" data-t="t4"><span class="n">4</span>更新的四个阶段</a>
+  <div class="grp">阶段一 · Trigger 触发</div>
+  <a href="./t9.html" data-t="t9"><span class="n">5</span>UpdateQueue：更新入队</a>
+  <div class="grp">阶段二 · Schedule 调度</div>
+  <a href="./t13.html" data-t="t13"><span class="n">6</span>Lane：选择更新</a>
+  <a href="./t12.html" data-t="t12"><span class="n">7</span>Scheduler：安排执行</a>
+  <div class="grp">阶段三 · Render 计算</div>
+  <a href="./t8.html" data-t="t8"><span class="n">8</span>Fiber：可中断工作单元</a>
+  <a href="./t5.html" data-t="t5"><span class="n">9</span>双缓存 Fiber 树</a>
+  <a href="./t7.html" data-t="t7"><span class="n">10</span>Hooks：读取与计算状态</a>
+  <a href="./t6.html" data-t="t6"><span class="n">11</span>Diff：协调子节点</a>
+  <a href="./t10.html" data-t="t10"><span class="n">12</span>flags：记录变更</a>
+  <div class="grp">阶段四 · Commit 提交</div>
+  <a href="./t11.html" data-t="t11"><span class="n">13</span>Commit：应用变更</a>
+  <div class="grp">并发延伸</div>
+  <a href="./t14.html" data-t="t14"><span class="n">14</span>Concurrent 并发渲染</a>
+  <a href="./t15.html" data-t="t15"><span class="n">15</span>两大并发 API</a>
+  <div class="grp">架构交互</div>
+  <a href="./t16.html" data-t="t16" class="active" aria-current="page"><span class="n">16</span>三大模块协作</a>
+  <a href="./t17.html" data-t="t17"><span class="n">17</span>批量更新原理</a>
+  <a href="./t18.html" data-t="t18"><span class="n">18</span>Suspense / lazy</a>
+  <a href="./t19.html" data-t="t19"><span class="n">19</span>合成事件系统</a>
+  <div class="grp">性能优化</div>
+  <a href="./t20.html" data-t="t20"><span class="n">20</span>渲染优化底层</a>
+  <a href="./t21.html" data-t="t21"><span class="n">21</span>渲染 bug 底层解释</a>
+  <div class="grp">高级实践与新架构</div>
+  <a href="./t22.html" data-t="t22"><span class="n">22</span>SSR / Hydration / 流式</a>
+  <a href="./t23.html" data-t="t23"><span class="n">23</span>Server Components</a>
+  <a href="./t24.html" data-t="t24"><span class="n">24</span>React 19 新特性</a>
+  <a href="./t25.html" data-t="t25"><span class="n">25</span>外部状态与撕裂</a>
+  <a href="./t26.html" data-t="t26"><span class="n">26</span>React Compiler</a>
+  <a href="./t27.html" data-t="t27"><span class="n">27</span>高级模式与陷阱</a>
+  <a href="./t28.html" data-t="t28"><span class="n">28</span>性能诊断与工程化</a>
+  <div class="grp">补充专题 · 常被漏掉的核心</div>
+  <a href="./ctx.html" data-t="ctx"><span class="n">C1</span>Context 源码原理</a>
+  <a href="./ref.html" data-t="ref"><span class="n">C2</span>useRef 与 ref 体系</a>
+  <div class="grp">源码附录 · 按需查阅</div>
+  <a href="./pk.html" data-t="pk"><span class="n">A1</span>宏观包结构</a>
+  <a href="./boot.html" data-t="boot"><span class="n">A2</span>启动过程</a>
+  <a href="./obj.html" data-t="obj"><span class="n">A3</span>核心对象速查</a>
+  <a href="./source.html" data-t="source"><span class="n">A4</span>源码阅读路线</a>
+  <div class="grp">总结</div>
+  <a href="./main.html" data-t="main"><span class="n">★</span>React 更新流程总览</a>
+</aside>
+<main id="main"><section class="topic active" id="t16">
+  <div class="crumb">第五层 · 架构交互 / 16</div>
+  <h1>16 · 三大模块完整协作</h1>
+  <div style="display:flex;flex-wrap:wrap;gap:3px;align-items:center;font-family:var(--mono);font-size:10.5px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:7px 10px;margin:6px 0 14px;overflow-x:auto"><b style="color:var(--txt2);margin-right:4px;font-family:inherit">🧭 主线</b><span data-go="t4" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:rgba(97,218,251,.22);border:1.5px solid var(--accent);color:var(--accent);font-weight:700">setState</span><span style="color:var(--dim)">→</span><span data-go="t9" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:rgba(97,218,251,.22);border:1.5px solid var(--accent);color:var(--accent);font-weight:700">Update</span><span style="color:var(--dim)">→</span><span data-go="t13" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:rgba(97,218,251,.22);border:1.5px solid var(--accent);color:var(--accent);font-weight:700">Lane</span><span style="color:var(--dim)">→</span><span data-go="t12" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:rgba(97,218,251,.22);border:1.5px solid var(--accent);color:var(--accent);font-weight:700">Scheduler</span><span style="color:var(--dim)">→</span><span data-go="t8" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:rgba(97,218,251,.22);border:1.5px solid var(--accent);color:var(--accent);font-weight:700">Render</span><span style="color:var(--dim)">→</span><span data-go="t10" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:rgba(97,218,251,.22);border:1.5px solid var(--accent);color:var(--accent);font-weight:700">Effect</span><span style="color:var(--dim)">→</span><span data-go="t11" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:rgba(97,218,251,.22);border:1.5px solid var(--accent);color:var(--accent);font-weight:700">Commit</span><span style="color:var(--dim)">→</span><span data-go="t11" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:rgba(97,218,251,.22);border:1.5px solid var(--accent);color:var(--accent);font-weight:700">DOM</span></div>
+  <div class="card" style="border-left:4px solid var(--accent)">
+    <b>🗺 本章路线图</b>
+    <p style="margin:8px 0 0">Scheduler(WHEN)→ Reconciler(WHAT)→ Renderer(HOW)<b>三层解耦</b>,任务像流水线一样流转。</p>
+    <p style="margin:6px 0 0">本章包括：<b>三层各自职责、解耦价值、任务流转全链路</b>(附源码调用链图)。</p>
+  </div>
+  <p>Scheduler / Reconciler / Renderer <b>三层解耦</b>,任务像流水线一样流转:</p>
+  <div class="flow">
+    <div class="flowbox"><span class="tag t-sched">Scheduler 调度层</span><p style="font-size:12px;color:var(--dim);margin:6px 0 0">纯 JS 时间/优先级管理,不认识 React。产出:在时间片里调用 callback。</p></div>
+    <div class="arrow">→</div>
+    <div class="flowbox"><span class="tag t-recon">Reconciler 协调层</span><p style="font-size:12px;color:var(--dim);margin:6px 0 0">平台无关。beginWork/completeWork + Diff,产出带 flags 的 WIP 树。</p></div>
+    <div class="arrow">→</div>
+    <div class="flowbox"><span class="tag t-render">Renderer 渲染层</span><p style="font-size:12px;color:var(--dim);margin:6px 0 0">平台相关。react-dom / native / 三方,据 flags 落地。</p></div>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:0">📊 源码调用链全景(ReactFiberWorkLoop)</h3>
+    <p style="font-size:12.5px;color:var(--dim);margin:2px 0 8px">这张图把从「输入(触发更新)」到「输出(react-dom)」的真实函数调用链画出来了 —— 全文的骨架都在这里。</p>
+    <svg viewBox="0 0 1000 700" style="width:100%;height:auto" font-family="ui-monospace,monospace">
+      <defs>
+        <marker id="mcArrB" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" style="fill:var(--accent)"/></marker>
+        <marker id="mcArrG" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" style="fill:var(--dim)"/></marker>
+        <marker id="mcArrR" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" style="fill:var(--recon)"/></marker>
+      </defs>
+      <!-- outer -->
+      <rect x="300" y="80" width="680" height="500" rx="14" style="fill:none;stroke:var(--line)" stroke-width="1.5" stroke-dasharray="5 4"/>
+      <text x="640" y="100" text-anchor="middle" style="fill:var(--dim)" font-size="13">ReactFiberWorkLoop</text>
+      <!-- yellow render region -->
+      <rect x="330" y="115" width="620" height="330" rx="12" style="fill:rgba(242,184,75,.10);stroke:var(--sched)" stroke-width="1.5"/>
+      <!-- cyan region -->
+      <rect x="470" y="130" width="465" height="160" rx="10" style="fill:rgba(97,218,251,.10);stroke:var(--accent)" stroke-width="1.2"/>
+      <circle cx="482" cy="130" r="13" style="fill:var(--accent)"/><text x="482" y="135" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">3</text>
+      <!-- performUnitOfWork -->
+      <rect x="495" y="150" width="215" height="120" rx="9" style="fill:rgba(242,184,75,.18);stroke:var(--sched)" stroke-width="1.5"/>
+      <text x="602" y="173" text-anchor="middle" style="fill:var(--txt)" font-size="13" font-weight="700">performUnitOfWork</text>
+      <rect x="515" y="186" width="175" height="30" rx="6" style="fill:var(--panel);stroke:var(--line)"/><text x="602" y="206" text-anchor="middle" style="fill:var(--txt)" font-size="12">beginWork</text>
+      <rect x="515" y="224" width="175" height="30" rx="6" style="fill:var(--panel);stroke:var(--line)"/><text x="602" y="244" text-anchor="middle" style="fill:var(--txt)" font-size="12">completeWork</text>
+      <!-- workLoop circle -->
+      <circle cx="855" cy="210" r="50" style="fill:none;stroke:var(--recon)" stroke-width="2.5"/>
+      <text x="855" y="206" text-anchor="middle" style="fill:var(--txt)" font-size="12" font-weight="700">workLoop</text>
+      <text x="855" y="223" text-anchor="middle" style="fill:var(--recon)" font-size="10">构建 fiber 树</text>
+      <line x1="803" y1="210" x2="716" y2="210" style="stroke:var(--dim)" stroke-width="3" marker-end="url(#mcArrG)"/>
+      <!-- entry boxes -->
+      <rect x="360" y="360" width="250" height="46" rx="8" style="fill:rgba(167,139,250,.16);stroke:var(--fiber)" stroke-width="1.5"/>
+      <text x="485" y="388" text-anchor="middle" style="fill:var(--txt)" font-size="12.5">performSyncWorkOnRoot</text>
+      <rect x="650" y="360" width="280" height="46" rx="8" style="fill:rgba(167,139,250,.16);stroke:var(--fiber)" stroke-width="1.5"/>
+      <text x="790" y="388" text-anchor="middle" style="fill:var(--txt)" font-size="12">performConcurrentWorkOnRoot</text>
+      <text x="485" y="330" text-anchor="middle" style="fill:var(--txt)" font-size="12">renderRootSync</text>
+      <line x1="485" y1="360" x2="485" y2="340" style="stroke:var(--dim)" stroke-width="2"/>
+      <line x1="485" y1="316" x2="485" y2="292" style="stroke:var(--dim)" stroke-width="2" marker-end="url(#mcArrG)"/>
+      <text x="790" y="330" text-anchor="middle" style="fill:var(--txt)" font-size="12">renderRootConcurrent</text>
+      <line x1="790" y1="360" x2="790" y2="340" style="stroke:var(--dim)" stroke-width="2"/>
+      <line x1="790" y1="316" x2="790" y2="292" style="stroke:var(--dim)" stroke-width="2" marker-end="url(#mcArrG)"/>
+      <!-- commitRoot -->
+      <rect x="250" y="185" width="170" height="46" rx="8" style="fill:rgba(126,231,135,.20);stroke:var(--recon)" stroke-width="1.5"/>
+      <circle cx="250" cy="185" r="13" style="fill:var(--accent)"/><text x="250" y="190" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">4</text>
+      <text x="335" y="213" text-anchor="middle" style="fill:var(--txt)" font-size="13" font-weight="700">commitRoot</text>
+      <line x1="495" y1="208" x2="424" y2="208" style="stroke:var(--accent)" stroke-width="2.5" marker-end="url(#mcArrB)"/>
+      <text x="459" y="199" text-anchor="middle" style="fill:var(--accent)" font-size="10.5">fiber 构造完成</text>
+      <!-- react-dom -->
+      <rect x="30" y="163" width="150" height="90" rx="10" style="fill:none;stroke:var(--line)" stroke-width="1.5" stroke-dasharray="5 4"/>
+      <text x="105" y="213" text-anchor="middle" style="fill:var(--txt)" font-size="13">react-dom</text>
+      <line x1="250" y1="208" x2="184" y2="208" style="stroke:var(--recon)" stroke-width="2.5" marker-end="url(#mcArrR)"/>
+      <text x="216" y="199" text-anchor="middle" style="fill:var(--recon)" font-size="10.5">输出</text>
+      <!-- bottom input chain -->
+      <text x="176" y="533" text-anchor="middle" style="fill:var(--dim)" font-size="11">输入</text>
+      <line x1="150" y1="545" x2="206" y2="545" style="stroke:var(--render)" stroke-width="2.5" marker-end="url(#mcArrB)"/>
+      <rect x="210" y="522" width="215" height="46" rx="8" style="fill:rgba(255,123,156,.16);stroke:var(--render)" stroke-width="1.5"/>
+      <circle cx="212" cy="522" r="13" style="fill:var(--accent)"/><text x="212" y="527" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">1</text>
+      <text x="317" y="550" text-anchor="middle" style="fill:var(--txt)" font-size="12">scheduleUpdateOnFiber</text>
+      <line x1="425" y1="545" x2="495" y2="545" style="stroke:var(--accent)" stroke-width="2.5" marker-end="url(#mcArrB)"/>
+      <rect x="500" y="518" width="270" height="54" rx="8" style="fill:rgba(167,139,250,.16);stroke:var(--fiber)" stroke-width="1.5"/>
+      <circle cx="502" cy="518" r="13" style="fill:var(--accent)"/><text x="502" y="523" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">2</text>
+      <text x="635" y="550" text-anchor="middle" style="fill:var(--txt)" font-size="12.5">ensureRootIsScheduled</text>
+      <!-- Scheduler -->
+      <rect x="740" y="600" width="240" height="90" rx="10" style="fill:none;stroke:var(--line)" stroke-width="1.5" stroke-dasharray="5 4"/>
+      <text x="820" y="620" text-anchor="middle" style="fill:var(--dim)" font-size="12">Scheduler</text>
+      <circle cx="900" cy="652" r="30" style="fill:none;stroke:var(--accent)" stroke-width="2.5"/>
+      <text x="900" y="650" text-anchor="middle" style="fill:var(--txt)" font-size="10" font-weight="700">workLoop</text>
+      <text x="900" y="663" text-anchor="middle" style="fill:var(--accent)" font-size="8.5">任务调度</text>
+      <path d="M690,572 L690,645 L868,645" style="fill:none;stroke:var(--accent)" stroke-width="2" marker-end="url(#mcArrB)"/>
+      <text x="700" y="600" style="fill:var(--accent)" font-size="10.5">注册调度 task</text>
+      <path d="M930,600 L930,420 L862,420 L862,410" style="fill:none;stroke:var(--accent)" stroke-width="2" marker-end="url(#mcArrB)"/>
+      <text x="922" y="498" text-anchor="end" style="fill:var(--accent)" font-size="10.5">执行 task 回调</text>
+      <text x="922" y="512" text-anchor="end" style="fill:var(--accent)" font-size="10.5">fiber 树构造</text>
+    </svg>
+    <p style="font-size:12px;color:var(--dim);margin:6px 0 0">① 触发 → ② 调度(注册到 Scheduler)→ ③ Scheduler 回调里驱动 render(sync / concurrent 两条入口 → performUnitOfWork 循环构建 fiber 树)→ ④ commitRoot 输出到 react-dom</p>
+  </div>
+
+  <h3>解耦的价值</h3>
+  <ul class="clean">
+    <li>Scheduler 不知道 Fiber,只调度"一个会返回续作的函数",可单独用于任何切片场景。</li>
+    <li>Reconciler 只输出"要做什么"(抽象增删改),不碰具体 API,通过 <b>HostConfig</b> 适配层调用 Renderer。</li>
+    <li>换 Renderer 就能换平台:同一套核心渲染 DOM / 原生 / Canvas / 3D。</li>
+  </ul>
+  <pre><span class="cm">// 任务流转全链路(bind 把它们串起来)</span>
+scheduleCallback(prio, performConcurrentWorkOnRoot.bind(<span class="kw">null</span>, root))
+   Scheduler 在时间片里 → performConcurrentWorkOnRoot
+      → renderRootConcurrent → workLoopConcurrent → beginWork/completeWork  <span class="cm">[Reconciler]</span>
+      → commitRoot → commitMutationEffects → HostConfig.appendChild/...      <span class="cm">[Renderer]</span></pre>
+  <div class="callout good"><b>本章小结：</b>Scheduler 只调度「会返回续作的函数」、Reconciler 通过 <b>HostConfig</b> 调 Renderer、换 Renderer 就换平台;调用链 scheduleCallback→performConcurrentWorkOnRoot→workLoop→commitRoot。→ 下一章:<a class="xref" data-go="t17">第五层·批量更新</a>。</div>
+  <div class="navbtns"><button class="ghost" data-go="t15">← 15两大并发 API</button><button class="act" data-go="t17">17批量更新原理 →</button></div>
+</section></main>
+<script src="./assets/site.js"></script>
+<script src="./assets/demos.js"></script>
+</body>
+</html>

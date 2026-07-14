@@ -1,6 +1,6 @@
 # React Internals Guide
 
-一份从心智模型到源码调用链的 React 原理学习指南，使用 Rspress 构建。
+一份从心智模型到源码调用链的 React 原理学习指南。Rspress 负责路由、搜索、侧栏和 GitHub Pages 构建；正文由从完整交互 HTML 自动拆出的独立章节承载，以保留原有布局、重点块与动画。
 
 ## 本地运行
 
@@ -15,6 +15,15 @@ npm run dev
 npm run build
 npm run preview
 ```
+
+只查看拆分后的原生多页版本：
+
+```bash
+npm run multipage:build
+npm run multipage:dev
+```
+
+访问 `http://127.0.0.1:4174/`。生成源位于 `react-internals-multipage/`，Rspress 构建时会自动同步到静态资源目录。
 
 ## 发布到 GitHub Pages
 
@@ -35,7 +44,7 @@ npm run preview
 - 核心专题
 - 源码阅读地图
 
-原始交互版本保留在 `docs/public/interactive.html`，迁移后的正文位于 `docs/`，可直接用 Markdown 持续维护。
+完整交互源保留在根目录 `react-principles-simplified.html`。`scripts/build-multipage.mjs` 会按侧栏顺序拆分出 37 个章节，并把共享样式和交互脚本独立到 `assets/`；`docs/` 中的 MDX 只负责把对应章节嵌入 Rspress 路由。
 
 ## License
 

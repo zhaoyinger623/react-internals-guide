@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+<title>React Compiler · React 原理全景</title>
+<script>
+  const embedParams = new URLSearchParams(location.search);
+  if (embedParams.get('embed') === '1') document.documentElement.classList.add('is-embed');
+  if (embedParams.get('theme') === 'light') document.documentElement.classList.add('embed-light');
+</script>
+<link rel="stylesheet" href="./assets/site.css">
+</head>
+<body data-chapter="t26">
+<aside id="side">
+  <div class="brand">⚛️ React 原理全景</div>
+  <button class="themebtn" id="themeBtn"><span class="ic">🌙</span><span id="themeLabel">切换到浅色模式</span></button>
+  <a href="./intro.html" data-t="intro"><span class="n">◎</span>如何使用本页</a>
+  <div class="grp">更新流程</div>
+  <a href="./journey.html" data-t="journey"><span class="n">★</span>一次 setState 的完整旅程</a>
+  <div class="grp">第一层 · 表层原理</div>
+  <a href="./t1.html" data-t="t1"><span class="n">1</span>组件渲染机制</a>
+  <a href="./t2.html" data-t="t2"><span class="n">2</span>虚拟 DOM 真实含义</a>
+  <a href="./t3.html" data-t="t3"><span class="n">3</span>生命周期执行顺序</a>
+  <div class="grp">第二层 · 一次更新的主线</div>
+  <a href="./t4.html" data-t="t4"><span class="n">4</span>更新的四个阶段</a>
+  <div class="grp">阶段一 · Trigger 触发</div>
+  <a href="./t9.html" data-t="t9"><span class="n">5</span>UpdateQueue：更新入队</a>
+  <div class="grp">阶段二 · Schedule 调度</div>
+  <a href="./t13.html" data-t="t13"><span class="n">6</span>Lane：选择更新</a>
+  <a href="./t12.html" data-t="t12"><span class="n">7</span>Scheduler：安排执行</a>
+  <div class="grp">阶段三 · Render 计算</div>
+  <a href="./t8.html" data-t="t8"><span class="n">8</span>Fiber：可中断工作单元</a>
+  <a href="./t5.html" data-t="t5"><span class="n">9</span>双缓存 Fiber 树</a>
+  <a href="./t7.html" data-t="t7"><span class="n">10</span>Hooks：读取与计算状态</a>
+  <a href="./t6.html" data-t="t6"><span class="n">11</span>Diff：协调子节点</a>
+  <a href="./t10.html" data-t="t10"><span class="n">12</span>flags：记录变更</a>
+  <div class="grp">阶段四 · Commit 提交</div>
+  <a href="./t11.html" data-t="t11"><span class="n">13</span>Commit：应用变更</a>
+  <div class="grp">并发延伸</div>
+  <a href="./t14.html" data-t="t14"><span class="n">14</span>Concurrent 并发渲染</a>
+  <a href="./t15.html" data-t="t15"><span class="n">15</span>两大并发 API</a>
+  <div class="grp">架构交互</div>
+  <a href="./t16.html" data-t="t16"><span class="n">16</span>三大模块协作</a>
+  <a href="./t17.html" data-t="t17"><span class="n">17</span>批量更新原理</a>
+  <a href="./t18.html" data-t="t18"><span class="n">18</span>Suspense / lazy</a>
+  <a href="./t19.html" data-t="t19"><span class="n">19</span>合成事件系统</a>
+  <div class="grp">性能优化</div>
+  <a href="./t20.html" data-t="t20"><span class="n">20</span>渲染优化底层</a>
+  <a href="./t21.html" data-t="t21"><span class="n">21</span>渲染 bug 底层解释</a>
+  <div class="grp">高级实践与新架构</div>
+  <a href="./t22.html" data-t="t22"><span class="n">22</span>SSR / Hydration / 流式</a>
+  <a href="./t23.html" data-t="t23"><span class="n">23</span>Server Components</a>
+  <a href="./t24.html" data-t="t24"><span class="n">24</span>React 19 新特性</a>
+  <a href="./t25.html" data-t="t25"><span class="n">25</span>外部状态与撕裂</a>
+  <a href="./t26.html" data-t="t26" class="active" aria-current="page"><span class="n">26</span>React Compiler</a>
+  <a href="./t27.html" data-t="t27"><span class="n">27</span>高级模式与陷阱</a>
+  <a href="./t28.html" data-t="t28"><span class="n">28</span>性能诊断与工程化</a>
+  <div class="grp">补充专题 · 常被漏掉的核心</div>
+  <a href="./ctx.html" data-t="ctx"><span class="n">C1</span>Context 源码原理</a>
+  <a href="./ref.html" data-t="ref"><span class="n">C2</span>useRef 与 ref 体系</a>
+  <div class="grp">源码附录 · 按需查阅</div>
+  <a href="./pk.html" data-t="pk"><span class="n">A1</span>宏观包结构</a>
+  <a href="./boot.html" data-t="boot"><span class="n">A2</span>启动过程</a>
+  <a href="./obj.html" data-t="obj"><span class="n">A3</span>核心对象速查</a>
+  <a href="./source.html" data-t="source"><span class="n">A4</span>源码阅读路线</a>
+  <div class="grp">总结</div>
+  <a href="./main.html" data-t="main"><span class="n">★</span>React 更新流程总览</a>
+</aside>
+<main id="main"><section class="topic active" id="t26">
+  <div class="crumb">第七层 · 高级实践与新架构 / 26</div>
+  <h1>26 · React Compiler(自动记忆化)</h1>
+  <div class="card" style="border-left:4px solid var(--accent)">
+    <b>🗺 本章路线图</b>
+    <p style="margin:8px 0 0">React Compiler 在<b>编译期</b>自动插入记忆化,让你几乎不用手写 memo/useMemo/useCallback。</p>
+    <p style="margin:6px 0 0">本章包括：<b>它做什么、为什么依赖「组件是纯的」、对手动 memo 的影响</b>。</p>
+  </div>
+  <p>手动 <code>useMemo/useCallback/memo</code> 心智负担重、容易写错或漏写。<b>React Compiler</b>(原 React Forget)是一个<b>编译期</b>工具,自动分析组件、在构建时插入等价的记忆化代码,让你<b>几乎不再需要手写</b> memo 系列。</p>
+
+  <h2><span class="dot" style="background:var(--accent)"></span>它做什么</h2>
+  <ul class="clean">
+    <li>静态分析每个组件的渲染逻辑,识别哪些值依赖哪些输入。</li>
+    <li>自动缓存组件内的计算结果与子元素,只有真正依赖变化时才重算/重渲染 —— 相当于<b>自动、细粒度的 useMemo</b>。</li>
+    <li>产出仍是标准 React 代码,运行时不变,只是「记忆化」被编译器包办。</li>
+  </ul>
+  <pre><span class="cm">// 你写(无任何 memo):</span>
+<span class="kw">function</span> <span class="fn">TodoList</span>({todos, filter}){
+  <span class="kw">const</span> visible = todos.<span class="fn">filter</span>(t =&gt; <span class="fn">match</span>(t, filter));
+  <span class="kw">return</span> &lt;List items={visible}/&gt;;
+}
+<span class="cm">// 编译器自动产出 ≈ 用缓存包住 visible 和 &lt;List&gt;,</span>
+<span class="cm">// 仅当 todos 或 filter 变化时才重算,等价于全自动 useMemo。</span></pre>
+
+  <h2><span class="dot" style="background:var(--warn)"></span>前提:遵守 React 规则</h2>
+  <p>编译器能安全优化的<b>前提是你的组件是「纯」的</b>、遵守 Hooks 规则、不在渲染中产生副作用。这也是为什么 <code>StrictMode</code> 双调用、ESLint 规则如此重要 —— 它们帮你写出编译器能优化的代码。它是<b>渐进采用</b>的:可整项目、也可按文件开启。</p>
+  <div class="callout good"><b>趋势判断:</b>未来 <code>useMemo/useCallback</code> 会从「性能必备」退化为「少数手动兜底」。但<b>理解它们的原理依然重要</b> —— 你得知道编译器在替你做什么、什么情况下它会放弃优化。</div>
+  <div class="callout good"><b>本章小结：</b>编译器静态分析、自动缓存计算与子元素 = 全自动 useMemo;前提是组件纯、守 Hooks 规则(所以 StrictMode/ESLint 重要);未来手写 memo 退为兜底。→ 下一章:<a class="xref" data-go="t27">第七层·高级模式与陷阱</a>。</div>
+  <div class="navbtns"><button class="ghost" data-go="t25">← 25外部状态与撕裂</button><button class="act" data-go="t27">27高级模式与陷阱 →</button></div>
+</section></main>
+<script src="./assets/site.js"></script>
+<script src="./assets/demos.js"></script>
+</body>
+</html>

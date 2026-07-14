@@ -89,6 +89,57 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
 }
 
+/* The actual lesson is rendered by the original HTML chapter inside a
+   same-origin frame. Rspress keeps routing/search/sidebar; the chapter keeps
+   its exact spacing, cards, diagrams and animation behavior. */
+.rp-doc:has(.embedded-chapter-shell) {
+  max-width: none !important;
+  padding: 0 !important;
+}
+
+.rp-doc:has(.embedded-chapter-shell) > h1 {
+  display: none !important;
+}
+
+.rp-doc-layout__doc-container:has(.embedded-chapter-shell) {
+  width: 100%;
+  max-width: none;
+  padding: 0 20px;
+}
+
+.embedded-chapter-shell {
+  width: 100%;
+  background: transparent;
+  transition: min-height 160ms ease;
+}
+
+.embedded-chapter-frame {
+  display: block;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  overflow: hidden;
+}
+
+.rp-prev-next-page__prev .rp-prev-next-page__item__desc,
+.rp-prev-next-page__next .rp-prev-next-page__item__desc {
+  font-size: 0;
+}
+
+.rp-prev-next-page__prev .rp-prev-next-page__item__desc::after {
+  content: '上一章';
+  font-size: 12px;
+}
+
+.rp-prev-next-page__next .rp-prev-next-page__item__desc::after {
+  content: '下一章';
+  font-size: 12px;
+}
+
+@media (max-width: 860px) {
+  .rp-doc-layout__doc-container:has(.embedded-chapter-shell) { padding: 0 8px; }
+}
+
 .rp-nav {
   border-bottom-color: var(--rp-c-divider);
   background: color-mix(in srgb, var(--rp-c-bg) 94%, transparent);

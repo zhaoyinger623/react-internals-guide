@@ -3,36 +3,6 @@ title: 外部状态与撕裂
 description: React 原理全景中的「外部状态与撕裂」，从运行机制继续深入源码。
 ---
 
-<div className="tutorial-chapter">
+import { EmbeddedChapter } from '../../theme/EmbeddedChapter';
 
-第七层 · 高级实践与新架构 / 25
-
-**🗺 本章路线图**
-
-并发渲染下,不同组件可能读到同一外部状态的**不同版本** = 撕裂(tearing)。
-
-本章包括：**撕裂为什么发生、useSyncExternalStore 怎么解决**。
-
-Redux、Zustand、以及任何存在 React 之外的状态源,在**并发渲染**下会遇到一个隐蔽问题:**撕裂(tearing)** —— 同一次渲染中,不同组件读到了**同一个外部状态的不同版本**,导致 UI 不一致。
-
-## 撕裂为什么发生
-
-并发渲染是**可中断**的。假设组件 A、B 都读外部 store:渲染 A 时 store=1,渲染被时间切片打断,期间外部把 store 改成 2,恢复后渲染 B 读到 2 → 同一帧里 A 显示 1、B 显示 2。同步渲染不会有这问题(一口气读完),并发才暴露。
-
-## 解法:`useSyncExternalStore`
-
-React 18 提供 `useSyncExternalStore`，用于在并发渲染中订阅外部 store。React 会比较快照；如果渲染期间快照发生变化，则重新检查并以同步方式完成更新，避免同一次提交中的组件读取到不同版本。Redux 等状态库可以通过这一接口与 React 集成。
-
-```js
-const state = useSyncExternalStore(
-  store.subscribe,      // 订阅:变化时通知 React 重渲染
-  store.getSnapshot,    // 读当前值(React 会用它校验一致性)
-  store.getServerSnapshot // SSR 时的值(可选)
-);
-```
-
-**问题来源：**渲染可以中断，而外部数据可能在中断期间发生变化。`useSyncExternalStore` 提供统一的订阅和快照读取方式，使 React 能检测变化并保持不同组件读取结果的一致性。
-
-**本章小结：**并发可中断 → 渲染途中外部数据变了 → 同一帧不同组件读到不同值 = 撕裂;`useSyncExternalStore` 检测到就退回同步渲染保证一致;现代状态库内部都用它。→ 下一章:[第七层·React Compiler](/04-advanced/t26)。
-
-</div>
+<EmbeddedChapter chapter="t25" />

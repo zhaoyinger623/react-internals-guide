@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+<title>如何使用本页 · React 原理全景</title>
+<script>
+  const embedParams = new URLSearchParams(location.search);
+  if (embedParams.get('embed') === '1') document.documentElement.classList.add('is-embed');
+  if (embedParams.get('theme') === 'light') document.documentElement.classList.add('embed-light');
+</script>
+<link rel="stylesheet" href="./assets/site.css">
+</head>
+<body data-chapter="intro">
+<aside id="side">
+  <div class="brand">⚛️ React 原理全景</div>
+  <button class="themebtn" id="themeBtn"><span class="ic">🌙</span><span id="themeLabel">切换到浅色模式</span></button>
+  <a href="./intro.html" data-t="intro" class="active" aria-current="page"><span class="n">◎</span>如何使用本页</a>
+  <div class="grp">更新流程</div>
+  <a href="./journey.html" data-t="journey"><span class="n">★</span>一次 setState 的完整旅程</a>
+  <div class="grp">第一层 · 表层原理</div>
+  <a href="./t1.html" data-t="t1"><span class="n">1</span>组件渲染机制</a>
+  <a href="./t2.html" data-t="t2"><span class="n">2</span>虚拟 DOM 真实含义</a>
+  <a href="./t3.html" data-t="t3"><span class="n">3</span>生命周期执行顺序</a>
+  <div class="grp">第二层 · 一次更新的主线</div>
+  <a href="./t4.html" data-t="t4"><span class="n">4</span>更新的四个阶段</a>
+  <div class="grp">阶段一 · Trigger 触发</div>
+  <a href="./t9.html" data-t="t9"><span class="n">5</span>UpdateQueue：更新入队</a>
+  <div class="grp">阶段二 · Schedule 调度</div>
+  <a href="./t13.html" data-t="t13"><span class="n">6</span>Lane：选择更新</a>
+  <a href="./t12.html" data-t="t12"><span class="n">7</span>Scheduler：安排执行</a>
+  <div class="grp">阶段三 · Render 计算</div>
+  <a href="./t8.html" data-t="t8"><span class="n">8</span>Fiber：可中断工作单元</a>
+  <a href="./t5.html" data-t="t5"><span class="n">9</span>双缓存 Fiber 树</a>
+  <a href="./t7.html" data-t="t7"><span class="n">10</span>Hooks：读取与计算状态</a>
+  <a href="./t6.html" data-t="t6"><span class="n">11</span>Diff：协调子节点</a>
+  <a href="./t10.html" data-t="t10"><span class="n">12</span>flags：记录变更</a>
+  <div class="grp">阶段四 · Commit 提交</div>
+  <a href="./t11.html" data-t="t11"><span class="n">13</span>Commit：应用变更</a>
+  <div class="grp">并发延伸</div>
+  <a href="./t14.html" data-t="t14"><span class="n">14</span>Concurrent 并发渲染</a>
+  <a href="./t15.html" data-t="t15"><span class="n">15</span>两大并发 API</a>
+  <div class="grp">架构交互</div>
+  <a href="./t16.html" data-t="t16"><span class="n">16</span>三大模块协作</a>
+  <a href="./t17.html" data-t="t17"><span class="n">17</span>批量更新原理</a>
+  <a href="./t18.html" data-t="t18"><span class="n">18</span>Suspense / lazy</a>
+  <a href="./t19.html" data-t="t19"><span class="n">19</span>合成事件系统</a>
+  <div class="grp">性能优化</div>
+  <a href="./t20.html" data-t="t20"><span class="n">20</span>渲染优化底层</a>
+  <a href="./t21.html" data-t="t21"><span class="n">21</span>渲染 bug 底层解释</a>
+  <div class="grp">高级实践与新架构</div>
+  <a href="./t22.html" data-t="t22"><span class="n">22</span>SSR / Hydration / 流式</a>
+  <a href="./t23.html" data-t="t23"><span class="n">23</span>Server Components</a>
+  <a href="./t24.html" data-t="t24"><span class="n">24</span>React 19 新特性</a>
+  <a href="./t25.html" data-t="t25"><span class="n">25</span>外部状态与撕裂</a>
+  <a href="./t26.html" data-t="t26"><span class="n">26</span>React Compiler</a>
+  <a href="./t27.html" data-t="t27"><span class="n">27</span>高级模式与陷阱</a>
+  <a href="./t28.html" data-t="t28"><span class="n">28</span>性能诊断与工程化</a>
+  <div class="grp">补充专题 · 常被漏掉的核心</div>
+  <a href="./ctx.html" data-t="ctx"><span class="n">C1</span>Context 源码原理</a>
+  <a href="./ref.html" data-t="ref"><span class="n">C2</span>useRef 与 ref 体系</a>
+  <div class="grp">源码附录 · 按需查阅</div>
+  <a href="./pk.html" data-t="pk"><span class="n">A1</span>宏观包结构</a>
+  <a href="./boot.html" data-t="boot"><span class="n">A2</span>启动过程</a>
+  <a href="./obj.html" data-t="obj"><span class="n">A3</span>核心对象速查</a>
+  <a href="./source.html" data-t="source"><span class="n">A4</span>源码阅读路线</a>
+  <div class="grp">总结</div>
+  <a href="./main.html" data-t="main"><span class="n">★</span>React 更新流程总览</a>
+</aside>
+<main id="main"><section class="topic active" id="intro">
+  <div class="crumb">START HERE</div>
+  <h1><span class="em">React 原理全景</span><br>从表层熟练 → 源码级 → 并发架构</h1>
+  <div class="callout good" style="font-size:14px"><b>教程以一次 <code>setState</code> 更新为主线。</b>每章对应更新流程中的一个环节，章节顶部会标出当前位置。Fiber、Hook、Lane 和 Scheduler 会放回同一条调用链中讲解。</div>
+  <div class="intro-hero">
+    <p style="margin-top:0">本教程从第一层开始：先理解 React 平时如何渲染组件、更新界面；再逐步进入 Fiber、Diff、Hooks、调度与并发。每一节都有讲解、图示和精简源码，帮助你把一个概念看具体。</p>
+    <p style="margin-bottom:0">建议顺序：先读「一次 setState 的旅程」了解整体流程，再按第一层到第四层往下读。源码术语会在对应环节中解释；文末的源码地图可用于查找包、文件和核心对象。</p>
+  </div>
+  <div class="card">
+    <h3 style="margin-top:0">三个主要模块</h3>
+    <p style="margin:4px 0 10px;font-size:13px;color:var(--txt2)">一次更新会依次涉及 Scheduler、Reconciler 和 Renderer。后续章节会分别展开它们的职责和协作方式。</p>
+    <svg viewBox="0 0 720 190" style="width:100%;height:auto">
+      <!-- connectors -->
+      <line x1="200" y1="70" x2="270" y2="70" style="stroke:var(--line)" stroke-width="3" stroke-dasharray="6 4" stroke-dashoffset="0"><animate attributeName="stroke-dashoffset" from="0" to="-20" dur="0.8s" repeatCount="indefinite"/></line>
+      <line x1="450" y1="70" x2="520" y2="70" style="stroke:var(--line)" stroke-width="3" stroke-dasharray="6 4"><animate attributeName="stroke-dashoffset" from="0" to="-20" dur="0.8s" repeatCount="indefinite"/></line>
+      <!-- boxes -->
+      <g>
+        <rect x="40" y="35" width="160" height="70" rx="14" style="fill:var(--panel2);stroke:var(--sched)" stroke-width="2"/>
+        <text x="120" y="62" text-anchor="middle" style="fill:var(--sched)" font-size="15" font-weight="700" font-family="monospace">Scheduler</text>
+        <text x="120" y="84" text-anchor="middle" style="fill:var(--dim)" font-size="12">WHEN · 何时/优先级</text>
+      </g>
+      <g>
+        <rect x="280" y="35" width="160" height="70" rx="14" style="fill:var(--panel2);stroke:var(--recon)" stroke-width="2"/>
+        <text x="360" y="62" text-anchor="middle" style="fill:var(--recon)" font-size="15" font-weight="700" font-family="monospace">Reconciler</text>
+        <text x="360" y="84" text-anchor="middle" style="fill:var(--dim)" font-size="12">WHAT · Fiber/Diff</text>
+      </g>
+      <g>
+        <rect x="520" y="35" width="160" height="70" rx="14" style="fill:var(--panel2);stroke:var(--render)" stroke-width="2"/>
+        <text x="600" y="62" text-anchor="middle" style="fill:var(--render)" font-size="15" font-weight="700" font-family="monospace">Renderer</text>
+        <text x="600" y="84" text-anchor="middle" style="fill:var(--dim)" font-size="12">HOW · 落地 DOM</text>
+      </g>
+      <!-- traveling update packet -->
+      <circle r="7" class="archdot">
+        <animateMotion dur="4s" repeatCount="indefinite" calcMode="linear" path="M120,145 L120,120 L600,120 L600,140"/>
+      </circle>
+      <text x="120" y="168" text-anchor="middle" style="fill:var(--accent)" font-size="11" font-family="monospace">update 进入 →</text>
+      <text x="600" y="162" text-anchor="middle" style="fill:var(--accent)" font-size="11" font-family="monospace">→ 屏幕更新</text>
+    </svg>
+    <p style="font-size:12.5px;color:var(--dim);text-align:center;margin:4px 0 0">🔵 小圆点 = 一次 update,依次流过三大模块最终落到屏幕(循环播放)</p>
+    <p style="text-align:center;font-size:12.5px;color:var(--txt2);margin:8px 0 0"><b>Scheduler</b>=何时做(WHEN) · <b>Reconciler</b>=做什么(WHAT,算出变更)· <b>Renderer</b>=怎么落地(HOW,改真实 DOM)。</p>
+  </div>
+  <div class="navbtns"><span></span><button class="act" data-go="journey">★一次 setState 的完整旅程 →</button></div>
+</section></main>
+<script src="./assets/site.js"></script>
+<script src="./assets/demos.js"></script>
+</body>
+</html>

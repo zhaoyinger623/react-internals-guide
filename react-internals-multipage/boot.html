@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+<title>启动过程 · React 原理全景</title>
+<script>
+  const embedParams = new URLSearchParams(location.search);
+  if (embedParams.get('embed') === '1') document.documentElement.classList.add('is-embed');
+  if (embedParams.get('theme') === 'light') document.documentElement.classList.add('embed-light');
+</script>
+<link rel="stylesheet" href="./assets/site.css">
+</head>
+<body data-chapter="boot">
+<aside id="side">
+  <div class="brand">⚛️ React 原理全景</div>
+  <button class="themebtn" id="themeBtn"><span class="ic">🌙</span><span id="themeLabel">切换到浅色模式</span></button>
+  <a href="./intro.html" data-t="intro"><span class="n">◎</span>如何使用本页</a>
+  <div class="grp">更新流程</div>
+  <a href="./journey.html" data-t="journey"><span class="n">★</span>一次 setState 的完整旅程</a>
+  <div class="grp">第一层 · 表层原理</div>
+  <a href="./t1.html" data-t="t1"><span class="n">1</span>组件渲染机制</a>
+  <a href="./t2.html" data-t="t2"><span class="n">2</span>虚拟 DOM 真实含义</a>
+  <a href="./t3.html" data-t="t3"><span class="n">3</span>生命周期执行顺序</a>
+  <div class="grp">第二层 · 一次更新的主线</div>
+  <a href="./t4.html" data-t="t4"><span class="n">4</span>更新的四个阶段</a>
+  <div class="grp">阶段一 · Trigger 触发</div>
+  <a href="./t9.html" data-t="t9"><span class="n">5</span>UpdateQueue：更新入队</a>
+  <div class="grp">阶段二 · Schedule 调度</div>
+  <a href="./t13.html" data-t="t13"><span class="n">6</span>Lane：选择更新</a>
+  <a href="./t12.html" data-t="t12"><span class="n">7</span>Scheduler：安排执行</a>
+  <div class="grp">阶段三 · Render 计算</div>
+  <a href="./t8.html" data-t="t8"><span class="n">8</span>Fiber：可中断工作单元</a>
+  <a href="./t5.html" data-t="t5"><span class="n">9</span>双缓存 Fiber 树</a>
+  <a href="./t7.html" data-t="t7"><span class="n">10</span>Hooks：读取与计算状态</a>
+  <a href="./t6.html" data-t="t6"><span class="n">11</span>Diff：协调子节点</a>
+  <a href="./t10.html" data-t="t10"><span class="n">12</span>flags：记录变更</a>
+  <div class="grp">阶段四 · Commit 提交</div>
+  <a href="./t11.html" data-t="t11"><span class="n">13</span>Commit：应用变更</a>
+  <div class="grp">并发延伸</div>
+  <a href="./t14.html" data-t="t14"><span class="n">14</span>Concurrent 并发渲染</a>
+  <a href="./t15.html" data-t="t15"><span class="n">15</span>两大并发 API</a>
+  <div class="grp">架构交互</div>
+  <a href="./t16.html" data-t="t16"><span class="n">16</span>三大模块协作</a>
+  <a href="./t17.html" data-t="t17"><span class="n">17</span>批量更新原理</a>
+  <a href="./t18.html" data-t="t18"><span class="n">18</span>Suspense / lazy</a>
+  <a href="./t19.html" data-t="t19"><span class="n">19</span>合成事件系统</a>
+  <div class="grp">性能优化</div>
+  <a href="./t20.html" data-t="t20"><span class="n">20</span>渲染优化底层</a>
+  <a href="./t21.html" data-t="t21"><span class="n">21</span>渲染 bug 底层解释</a>
+  <div class="grp">高级实践与新架构</div>
+  <a href="./t22.html" data-t="t22"><span class="n">22</span>SSR / Hydration / 流式</a>
+  <a href="./t23.html" data-t="t23"><span class="n">23</span>Server Components</a>
+  <a href="./t24.html" data-t="t24"><span class="n">24</span>React 19 新特性</a>
+  <a href="./t25.html" data-t="t25"><span class="n">25</span>外部状态与撕裂</a>
+  <a href="./t26.html" data-t="t26"><span class="n">26</span>React Compiler</a>
+  <a href="./t27.html" data-t="t27"><span class="n">27</span>高级模式与陷阱</a>
+  <a href="./t28.html" data-t="t28"><span class="n">28</span>性能诊断与工程化</a>
+  <div class="grp">补充专题 · 常被漏掉的核心</div>
+  <a href="./ctx.html" data-t="ctx"><span class="n">C1</span>Context 源码原理</a>
+  <a href="./ref.html" data-t="ref"><span class="n">C2</span>useRef 与 ref 体系</a>
+  <div class="grp">源码附录 · 按需查阅</div>
+  <a href="./pk.html" data-t="pk"><span class="n">A1</span>宏观包结构</a>
+  <a href="./boot.html" data-t="boot" class="active" aria-current="page"><span class="n">A2</span>启动过程</a>
+  <a href="./obj.html" data-t="obj"><span class="n">A3</span>核心对象速查</a>
+  <a href="./source.html" data-t="source"><span class="n">A4</span>源码阅读路线</a>
+  <div class="grp">总结</div>
+  <a href="./main.html" data-t="main"><span class="n">★</span>React 更新流程总览</a>
+</aside>
+<main id="main"><section class="topic active" id="boot">
+  <div class="crumb">源码附录 / A2</div>
+  <h1>A2 · 启动过程</h1>
+  <p>从 <code>createRoot(...).render(&lt;App/&gt;)</code> 到第一次把界面画出来,React 先搭了个「地基」——创建两个根对象。很多人卡在<b>「为什么要两个?它们分别是啥?那些箭头又是什么?」</b>,先用一个类比讲清楚,再看代码和图。</p>
+  <div class="card">
+    <h3 style="margin-top:0">🏗️ 先用「盖楼」类比理解三个角色</h3>
+    <table class="simple">
+      <tr><th>源码里的东西</th><th>类比</th><th>大白话</th></tr>
+      <tr><td><code>#root</code>(DOM 容器)</td><td>一块空地</td><td>你在 HTML 里留的 <code>&lt;div id="root"&gt;</code>,界面就盖在这块地上</td></tr>
+      <tr><td><code>fiberRootNode</code></td><td>应用根对象</td><td>保存 DOM 容器、待处理的更新优先级，以及当前正在使用的 Fiber 树</td></tr>
+      <tr><td><code>hostRootFiber</code></td><td>组件树的「树根」</td><td>你写的所有组件(<code>&lt;App/&gt;</code> 及其子孙)都长在它下面,是 Fiber 树最顶端的节点</td></tr>
+    </table>
+    <p style="font-size:13px;margin-bottom:0"><code>fiberRoot.current</code> 指向当前 Fiber 树的根节点；<code>hostRootFiber.stateNode</code> 反向指向 <code>fiberRoot</code>。这两个引用让调度系统可以从应用根找到当前树，也可以从树根返回应用根。</p>
+  </div>
+  <pre><span class="cm">// React 18 并发入口</span>
+<span class="kw">import</span> { createRoot } <span class="kw">from</span> <span class="st">'react-dom/client'</span>;
+<span class="kw">const</span> root = <span class="fn">createRoot</span>(document.getElementById(<span class="st">'root'</span>));  <span class="cm">// ① 建两个根对象</span>
+root.<span class="fn">render</span>(&lt;App/&gt;);                                    <span class="cm">// ② 发起首次更新</span></pre>
+  <div class="card" style="text-align:center">
+    <svg viewBox="0 0 1000 250" style="width:100%;height:auto" font-family="ui-monospace,monospace">
+      <defs><marker id="btA" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" style="fill:var(--accent)"/></marker></defs>
+      <rect x="30" y="90" width="150" height="70" rx="10" style="fill:none;stroke:var(--line)" stroke-width="1.5" stroke-dasharray="5 4"/>
+      <text x="105" y="120" text-anchor="middle" style="fill:var(--txt)" font-size="12">#root</text>
+      <text x="105" y="138" text-anchor="middle" style="fill:var(--dim)" font-size="9.5">真实 DOM 容器</text>
+
+      <rect x="250" y="80" width="200" height="90" rx="12" style="fill:rgba(242,184,75,.14);stroke:var(--sched)" stroke-width="1.8"/>
+      <text x="350" y="108" text-anchor="middle" style="fill:var(--sched)" font-size="13" font-weight="700">fiberRootNode</text>
+      <text x="350" y="128" text-anchor="middle" style="fill:var(--txt)" font-size="9.5">整个应用的根对象</text>
+      <text x="350" y="143" text-anchor="middle" style="fill:var(--txt)" font-size="9.5">记着 容器/待办/调度</text>
+      <text x="350" y="158" text-anchor="middle" style="fill:var(--dim)" font-size="9">.current ↴</text>
+
+      <rect x="540" y="80" width="200" height="90" rx="12" style="fill:rgba(167,139,250,.16);stroke:var(--fiber)" stroke-width="1.8"/>
+      <text x="640" y="108" text-anchor="middle" style="fill:var(--fiber)" font-size="13" font-weight="700">hostRootFiber</text>
+      <text x="640" y="128" text-anchor="middle" style="fill:var(--txt)" font-size="9.5">Fiber 树的根节点</text>
+      <text x="640" y="143" text-anchor="middle" style="fill:var(--txt)" font-size="9.5">tag = HostRoot</text>
+      <text x="640" y="158" text-anchor="middle" style="fill:var(--dim)" font-size="9">.stateNode ↰</text>
+
+      <rect x="830" y="90" width="140" height="70" rx="10" style="fill:rgba(97,218,251,.12);stroke:var(--accent)" stroke-width="1.5"/>
+      <text x="900" y="120" text-anchor="middle" style="fill:var(--accent)" font-size="12" font-weight="700">&lt;App/&gt; 树</text>
+      <text x="900" y="138" text-anchor="middle" style="fill:var(--dim)" font-size="9.5">你的组件 Fiber</text>
+
+      <line x1="180" y1="125" x2="248" y2="125" style="stroke:var(--accent)" stroke-width="2" marker-end="url(#btA)"/>
+      <text x="214" y="115" text-anchor="middle" style="fill:var(--dim)" font-size="9">container</text>
+      <path d="M450,120 C490,120 500,120 538,120" style="fill:none;stroke:var(--accent)" stroke-width="2" marker-end="url(#btA)"/>
+      <text x="495" y="110" text-anchor="middle" style="fill:var(--accent)" font-size="9">.current</text>
+      <path d="M540,150 C500,150 490,150 452,150" style="fill:none;stroke:var(--fiber)" stroke-width="2" marker-end="url(#btA)"/>
+      <text x="495" y="168" text-anchor="middle" style="fill:var(--fiber)" font-size="9">.stateNode</text>
+      <line x1="740" y1="125" x2="828" y2="125" style="stroke:var(--accent)" stroke-width="2" marker-end="url(#btA)"/>
+      <text x="784" y="115" text-anchor="middle" style="fill:var(--dim)" font-size="9">render(App)</text>
+    </svg>
+  </div>
+  <h3>启动过程分为三步</h3>
+  <ol style="padding-left:22px;color:var(--txt2);font-size:14px;line-height:1.95">
+    <li><b>创建两个根对象</b> —— <code>createRoot(#root)</code> 创建应用根 <code>fiberRootNode</code> 和 Fiber 树根 <code>hostRootFiber</code>，并建立双向引用。</li>
+    <li><b>把 &lt;App/&gt; 变成一次「更新」</b> —— <code>root.render(&lt;App/&gt;)</code> 生成一个 <code>Update</code>,挂到 <code>hostRootFiber</code> 的更新队列上,再喊一声 <code>scheduleUpdateOnFiber</code>(“有活了,安排渲染”)。</li>
+    <li><b>进入四个阶段</b> —— 从此走<a class="xref" data-go="t4">更新主线·四个阶段</a> 的 Trigger→Schedule→Render→Commit。因为屏幕上还什么都没有,这第一次特别叫 <b>mount(挂载)</b>;以后再更新叫 update。</li>
+  </ol>
+  <div class="callout"><b>与双缓存的关系：</b>首次渲染时，<code>hostRootFiber</code> 是 current 树的起点，React 在内存中构建 workInProgress 树。提交完成后，<code>fiberRoot.current</code> 指向新树。详见<a class="xref" data-go="t5">Render·双缓存</a>。</div>
+  <div class="callout warn" style="border-color:var(--recon);background:rgba(126,231,135,.06)"><b>本节过程：</b>创建应用根和 Fiber 树根 → 将 <code>&lt;App/&gt;</code> 放入根节点的更新队列 → 触发首次渲染（mount）。</div>
+  <table class="simple">
+    <tr><th>入口</th><th>模式</th><th>说明</th></tr>
+    <tr><td><code>ReactDOM.render</code>(旧)</td><td>Legacy 同步</td><td>React 17 及以前默认;更新同步、不开并发特性</td></tr>
+    <tr><td><code>createRoot().render</code></td><td>Concurrent</td><td>React 18 起;开启并发、自动批处理、时间切片</td></tr>
+  </table>
+  <div class="navbtns"><button class="ghost" data-go="pk">← A1宏观包结构</button><button class="act" data-go="obj">A3核心对象速查 →</button></div>
+</section></main>
+<script src="./assets/site.js"></script>
+<script src="./assets/demos.js"></script>
+</body>
+</html>

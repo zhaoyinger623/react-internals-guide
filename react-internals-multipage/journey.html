@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+<title>一次 setState 的完整旅程 · React 原理全景</title>
+<script>
+  const embedParams = new URLSearchParams(location.search);
+  if (embedParams.get('embed') === '1') document.documentElement.classList.add('is-embed');
+  if (embedParams.get('theme') === 'light') document.documentElement.classList.add('embed-light');
+</script>
+<link rel="stylesheet" href="./assets/site.css">
+</head>
+<body data-chapter="journey">
+<aside id="side">
+  <div class="brand">⚛️ React 原理全景</div>
+  <button class="themebtn" id="themeBtn"><span class="ic">🌙</span><span id="themeLabel">切换到浅色模式</span></button>
+  <a href="./intro.html" data-t="intro"><span class="n">◎</span>如何使用本页</a>
+  <div class="grp">更新流程</div>
+  <a href="./journey.html" data-t="journey" class="active" aria-current="page"><span class="n">★</span>一次 setState 的完整旅程</a>
+  <div class="grp">第一层 · 表层原理</div>
+  <a href="./t1.html" data-t="t1"><span class="n">1</span>组件渲染机制</a>
+  <a href="./t2.html" data-t="t2"><span class="n">2</span>虚拟 DOM 真实含义</a>
+  <a href="./t3.html" data-t="t3"><span class="n">3</span>生命周期执行顺序</a>
+  <div class="grp">第二层 · 一次更新的主线</div>
+  <a href="./t4.html" data-t="t4"><span class="n">4</span>更新的四个阶段</a>
+  <div class="grp">阶段一 · Trigger 触发</div>
+  <a href="./t9.html" data-t="t9"><span class="n">5</span>UpdateQueue：更新入队</a>
+  <div class="grp">阶段二 · Schedule 调度</div>
+  <a href="./t13.html" data-t="t13"><span class="n">6</span>Lane：选择更新</a>
+  <a href="./t12.html" data-t="t12"><span class="n">7</span>Scheduler：安排执行</a>
+  <div class="grp">阶段三 · Render 计算</div>
+  <a href="./t8.html" data-t="t8"><span class="n">8</span>Fiber：可中断工作单元</a>
+  <a href="./t5.html" data-t="t5"><span class="n">9</span>双缓存 Fiber 树</a>
+  <a href="./t7.html" data-t="t7"><span class="n">10</span>Hooks：读取与计算状态</a>
+  <a href="./t6.html" data-t="t6"><span class="n">11</span>Diff：协调子节点</a>
+  <a href="./t10.html" data-t="t10"><span class="n">12</span>flags：记录变更</a>
+  <div class="grp">阶段四 · Commit 提交</div>
+  <a href="./t11.html" data-t="t11"><span class="n">13</span>Commit：应用变更</a>
+  <div class="grp">并发延伸</div>
+  <a href="./t14.html" data-t="t14"><span class="n">14</span>Concurrent 并发渲染</a>
+  <a href="./t15.html" data-t="t15"><span class="n">15</span>两大并发 API</a>
+  <div class="grp">架构交互</div>
+  <a href="./t16.html" data-t="t16"><span class="n">16</span>三大模块协作</a>
+  <a href="./t17.html" data-t="t17"><span class="n">17</span>批量更新原理</a>
+  <a href="./t18.html" data-t="t18"><span class="n">18</span>Suspense / lazy</a>
+  <a href="./t19.html" data-t="t19"><span class="n">19</span>合成事件系统</a>
+  <div class="grp">性能优化</div>
+  <a href="./t20.html" data-t="t20"><span class="n">20</span>渲染优化底层</a>
+  <a href="./t21.html" data-t="t21"><span class="n">21</span>渲染 bug 底层解释</a>
+  <div class="grp">高级实践与新架构</div>
+  <a href="./t22.html" data-t="t22"><span class="n">22</span>SSR / Hydration / 流式</a>
+  <a href="./t23.html" data-t="t23"><span class="n">23</span>Server Components</a>
+  <a href="./t24.html" data-t="t24"><span class="n">24</span>React 19 新特性</a>
+  <a href="./t25.html" data-t="t25"><span class="n">25</span>外部状态与撕裂</a>
+  <a href="./t26.html" data-t="t26"><span class="n">26</span>React Compiler</a>
+  <a href="./t27.html" data-t="t27"><span class="n">27</span>高级模式与陷阱</a>
+  <a href="./t28.html" data-t="t28"><span class="n">28</span>性能诊断与工程化</a>
+  <div class="grp">补充专题 · 常被漏掉的核心</div>
+  <a href="./ctx.html" data-t="ctx"><span class="n">C1</span>Context 源码原理</a>
+  <a href="./ref.html" data-t="ref"><span class="n">C2</span>useRef 与 ref 体系</a>
+  <div class="grp">源码附录 · 按需查阅</div>
+  <a href="./pk.html" data-t="pk"><span class="n">A1</span>宏观包结构</a>
+  <a href="./boot.html" data-t="boot"><span class="n">A2</span>启动过程</a>
+  <a href="./obj.html" data-t="obj"><span class="n">A3</span>核心对象速查</a>
+  <a href="./source.html" data-t="source"><span class="n">A4</span>源码阅读路线</a>
+  <div class="grp">总结</div>
+  <a href="./main.html" data-t="main"><span class="n">★</span>React 更新流程总览</a>
+</aside>
+<main id="main"><section class="topic active" id="journey">
+  <div class="crumb">★ 主线 · 从一次 setState 开始</div>
+  <h1><span class="em">一次 setState 的完整旅程</span></h1>
+  <div style="display:flex;flex-wrap:wrap;gap:3px;align-items:center;font-family:var(--mono);font-size:10.5px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:7px 10px;margin:6px 0 14px;overflow-x:auto"><b style="color:var(--txt2);margin-right:4px">🧭 主线</b><span data-go="t4" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:rgba(97,218,251,.22);border:1.5px solid var(--accent);color:var(--accent);font-weight:700">setState</span><span style="color:var(--dim)">→</span><span data-go="t9" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:rgba(97,218,251,.22);border:1.5px solid var(--accent);color:var(--accent);font-weight:700">Update</span><span style="color:var(--dim)">→</span><span data-go="t13" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:rgba(97,218,251,.22);border:1.5px solid var(--accent);color:var(--accent);font-weight:700">Lane</span><span style="color:var(--dim)">→</span><span data-go="t12" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:rgba(97,218,251,.22);border:1.5px solid var(--accent);color:var(--accent);font-weight:700">Scheduler</span><span style="color:var(--dim)">→</span><span data-go="t8" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:rgba(97,218,251,.22);border:1.5px solid var(--accent);color:var(--accent);font-weight:700">Render</span><span style="color:var(--dim)">→</span><span data-go="t10" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:rgba(97,218,251,.22);border:1.5px solid var(--accent);color:var(--accent);font-weight:700">Effect</span><span style="color:var(--dim)">→</span><span data-go="t11" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:rgba(97,218,251,.22);border:1.5px solid var(--accent);color:var(--accent);font-weight:700">Commit</span><span style="color:var(--dim)">→</span><span data-go="t11" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:rgba(97,218,251,.22);border:1.5px solid var(--accent);color:var(--accent);font-weight:700">DOM</span></div>
+  <div class="callout good" style="font-size:14px">这一章先说明 <code>setState</code> 之后依次发生哪些事情。这里暂不展开源码细节；后续章节会按照 Update、Lane、Render 和 Commit 等环节分别讲解。</div>
+
+  <h2><span class="dot" style="background:var(--accent)"></span>从点击到屏幕,一共 10 步</h2>
+  <div style="display:flex;flex-direction:column;gap:6px;margin:10px 0">
+<div style="border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:10px;padding:12px 14px;background:var(--panel)"><div style="font-weight:700;color:var(--accent);font-size:14px">👆 你点了按钮</div><p style="margin:5px 0 0;font-size:13px;color:var(--txt2)">浏览器触发事件。React 把事件统一委托到根容器,反查到是哪个组件、要调哪个 onClick。 <a class="xref" data-go="t19">深入:第五层·合成事件 →</a></p></div><div style="text-align:center;color:var(--dim);font-size:18px;line-height:1">↓</div><div style="border:1px solid var(--line);border-left:4px solid var(--fiber);border-radius:10px;padding:12px 14px;background:var(--panel)"><div style="font-weight:700;color:var(--fiber);font-size:14px">📞 调用 setState</div><p style="margin:5px 0 0;font-size:13px;color:var(--txt2)">你的 onClick 里执行 setState。React 据「什么事件触发的」给这次更新分配一个优先级 <b>Lane</b>(点击=最高优)。 <a class="xref" data-go="t13">深入:Schedule·Lane →</a></p></div><div style="text-align:center;color:var(--dim);font-size:18px;line-height:1">↓</div><div style="border:1px solid var(--line);border-left:4px solid var(--fiber);border-radius:10px;padding:12px 14px;background:var(--panel)"><div style="font-weight:700;color:var(--fiber);font-size:14px">📥 产生 Update,入队</div><p style="margin:5px 0 0;font-size:13px;color:var(--txt2)">生成一个 <b>Update</b> 对象挂到该组件 Fiber 的 <b>UpdateQueue</b>,并把 Lane 一路冒泡到 root,标记「这个应用有活了」。 <a class="xref" data-go="t9">深入:Trigger·UpdateQueue →</a></p></div><div style="text-align:center;color:var(--dim);font-size:18px;line-height:1">↓</div><div style="border:1px solid var(--line);border-left:4px solid var(--sched);border-radius:10px;padding:12px 14px;background:var(--panel)"><div style="font-weight:700;color:var(--sched);font-size:14px">⏱ Scheduler 安排</div><p style="margin:5px 0 0;font-size:13px;color:var(--txt2)">调度器决定「<b>什么时候做、先做谁</b>」。它把渲染工作切成一片约 5ms,片与片之间把控制权还给浏览器绘制/响应——所以页面不卡。 <a class="xref" data-go="t12">深入:Schedule·Scheduler →</a></p></div><div style="text-align:center;color:var(--dim);font-size:18px;line-height:1">↓</div><div style="border:1px solid var(--line);border-left:4px solid var(--recon);border-radius:10px;padding:12px 14px;background:var(--panel)"><div style="font-weight:700;color:var(--recon);font-size:14px">🡓 Render·beginWork</div><p style="margin:5px 0 0;font-size:13px;color:var(--txt2)">从上往下遍历 Fiber 树:<b>重新执行你的组件</b>拿到新 JSX,和旧的做 <b>Diff</b>,生成/复用子 Fiber。<b>这一步只算,不碰真实 DOM。</b> <a class="xref" data-go="t8">深入:Render·Fiber 架构 →</a></p></div><div style="text-align:center;color:var(--dim);font-size:18px;line-height:1">↓</div><div style="border:1px solid var(--line);border-left:4px solid var(--recon);border-radius:10px;padding:12px 14px;background:var(--panel)"><div style="font-weight:700;color:var(--recon);font-size:14px">🡑 Render·completeWork</div><p style="margin:5px 0 0;font-size:13px;color:var(--txt2)">走到底再往上归:为原生节点<b>创建离屏 DOM</b>、把子 DOM 拼上,并记录之后需要执行的 DOM 变更。 <a class="xref" data-go="t10">深入:Render·变更标记 →</a></p></div><div style="text-align:center;color:var(--dim);font-size:18px;line-height:1">↓</div><div style="border:1px solid var(--line);border-left:4px solid var(--recon);border-radius:10px;padding:12px 14px;background:var(--panel)"><div style="font-weight:700;color:var(--recon);font-size:14px">🌳 得到一棵带标记的新树</div><p style="margin:5px 0 0;font-size:13px;color:var(--txt2)">Render 结束,内存里有了一棵记录了变更的新 Fiber 树(workInProgress)。<b>此时屏幕还没变</b>——这棵树可以被中断、被丢弃重来,用户看不见。 <a class="xref" data-go="t5">深入:Render·双缓存 →</a></p></div><div style="text-align:center;color:var(--dim);font-size:18px;line-height:1">↓</div><div style="border:1px solid var(--line);border-left:4px solid var(--render);border-radius:10px;padding:12px 14px;background:var(--panel)"><div style="font-weight:700;color:var(--render);font-size:14px">✅ Commit 落地</div><p style="margin:5px 0 0;font-size:13px;color:var(--txt2)">按照这些变更标记<b>一次性、同步</b>地改真实 DOM(插入/更新/删除),并把 <code>current</code> 指针切到新树。<b>屏幕在这一刻变化。</b> <a class="xref" data-go="t11">深入:Commit·提交阶段 →</a></p></div><div style="text-align:center;color:var(--dim);font-size:18px;line-height:1">↓</div><div style="border:1px solid var(--line);border-left:4px solid var(--render);border-radius:10px;padding:12px 14px;background:var(--panel)"><div style="font-weight:700;color:var(--render);font-size:14px">🎬 effect 执行</div><p style="margin:5px 0 0;font-size:13px;color:var(--txt2)"><code>useLayoutEffect</code> 在绘制<b>前</b>同步跑(避免闪烁)→ 浏览器绘制 → <code>useEffect</code> 在绘制<b>后</b>异步跑。 <a class="xref" data-go="t3">深入:第一层·生命周期 →</a></p></div><div style="text-align:center;color:var(--dim);font-size:18px;line-height:1">↓</div><div style="border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:10px;padding:12px 14px;background:var(--panel)"><div style="font-weight:700;color:var(--accent);font-size:14px">🖥 屏幕更新</div><p style="margin:5px 0 0;font-size:13px;color:var(--txt2)">用户看到了最新界面。一次 setState 的旅程结束。 </p></div>
+  </div>
+
+  <div class="callout"><b>章节对应关系：</b><a class="xref" data-go="t9">UpdateQueue</a> 对应第 3 步，<a class="xref" data-go="t12">Scheduler</a> 对应第 4 步，<a class="xref" data-go="t8">Fiber</a>、<a class="xref" data-go="t6">Diff</a> 和 <a class="xref" data-go="t7">Hooks</a> 主要发生在第 5 步，<a class="xref" data-go="t11">Commit</a> 对应第 8 步。</div>
+  <h2><span class="dot" style="background:var(--recon)"></span>读后续章节前，先分清三件事</h2>
+  <div class="key-differences">
+    <div class="key-diff">
+      <div class="key-diff-title">① Render 与 Commit</div>
+      <div class="key-diff-body">
+        <p><b>Render：</b>执行组件、比较新旧结果，算出哪些节点需要新增、更新或删除。此时不修改页面。</p>
+        <p><b>Commit：</b>把已经算好的结果应用到 DOM，页面在这个阶段发生变化。</p>
+        <p class="result">重点：Render 负责“算”，Commit 负责“改”。</p>
+      </div>
+    </div>
+    <div class="key-diff">
+      <div class="key-diff-title">② 为什么只有 Render 能中断</div>
+      <div class="key-diff-body">
+        <p>Render 操作的是内存中的 workInProgress Fiber 树。暂停、重新计算或丢弃它，都不会让用户看到不完整的页面。</p>
+        <p>Commit 直接修改 DOM。如果执行到一半暂停，页面可能同时包含一部分旧结果和一部分新结果。</p>
+        <p class="result">因此：Render 可以中断，Commit 必须连续完成。</p>
+      </div>
+    </div>
+    <div class="key-diff">
+      <div class="key-diff-title">③ Lane 与 Scheduler</div>
+      <div class="key-diff-body">
+        <p><b>Lane：</b>标记更新的优先级，决定本次 Render 要处理哪些更新。</p>
+        <p><b>Scheduler：</b>安排任务何时运行，并判断当前任务是否需要让出主线程。</p>
+        <p class="result">重点：Lane 选择“做哪些更新”，Scheduler 安排“什么时候做”。</p>
+      </div>
+    </div>
+  </div>
+  <div class="navbtns"><button class="ghost" data-go="intro">← ◎如何使用本页</button><button class="act" data-go="t1">1组件渲染机制 →</button></div>
+</section></main>
+<script src="./assets/site.js"></script>
+<script src="./assets/demos.js"></script>
+</body>
+</html>

@@ -3,54 +3,6 @@ title: 一次 setState 的完整旅程
 description: 从点击事件到浏览器绘制，用十个步骤串起 Update、Lane、Scheduler、Fiber、Diff、Commit 和 Effect。
 ---
 
-import { UpdateJourneyDemo } from '../../theme/FoundationVisuals';
-import { Callout, ChapterRoute, ContentCard } from '../../theme/TutorialPrimitives';
+import { EmbeddedChapter } from '../../theme/EmbeddedChapter';
 
-<div className="tutorial-crumb">★ 主线 · 从一次 setState 开始</div>
-
-<ChapterRoute steps={[
-  { label: 'setState', active: true },
-  { label: 'Update', href: '/02-update-pipeline/t9' },
-  { label: 'Lane', href: '/02-update-pipeline/t13' },
-  { label: 'Scheduler', href: '/02-update-pipeline/t12' },
-  { label: 'Render', href: '/02-update-pipeline/t8' },
-  { label: 'Effect', href: '/02-update-pipeline/t10' },
-  { label: 'Commit', href: '/02-update-pipeline/t11' },
-  { label: 'DOM', href: '/02-update-pipeline/t11' },
-]} />
-
-<ContentCard tone="accent">
-
-本章先回答 `setState` 之后依次发生什么，不急着展开每个函数的源码。后续章节会沿 Update、Lane、Render 和 Commit 分别深入。
-
-</ContentCard>
-
-## 从点击到屏幕：十个步骤
-
-<UpdateJourneyDemo />
-
-<Callout type="success">
-
-章节对应关系：UpdateQueue 对应第 3 步，Lane 与 Scheduler 对应第 4 步，Fiber、Hooks、Diff 和 flags 主要发生在第 5～7 步，Commit 对应第 8～9 步。
-
-</Callout>
-
-## 读后续章节前，先分清三件事
-
-### 1. Render 负责“算”，Commit 负责“改”
-
-Render 执行组件、比较新旧结果，并得到带变更标记的 `workInProgress` Fiber 树。此时页面没有变化。Commit 才读取标记，修改真实 DOM 并运行提交阶段生命周期。
-
-### 2. 为什么只有 Render 可以中断
-
-Render 操作的是内存中的新树，暂停、重新计算或丢弃都不会让用户看到半成品。Commit 直接修改 DOM；若执行一半暂停，页面会同时包含旧结果和新结果，因此必须连续完成。
-
-### 3. Lane 与 Scheduler 不是同一件事
-
-Lane 标记更新的优先级并帮助 React 选择“本轮做哪些更新”；Scheduler 负责安排“什么时候回来继续处理 root”。Lane 不会主动暂停 JavaScript，Scheduler 也不会读取组件的更新队列。
-
-<ContentCard tone="purple">
-
-把整条主线压缩成一句话：**事件产生 Update；Lane 选择本轮工作；Scheduler 安排执行机会；Reconciler 计算 Fiber；Commit 把结果交给 Renderer 落到 DOM。**
-
-</ContentCard>
+<EmbeddedChapter chapter="journey" />

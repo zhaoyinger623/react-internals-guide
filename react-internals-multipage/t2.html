@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+<title>虚拟 DOM 真实含义 · React 原理全景</title>
+<script>
+  const embedParams = new URLSearchParams(location.search);
+  if (embedParams.get('embed') === '1') document.documentElement.classList.add('is-embed');
+  if (embedParams.get('theme') === 'light') document.documentElement.classList.add('embed-light');
+</script>
+<link rel="stylesheet" href="./assets/site.css">
+</head>
+<body data-chapter="t2">
+<aside id="side">
+  <div class="brand">⚛️ React 原理全景</div>
+  <button class="themebtn" id="themeBtn"><span class="ic">🌙</span><span id="themeLabel">切换到浅色模式</span></button>
+  <a href="./intro.html" data-t="intro"><span class="n">◎</span>如何使用本页</a>
+  <div class="grp">更新流程</div>
+  <a href="./journey.html" data-t="journey"><span class="n">★</span>一次 setState 的完整旅程</a>
+  <div class="grp">第一层 · 表层原理</div>
+  <a href="./t1.html" data-t="t1"><span class="n">1</span>组件渲染机制</a>
+  <a href="./t2.html" data-t="t2" class="active" aria-current="page"><span class="n">2</span>虚拟 DOM 真实含义</a>
+  <a href="./t3.html" data-t="t3"><span class="n">3</span>生命周期执行顺序</a>
+  <div class="grp">第二层 · 一次更新的主线</div>
+  <a href="./t4.html" data-t="t4"><span class="n">4</span>更新的四个阶段</a>
+  <div class="grp">阶段一 · Trigger 触发</div>
+  <a href="./t9.html" data-t="t9"><span class="n">5</span>UpdateQueue：更新入队</a>
+  <div class="grp">阶段二 · Schedule 调度</div>
+  <a href="./t13.html" data-t="t13"><span class="n">6</span>Lane：选择更新</a>
+  <a href="./t12.html" data-t="t12"><span class="n">7</span>Scheduler：安排执行</a>
+  <div class="grp">阶段三 · Render 计算</div>
+  <a href="./t8.html" data-t="t8"><span class="n">8</span>Fiber：可中断工作单元</a>
+  <a href="./t5.html" data-t="t5"><span class="n">9</span>双缓存 Fiber 树</a>
+  <a href="./t7.html" data-t="t7"><span class="n">10</span>Hooks：读取与计算状态</a>
+  <a href="./t6.html" data-t="t6"><span class="n">11</span>Diff：协调子节点</a>
+  <a href="./t10.html" data-t="t10"><span class="n">12</span>flags：记录变更</a>
+  <div class="grp">阶段四 · Commit 提交</div>
+  <a href="./t11.html" data-t="t11"><span class="n">13</span>Commit：应用变更</a>
+  <div class="grp">并发延伸</div>
+  <a href="./t14.html" data-t="t14"><span class="n">14</span>Concurrent 并发渲染</a>
+  <a href="./t15.html" data-t="t15"><span class="n">15</span>两大并发 API</a>
+  <div class="grp">架构交互</div>
+  <a href="./t16.html" data-t="t16"><span class="n">16</span>三大模块协作</a>
+  <a href="./t17.html" data-t="t17"><span class="n">17</span>批量更新原理</a>
+  <a href="./t18.html" data-t="t18"><span class="n">18</span>Suspense / lazy</a>
+  <a href="./t19.html" data-t="t19"><span class="n">19</span>合成事件系统</a>
+  <div class="grp">性能优化</div>
+  <a href="./t20.html" data-t="t20"><span class="n">20</span>渲染优化底层</a>
+  <a href="./t21.html" data-t="t21"><span class="n">21</span>渲染 bug 底层解释</a>
+  <div class="grp">高级实践与新架构</div>
+  <a href="./t22.html" data-t="t22"><span class="n">22</span>SSR / Hydration / 流式</a>
+  <a href="./t23.html" data-t="t23"><span class="n">23</span>Server Components</a>
+  <a href="./t24.html" data-t="t24"><span class="n">24</span>React 19 新特性</a>
+  <a href="./t25.html" data-t="t25"><span class="n">25</span>外部状态与撕裂</a>
+  <a href="./t26.html" data-t="t26"><span class="n">26</span>React Compiler</a>
+  <a href="./t27.html" data-t="t27"><span class="n">27</span>高级模式与陷阱</a>
+  <a href="./t28.html" data-t="t28"><span class="n">28</span>性能诊断与工程化</a>
+  <div class="grp">补充专题 · 常被漏掉的核心</div>
+  <a href="./ctx.html" data-t="ctx"><span class="n">C1</span>Context 源码原理</a>
+  <a href="./ref.html" data-t="ref"><span class="n">C2</span>useRef 与 ref 体系</a>
+  <div class="grp">源码附录 · 按需查阅</div>
+  <a href="./pk.html" data-t="pk"><span class="n">A1</span>宏观包结构</a>
+  <a href="./boot.html" data-t="boot"><span class="n">A2</span>启动过程</a>
+  <a href="./obj.html" data-t="obj"><span class="n">A3</span>核心对象速查</a>
+  <a href="./source.html" data-t="source"><span class="n">A4</span>源码阅读路线</a>
+  <div class="grp">总结</div>
+  <a href="./main.html" data-t="main"><span class="n">★</span>React 更新流程总览</a>
+</aside>
+<main id="main"><section class="topic active" id="t2">
+  <div class="crumb">第一层 · 表层原理 / 02</div>
+  <h1>2 · 虚拟 DOM 的真实含义</h1>
+  <div style="display:flex;flex-wrap:wrap;gap:3px;align-items:center;font-family:var(--mono);font-size:10.5px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:7px 10px;margin:6px 0 14px;overflow-x:auto"><b style="color:var(--txt2);margin-right:4px;font-family:inherit">🧭 主线</b><span data-go="t4" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">setState</span><span style="color:var(--dim)">→</span><span data-go="t9" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">Update</span><span style="color:var(--dim)">→</span><span data-go="t13" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">Lane</span><span style="color:var(--dim)">→</span><span data-go="t12" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">Scheduler</span><span style="color:var(--dim)">→</span><span data-go="t8" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:rgba(97,218,251,.22);border:1.5px solid var(--accent);color:var(--accent);font-weight:700">Render</span><span style="color:var(--dim)">→</span><span data-go="t10" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">Effect</span><span style="color:var(--dim)">→</span><span data-go="t11" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">Commit</span><span style="color:var(--dim)">→</span><span data-go="t11" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">DOM</span></div>
+  <div class="card" style="border-left:4px solid var(--accent)">
+    <b>🗺 本章路线图</b>
+    <p style="margin:8px 0 0">虚拟 DOM <b>不是为了「快」</b>,是为了<b>分层解耦、跨平台、可中断</b>。本章包括：</p>
+    <p style="margin:6px 0 0"><b>① 它到底为了什么</b> · <b>② 和真实 DOM 的关系</b>(JSX → React Element → Fiber → 真实 DOM)· <b>③ React vs Vue</b> 两种更新哲学的取舍。</p>
+  </div>
+  <div class="callout warn"><b>最大误解:虚拟 DOM 不是为了"快"。</b>手写精准的原生 DOM 操作永远比"生成 VDOM → Diff → 再操作 DOM"更快。虚拟 DOM 的真正价值是<b>架构</b>。</div>
+
+  <h2><span class="dot" style="background:var(--accent)"></span>它到底为了什么</h2>
+  <ul class="clean">
+    <li><b>分层架构 / 解耦:</b>用一个 JS 对象描述 UI,把"UI 长什么样"和"怎么落地"分开。上层只关心声明式的树。</li>
+    <li><b>跨平台:</b>同一棵 VDOM/Fiber 树,可以交给 <code>react-dom</code> 渲染成 DOM、<code>react-native</code> 渲染成原生视图、<code>react-three-fiber</code> 渲染成 3D。核心不碰平台。</li>
+    <li><b>可中断渲染:</b>VDOM/Fiber 是纯 JS 内存对象,可以在内存里慢慢构建、随时暂停丢弃重来,而不触碰真实 DOM。这是 Concurrent 的地基。</li>
+  </ul>
+
+  <h2><span class="dot" style="background:var(--fiber)"></span>虚拟 DOM 与真实 DOM 的关系</h2>
+  <p>从你写的 JSX 到屏幕上的真实 DOM,中间要经过<b>三次「变身」</b>,每一步产物不同、职责不同:</p>
+  <ol style="padding-left:22px;color:var(--txt2);font-size:14px;line-height:1.95">
+    <li><b>JSX → React Element</b>:JSX 只是语法糖。Babel 把 <code>&lt;div className="x"&gt;hi&lt;/div&gt;</code> 编译成 <code>React.createElement('div',{className:'x'},'hi')</code>,执行后得到一个<b>轻量、不可变的普通 JS 对象</b>——这就是 React Element(「虚拟 DOM」的最小单位)。它只<b>描述</b>「长什么样」,不含任何真实节点。</li>
+    <li><b>React Element → Fiber 节点</b>:Reconciler 拿这个描述去创建/更新对应的 <b>Fiber 节点</b>。Fiber 更「重」,带 <code>child/sibling/return</code> 指针和工作信息,是可中断遍历、承载 state 的载体。</li>
+    <li><b>Fiber → 真实 DOM</b>：首次挂载时，Renderer 创建 DOM 节点并写入初始属性，Fiber 的 <code>stateNode</code> 指向该节点；Commit 阶段再把节点插入页面。更新时，Render 阶段比较新旧 props，Commit 阶段应用差异。</li>
+  </ol>
+  <div class="callout good"><b>三者的区别：</b>React Element 描述期望的界面；Fiber 保存组件状态、树结构和当前工作进度；真实 DOM 是浏览器中已经提交的界面。渲染先产生新的 Element，React 将其与旧 Fiber 对比，再决定需要执行哪些 DOM 操作。</div>
+  <p style="font-size:13px;color:var(--dim);margin-top:10px">重点看第 1 步的产物 —— 一个 JSX 编译后长这样:</p>
+  <pre><span class="cm">// 你写的 JSX</span>
+&lt;div className="x"&gt;hi&lt;/div&gt;
+
+<span class="cm">// ↓ Babel 编译 + 执行,得到一个普通对象 = React Element</span>
+{
+  $$typeof: <span class="fn">Symbol</span>(react.element),      <span class="cm">// 标记:这是合法 React 元素</span>
+  type:  <span class="st">'div'</span>,                       <span class="cm">// 标签名 / 组件</span>
+  key:   <span class="kw">null</span>,
+  ref:   <span class="kw">null</span>,
+  props: { className: <span class="st">'x'</span>, children: <span class="st">'hi'</span> }  <span class="cm">// 属性 + 子节点</span>
+}</pre>
+  <h3>JSX 中的事件和样式保存在哪里</h3>
+  <p><code>className</code>、<code>style</code>、<code>onClick</code> 等内容都会先进入 React Element 的 <code>props</code>。React Element 只保存这些值，不会在这一刻修改 DOM，也不会执行事件函数。</p>
+  <pre><span class="kw">const</span> <span class="fn">handleSave</span> = () =&gt; <span class="fn">save</span>();
+
+<span class="cm">// JSX</span>
+&lt;button
+  className=<span class="st">"save"</span>
+  style={{ color: <span class="st">'white'</span>, backgroundColor: active ? <span class="st">'#1677ff'</span> : <span class="st">'#999'</span> }}
+  onClick={handleSave}
+  disabled={!active}
+&gt;
+  保存
+&lt;/button&gt;
+
+<span class="cm">// JSX 执行后得到的 React Element（省略其他字段）</span>
+{
+  type: <span class="st">'button'</span>,
+  props: {
+    className: <span class="st">'save'</span>,
+    style: { color: <span class="st">'white'</span>, backgroundColor: <span class="st">'#1677ff'</span> },
+    onClick: handleSave,       <span class="cm">// 保存函数引用，不会在这里执行</span>
+    disabled: <span class="kw">false</span>,
+    children: <span class="st">'保存'</span>
+  }
+}</pre>
+
+  <table class="simple">
+    <tr><th>prop</th><th>React Element 中保存的值</th><th>Renderer 如何处理</th></tr>
+    <tr><td><code>className</code></td><td>字符串 <code>'save'</code></td><td>写入 DOM 的 <code>class</code>。</td></tr>
+    <tr><td><code>style</code></td><td>样式对象</td><td>逐项写入 <code>dom.style</code>。更新时只修改变化的样式，并清除被删除的样式。</td></tr>
+    <tr><td><code>disabled</code></td><td>布尔值</td><td>根据值设置或移除对应的 DOM 属性。</td></tr>
+    <tr><td><code>children</code></td><td>字符串或子 Element</td><td>生成文本节点，或继续为子 Element 创建 Fiber 和 DOM。</td></tr>
+    <tr><td><code>onClick</code></td><td>函数引用</td><td>由 React 事件系统保存和派发，通常不会给这个 button 单独设置一个原生 <code>onclick</code>。</td></tr>
+  </table>
+
+  <h3>事件为什么能在点击时执行</h3>
+  <div class="flow">
+    <div class="flowbox"><b>① createRoot</b><p style="font-size:12.5px">React 在根容器上注册事件监听器。</p></div>
+    <div class="arrow">→</div>
+    <div class="flowbox"><b>② 用户点击 button</b><p style="font-size:12.5px">原生 click 冒泡到根容器。</p></div>
+    <div class="arrow">→</div>
+    <div class="flowbox"><b>③ 找到目标 Fiber</b><p style="font-size:12.5px">React 从 DOM 节点找到对应 Fiber，并读取最新的 <code>onClick</code>。</p></div>
+    <div class="arrow">→</div>
+    <div class="flowbox"><b>④ 派发事件</b><p style="font-size:12.5px">React 按捕获和冒泡顺序调用事件函数。</p></div>
+  </div>
+  <p style="font-size:13px;color:var(--dim);margin-top:8px">因此，React Element 负责保存“期望的属性和行为”，Fiber 负责比较与记录变化，Renderer 再把变化落实到 DOM 和事件系统。完整链路如下：</p>
+  <div class="card" style="text-align:center">
+    <svg viewBox="0 0 760 130" style="width:100%;height:auto">
+      <defs><marker id="ah" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" style="fill:var(--accent)"/></marker></defs>
+      <g font-family="monospace">
+        <rect x="10" y="35" width="150" height="60" rx="12" style="fill:var(--panel2);stroke:var(--fiber)" stroke-width="2"/>
+        <text x="85" y="60" text-anchor="middle" style="fill:var(--fiber)" font-size="13" font-weight="700">JSX</text>
+        <text x="85" y="80" text-anchor="middle" style="fill:var(--dim)" font-size="10.5">&lt;div&gt;hi&lt;/div&gt;</text>
+
+        <rect x="205" y="35" width="150" height="60" rx="12" style="fill:var(--panel2);stroke:var(--recon)" stroke-width="2"/>
+        <text x="280" y="58" text-anchor="middle" style="fill:var(--recon)" font-size="12.5" font-weight="700">React Element</text>
+        <text x="280" y="78" text-anchor="middle" style="fill:var(--dim)" font-size="10">轻量 JS 对象</text>
+
+        <rect x="400" y="35" width="150" height="60" rx="12" style="fill:var(--panel2);stroke:var(--sched)" stroke-width="2"/>
+        <text x="475" y="58" text-anchor="middle" style="fill:var(--sched)" font-size="13" font-weight="700">Fiber 节点</text>
+        <text x="475" y="78" text-anchor="middle" style="fill:var(--dim)" font-size="10">带指针/工作信息</text>
+
+        <rect x="595" y="35" width="155" height="60" rx="12" style="fill:var(--panel2);stroke:var(--render)" stroke-width="2"/>
+        <text x="672" y="58" text-anchor="middle" style="fill:var(--render)" font-size="13" font-weight="700">真实 DOM</text>
+        <text x="672" y="78" text-anchor="middle" style="fill:var(--dim)" font-size="10">stateNode →</text>
+
+        <line x1="162" y1="65" x2="203" y2="65" style="stroke:var(--accent)" stroke-width="2" marker-end="url(#ah)"/>
+        <line x1="357" y1="65" x2="398" y2="65" style="stroke:var(--accent)" stroke-width="2" marker-end="url(#ah)"/>
+        <line x1="552" y1="65" x2="593" y2="65" style="stroke:var(--accent)" stroke-width="2" marker-end="url(#ah)"/>
+        <text x="182" y="28" text-anchor="middle" style="fill:var(--dim)" font-size="9.5">Babel 编译</text>
+        <text x="377" y="28" text-anchor="middle" style="fill:var(--dim)" font-size="9.5">Reconciler</text>
+        <text x="572" y="28" text-anchor="middle" style="fill:var(--dim)" font-size="9.5">Renderer</text>
+      </g>
+      <circle r="5" style="fill:var(--accent);opacity:.9"><animateMotion dur="3.5s" repeatCount="indefinite" path="M85,110 L672,110"/></circle>
+    </svg>
+  </div>
+
+  <h2><span class="dot" style="background:var(--recon)"></span>深入对比:React vs Vue 的两种更新哲学</h2>
+  <p>这是<b>中立的架构取舍,不是谁更好</b>。两者都用虚拟 DOM,但更新的思路截然不同——理解这点能帮你看清各自的性能特征和心智模型。</p>
+
+  <h3>核心分歧:「谁变了我不知道,全量重算」vs「我精确知道谁变了」</h3>
+  <div class="grid2">
+    <div class="card" style="border-color:rgba(97,218,251,.35)">
+      <span class="tag t-recon" style="background:rgba(97,218,251,.14);color:var(--accent);border-color:rgba(97,218,251,.4)">React · 运行时全量 Diff</span>
+      <p style="font-size:13px;margin-bottom:0">状态一变,React <b>不知道具体哪里变了</b>,于是把<b>整个组件函数重新执行一遍</b>生成新 VDOM,再和旧 VDOM 做 Diff 找差异。靠<b>运行时对比</b>决定更新什么。为了让「全量重算」不卡顿,才需要 Fiber + 时间切片把大 Diff 摊到多帧。</p>
+    </div>
+    <div class="card" style="border-color:rgba(126,231,135,.35)">
+      <span class="tag t-recon">Vue · 响应式依赖追踪</span>
+      <p style="font-size:13px;margin-bottom:0">Vue 的响应式系统在渲染时<b>记录了每个组件/effect 依赖了哪些数据</b>。某个数据变了,Vue <b>精确知道</b>只有依赖它的地方需要更新,<b>定向触发</b>,不必从父到子全量重算。</p>
+    </div>
+  </div>
+
+  <h3>Vue 3 的编译期优化:让 Diff「作弊」</h3>
+  <p>Vue 用<b>模板(template)</b>而非 JSX,模板结构在编译期就能被静态分析,于是能做 React 的 JSX 难做的优化:</p>
+  <table class="simple">
+    <tr><th>优化</th><th>做什么</th></tr>
+    <tr><td><b>静态提升</b>(hoistStatic)</td><td>把不会变的节点<b>提到渲染函数外</b>,只创建一次、每次渲染复用,不参与 Diff</td></tr>
+    <tr><td><b>PatchFlag</b>(补丁标记)</td><td>编译期给<b>动态节点</b>打标记(如「只有 class 会变」),运行时<b>只 diff 标记的那部分属性</b>,跳过静态内容</td></tr>
+    <tr><td><b>Block Tree</b>(区块树)</td><td>把动态节点收集进一个扁平数组,更新时<b>只遍历动态节点</b>,跳过整片静态子树,把 Diff 从「树规模」降到「动态节点规模」</td></tr>
+    <tr><td><b>事件缓存</b>(cacheHandlers)</td><td>内联事件回调被缓存,避免每次渲染都当成「新 prop」</td></tr>
+  </table>
+
+  <h3>那 React 拿什么对标?</h3>
+  <p>JSX 可以包含任意 JavaScript，编译器能够获得的静态结构信息通常少于模板。过去 React 项目常使用 <code>React.memo</code>、<code>useMemo</code> 和 <code>useCallback</code> 手动减少重复计算；<b>React Compiler</b>（<a class="xref" data-go="t26">第七层·React Compiler</a>）则在编译阶段分析组件并自动加入记忆化。两种框架的优化路径不同，不宜只用“谁更快”概括。</p>
+
+  <table class="simple">
+    <tr><th>维度</th><th>React</th><th>Vue</th></tr>
+    <tr><td>更新粒度</td><td>组件级:状态变 → 整个组件重执行 → Diff</td><td>依赖级:响应式精确追踪,定向更新</td></tr>
+    <tr><td>视图写法</td><td>JSX(就是 JS,灵活但难静态分析)</td><td>模板(可编译期静态分析,便于优化)</td></tr>
+    <tr><td>VDOM 角色</td><td><b>唯一</b>更新路径,纯靠运行时 Diff</td><td>VDOM + <b>编译期优化</b>,部分绕过 Diff</td></tr>
+    <tr><td>优化方式</td><td>手动 memo 系列 → React Compiler 自动</td><td>编译期自动(PatchFlag/Block/静态提升)</td></tr>
+    <tr><td>并发/可中断</td><td>✅ Fiber + 时间切片(<a class="xref" data-go="t12">Schedule·Scheduler</a>/<a class="xref" data-go="t14">第四层·Concurrent</a>)</td><td>探索中,非默认</td></tr>
+    <tr><td>心智模型</td><td>「一切皆重渲染,你来标记哪里别重渲」</td><td>「数据驱动,框架帮你算哪里要变」</td></tr>
+  </table>
+  <div class="callout"><b>所以「Vue 的 VDOM 不如 React 纯粹」是什么意思?</b> 指 React 把一切交给<b>运行时的 VDOM Diff</b>,不依赖模板编译期的靶向更新——VDOM 是它<b>唯一且纯粹</b>的更新路径;Vue 则把 VDOM 和<b>编译期优化混用</b>,让 VDOM「掺了水」,不那么「纯 VDOM」。<b>这是褒是贬取决于视角</b>:纯粹 = 心智简单、可中断、跨平台一致;不纯粹 = 运行时更省、开箱即用更快。两条路都很成功。</div>
+  <div class="callout good"><b>本章小结：</b>虚拟 DOM 是一层<b>轻量描述</b>,把「UI 长啥样」和「怎么落地」解耦 → 才能跨平台、才能可中断;React 纯靠<b>运行时 Diff</b>,Vue 掺了<b>编译期优化</b>。→ 下一章:<a class="xref" data-go="t3">第一层·生命周期</a>。</div>
+  <div class="navbtns"><button class="ghost" data-go="t1">← 1组件渲染机制</button><button class="act" data-go="t3">3生命周期执行顺序 →</button></div>
+</section></main>
+<script src="./assets/site.js"></script>
+<script src="./assets/demos.js"></script>
+</body>
+</html>

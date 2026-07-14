@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+<title>两大并发 API · React 原理全景</title>
+<script>
+  const embedParams = new URLSearchParams(location.search);
+  if (embedParams.get('embed') === '1') document.documentElement.classList.add('is-embed');
+  if (embedParams.get('theme') === 'light') document.documentElement.classList.add('embed-light');
+</script>
+<link rel="stylesheet" href="./assets/site.css">
+</head>
+<body data-chapter="t15">
+<aside id="side">
+  <div class="brand">⚛️ React 原理全景</div>
+  <button class="themebtn" id="themeBtn"><span class="ic">🌙</span><span id="themeLabel">切换到浅色模式</span></button>
+  <a href="./intro.html" data-t="intro"><span class="n">◎</span>如何使用本页</a>
+  <div class="grp">更新流程</div>
+  <a href="./journey.html" data-t="journey"><span class="n">★</span>一次 setState 的完整旅程</a>
+  <div class="grp">第一层 · 表层原理</div>
+  <a href="./t1.html" data-t="t1"><span class="n">1</span>组件渲染机制</a>
+  <a href="./t2.html" data-t="t2"><span class="n">2</span>虚拟 DOM 真实含义</a>
+  <a href="./t3.html" data-t="t3"><span class="n">3</span>生命周期执行顺序</a>
+  <div class="grp">第二层 · 一次更新的主线</div>
+  <a href="./t4.html" data-t="t4"><span class="n">4</span>更新的四个阶段</a>
+  <div class="grp">阶段一 · Trigger 触发</div>
+  <a href="./t9.html" data-t="t9"><span class="n">5</span>UpdateQueue：更新入队</a>
+  <div class="grp">阶段二 · Schedule 调度</div>
+  <a href="./t13.html" data-t="t13"><span class="n">6</span>Lane：选择更新</a>
+  <a href="./t12.html" data-t="t12"><span class="n">7</span>Scheduler：安排执行</a>
+  <div class="grp">阶段三 · Render 计算</div>
+  <a href="./t8.html" data-t="t8"><span class="n">8</span>Fiber：可中断工作单元</a>
+  <a href="./t5.html" data-t="t5"><span class="n">9</span>双缓存 Fiber 树</a>
+  <a href="./t7.html" data-t="t7"><span class="n">10</span>Hooks：读取与计算状态</a>
+  <a href="./t6.html" data-t="t6"><span class="n">11</span>Diff：协调子节点</a>
+  <a href="./t10.html" data-t="t10"><span class="n">12</span>flags：记录变更</a>
+  <div class="grp">阶段四 · Commit 提交</div>
+  <a href="./t11.html" data-t="t11"><span class="n">13</span>Commit：应用变更</a>
+  <div class="grp">并发延伸</div>
+  <a href="./t14.html" data-t="t14"><span class="n">14</span>Concurrent 并发渲染</a>
+  <a href="./t15.html" data-t="t15" class="active" aria-current="page"><span class="n">15</span>两大并发 API</a>
+  <div class="grp">架构交互</div>
+  <a href="./t16.html" data-t="t16"><span class="n">16</span>三大模块协作</a>
+  <a href="./t17.html" data-t="t17"><span class="n">17</span>批量更新原理</a>
+  <a href="./t18.html" data-t="t18"><span class="n">18</span>Suspense / lazy</a>
+  <a href="./t19.html" data-t="t19"><span class="n">19</span>合成事件系统</a>
+  <div class="grp">性能优化</div>
+  <a href="./t20.html" data-t="t20"><span class="n">20</span>渲染优化底层</a>
+  <a href="./t21.html" data-t="t21"><span class="n">21</span>渲染 bug 底层解释</a>
+  <div class="grp">高级实践与新架构</div>
+  <a href="./t22.html" data-t="t22"><span class="n">22</span>SSR / Hydration / 流式</a>
+  <a href="./t23.html" data-t="t23"><span class="n">23</span>Server Components</a>
+  <a href="./t24.html" data-t="t24"><span class="n">24</span>React 19 新特性</a>
+  <a href="./t25.html" data-t="t25"><span class="n">25</span>外部状态与撕裂</a>
+  <a href="./t26.html" data-t="t26"><span class="n">26</span>React Compiler</a>
+  <a href="./t27.html" data-t="t27"><span class="n">27</span>高级模式与陷阱</a>
+  <a href="./t28.html" data-t="t28"><span class="n">28</span>性能诊断与工程化</a>
+  <div class="grp">补充专题 · 常被漏掉的核心</div>
+  <a href="./ctx.html" data-t="ctx"><span class="n">C1</span>Context 源码原理</a>
+  <a href="./ref.html" data-t="ref"><span class="n">C2</span>useRef 与 ref 体系</a>
+  <div class="grp">源码附录 · 按需查阅</div>
+  <a href="./pk.html" data-t="pk"><span class="n">A1</span>宏观包结构</a>
+  <a href="./boot.html" data-t="boot"><span class="n">A2</span>启动过程</a>
+  <a href="./obj.html" data-t="obj"><span class="n">A3</span>核心对象速查</a>
+  <a href="./source.html" data-t="source"><span class="n">A4</span>源码阅读路线</a>
+  <div class="grp">总结</div>
+  <a href="./main.html" data-t="main"><span class="n">★</span>React 更新流程总览</a>
+</aside>
+<main id="main"><section class="topic active" id="t15">
+  <div class="crumb">第四层 · 并发架构 / 15</div>
+  <h1>15 · 两大并发 API 底层</h1>
+  <div style="display:flex;flex-wrap:wrap;gap:3px;align-items:center;font-family:var(--mono);font-size:10.5px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:7px 10px;margin:6px 0 14px;overflow-x:auto"><b style="color:var(--txt2);margin-right:4px;font-family:inherit">🧭 主线</b><span data-go="t4" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">setState</span><span style="color:var(--dim)">→</span><span data-go="t9" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">Update</span><span style="color:var(--dim)">→</span><span data-go="t13" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:rgba(97,218,251,.22);border:1.5px solid var(--accent);color:var(--accent);font-weight:700">Lane</span><span style="color:var(--dim)">→</span><span data-go="t12" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">Scheduler</span><span style="color:var(--dim)">→</span><span data-go="t8" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">Render</span><span style="color:var(--dim)">→</span><span data-go="t10" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">Effect</span><span style="color:var(--dim)">→</span><span data-go="t11" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">Commit</span><span style="color:var(--dim)">→</span><span data-go="t11" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">DOM</span></div>
+  <div class="card" style="border-left:4px solid var(--accent)">
+    <b>🗺 本章路线图</b>
+    <p style="margin:8px 0 0">useTransition 把「<b>更新</b>」降优先级,useDeferredValue 把「<b>值</b>」降优先级——本质都是让高优交互能抢占。</p>
+    <p style="margin:6px 0 0">本章包括：<b>两者原理、区别、使用场景、底层 Lane 差异</b>。</p>
+  </div>
+  <div class="grid2">
+    <div class="card">
+      <h3 style="margin-top:0"><code>useTransition</code></h3>
+      <p style="font-size:13px">把<b>更新</b>标记为低优。<code>startTransition(fn)</code> 内的 setState 拿到 <b>TransitionLane</b>,可被用户输入等高优<b>打断</b>。返回 <code>isPending</code> 标识过渡进行中。</p>
+      <pre><span class="kw">const</span> [isPending, startTransition] = <span class="fn">useTransition</span>();
+<span class="fn">startTransition</span>(() =&gt; {
+  <span class="fn">setList</span>(bigFilteredList);  <span class="cm">// → TransitionLane(低优)</span>
+});</pre>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0"><code>useDeferredValue</code></h3>
+      <p style="font-size:13px">把<b>值</b>降级。返回一个"滞后版"的值,React 先用旧值渲染(高优),再在低优 lane 用新值渲染一遍。适合你<b>拿不到 setState</b>(值来自 props)的场景。</p>
+      <pre><span class="kw">const</span> deferredQuery = <span class="fn">useDeferredValue</span>(query);
+<span class="cm">// 输入框用 query 即时更新,列表用 deferredQuery 滞后更新</span></pre>
+    </div>
+  </div>
+
+  <h2><span class="dot" style="background:var(--recon)"></span>怎么用:两个真实场景(照着抄)</h2>
+
+  <h3>场景 A · 搜索框打字卡顿 → useDeferredValue</h3>
+  <p style="font-size:13px">受控输入 + 一个<b>昂贵的派生视图</b>(过滤大列表 / Markdown 预览 / 图表)。你拿不到列表的 setState(它是 query 派生的),就用 <code>useDeferredValue</code> 包住那个「值」:</p>
+  <pre><span class="kw">function</span> <span class="fn">SearchPage</span>(){
+  <span class="kw">const</span> [query, setQuery] = <span class="fn">useState</span>(<span class="st">''</span>);
+  <span class="kw">const</span> deferredQuery = <span class="fn">useDeferredValue</span>(query); <span class="cm">// 滞后版的 query</span>
+  <span class="kw">return</span> (
+    &lt;&gt;
+      &lt;input value={query} onChange={e =&gt; <span class="fn">setQuery</span>(e.target.value)} /&gt;  <span class="cm">// 输入框用 query:即时、跟手</span>
+      &lt;BigList query={deferredQuery} /&gt;   <span class="cm">// 大列表用 deferredQuery:稍后跟上,不卡输入</span>
+    &lt;/&gt;
+  );
+}</pre>
+  <p style="font-size:12.5px;color:var(--dim)">效果:你飞快打字时,输入框每个字都即时显示(高优);而重型列表用「滞后值」在空档里慢慢追上,不会因为列表重渲染卡住你打字。</p>
+
+  <h3>场景 B · 切换重型 tab / 提交搜索 → useTransition</h3>
+  <p style="font-size:13px">一次交互会触发<b>昂贵渲染</b>,但你想让交互本身保持跟手。你<b>能拿到那段 setState</b>,就用 <code>startTransition</code> 把它标成「非紧急」;<code>isPending</code> 还能显示 loading:</p>
+  <pre><span class="kw">function</span> <span class="fn">Tabs</span>(){
+  <span class="kw">const</span> [tab, setTab] = <span class="fn">useState</span>(<span class="st">'home'</span>);
+  <span class="kw">const</span> [isPending, startTransition] = <span class="fn">useTransition</span>();
+  <span class="kw">function</span> <span class="fn">select</span>(next){
+    <span class="fn">startTransition</span>(() =&gt; <span class="fn">setTab</span>(next)); <span class="cm">// 这次切换是「可被打断的低优」</span>
+  }
+  <span class="kw">return</span> (
+    &lt;&gt;
+      &lt;button onClick={() =&gt; <span class="fn">select</span>(<span class="st">'posts'</span>)}&gt;Posts&lt;/button&gt;
+      {isPending &amp;&amp; &lt;Spinner/&gt;}        <span class="cm">// 过渡中显示 loading</span>
+      &lt;TabContent tab={tab}/&gt;            <span class="cm">// 切到很重的 tab 时,旧内容先留着,不白屏</span>
+    &lt;/&gt;
+  );
+}</pre>
+  <p style="font-size:12.5px;color:var(--dim)">效果:点按钮瞬间响应,重型 tab 内容在后台低优渲染(可被你下一次点击打断),ready 后再换上;期间用 isPending 显示转圈。</p>
+
+  <div class="callout good"><b>选择方式：</b>你能改那段 <b>setState</b> → 用 <b>useTransition</b>(还能拿 isPending 显 loading);你手里只有一个<b>值</b>(通常来自 props/上游),改不到它的 setState → 用 <b>useDeferredValue</b>。</div>
+  <div class="card">
+    <b>📋 常见适用场景</b>
+    <ul class="clean" style="margin:6px 0 0">
+      <li>大列表<b>实时过滤 / 搜索</b>(输入跟手、结果稍后)</li>
+      <li>切换<b>重型 tab / 路由</b>(旧页先留,新页后台渲染)</li>
+      <li>输入时的<b>实时预览</b>:Markdown、代码高亮、图表重绘</li>
+      <li><b>自动补全</b>下拉:输入即时、候选列表滞后</li>
+    </ul>
+    <p style="font-size:12px;color:var(--dim);margin:8px 0 0">⚠️ 不要滥用:只在「某段渲染确实重、且会拖慢交互」时用。轻量更新加了反而多一次渲染。</p>
+  </div>
+
+  <table class="simple">
+    <tr><th></th><th>useTransition</th><th>useDeferredValue</th></tr>
+    <tr><td>作用对象</td><td>一段更新逻辑(你能改 setState)</td><td>一个值(常是外部传入的 props)</td></tr>
+    <tr><td>底层</td><td>startTransition 内更新走 TransitionLane</td><td>内部对该值发起一个 TransitionLane 的延迟更新</td></tr>
+    <tr><td>额外产出</td><td><code>isPending</code> 布尔</td><td>无(直接返回滞后值)</td></tr>
+    <tr><td>场景</td><td>点 tab、提交搜索触发大列表渲染</td><td>受控输入 + 昂贵派生视图</td></tr>
+  </table>
+  <div class="callout">两者都会让相关更新使用 TransitionLane，使输入等高优先级更新可以先执行。区别在于：<code>useTransition</code> 包装状态更新，<code>useDeferredValue</code> 接收一个值并返回它的延迟版本。</div>
+  <div class="callout good"><b>本章小结：</b>两者都把某些更新降到 <b>TransitionLane</b>、让用户输入能抢占;useTransition 包一段更新(带 isPending),useDeferredValue 包一个值(拿不到 setState 时用)。→ 下一章:<a class="xref" data-go="t16">第五层·三大模块协作</a>。</div>
+  <div class="navbtns"><button class="ghost" data-go="t14">← 14Concurrent 并发渲染</button><button class="act" data-go="t16">16三大模块协作 →</button></div>
+</section></main>
+<script src="./assets/site.js"></script>
+<script src="./assets/demos.js"></script>
+</body>
+</html>

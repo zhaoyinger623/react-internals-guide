@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+<title>渲染优化底层 · React 原理全景</title>
+<script>
+  const embedParams = new URLSearchParams(location.search);
+  if (embedParams.get('embed') === '1') document.documentElement.classList.add('is-embed');
+  if (embedParams.get('theme') === 'light') document.documentElement.classList.add('embed-light');
+</script>
+<link rel="stylesheet" href="./assets/site.css">
+</head>
+<body data-chapter="t20">
+<aside id="side">
+  <div class="brand">⚛️ React 原理全景</div>
+  <button class="themebtn" id="themeBtn"><span class="ic">🌙</span><span id="themeLabel">切换到浅色模式</span></button>
+  <a href="./intro.html" data-t="intro"><span class="n">◎</span>如何使用本页</a>
+  <div class="grp">更新流程</div>
+  <a href="./journey.html" data-t="journey"><span class="n">★</span>一次 setState 的完整旅程</a>
+  <div class="grp">第一层 · 表层原理</div>
+  <a href="./t1.html" data-t="t1"><span class="n">1</span>组件渲染机制</a>
+  <a href="./t2.html" data-t="t2"><span class="n">2</span>虚拟 DOM 真实含义</a>
+  <a href="./t3.html" data-t="t3"><span class="n">3</span>生命周期执行顺序</a>
+  <div class="grp">第二层 · 一次更新的主线</div>
+  <a href="./t4.html" data-t="t4"><span class="n">4</span>更新的四个阶段</a>
+  <div class="grp">阶段一 · Trigger 触发</div>
+  <a href="./t9.html" data-t="t9"><span class="n">5</span>UpdateQueue：更新入队</a>
+  <div class="grp">阶段二 · Schedule 调度</div>
+  <a href="./t13.html" data-t="t13"><span class="n">6</span>Lane：选择更新</a>
+  <a href="./t12.html" data-t="t12"><span class="n">7</span>Scheduler：安排执行</a>
+  <div class="grp">阶段三 · Render 计算</div>
+  <a href="./t8.html" data-t="t8"><span class="n">8</span>Fiber：可中断工作单元</a>
+  <a href="./t5.html" data-t="t5"><span class="n">9</span>双缓存 Fiber 树</a>
+  <a href="./t7.html" data-t="t7"><span class="n">10</span>Hooks：读取与计算状态</a>
+  <a href="./t6.html" data-t="t6"><span class="n">11</span>Diff：协调子节点</a>
+  <a href="./t10.html" data-t="t10"><span class="n">12</span>flags：记录变更</a>
+  <div class="grp">阶段四 · Commit 提交</div>
+  <a href="./t11.html" data-t="t11"><span class="n">13</span>Commit：应用变更</a>
+  <div class="grp">并发延伸</div>
+  <a href="./t14.html" data-t="t14"><span class="n">14</span>Concurrent 并发渲染</a>
+  <a href="./t15.html" data-t="t15"><span class="n">15</span>两大并发 API</a>
+  <div class="grp">架构交互</div>
+  <a href="./t16.html" data-t="t16"><span class="n">16</span>三大模块协作</a>
+  <a href="./t17.html" data-t="t17"><span class="n">17</span>批量更新原理</a>
+  <a href="./t18.html" data-t="t18"><span class="n">18</span>Suspense / lazy</a>
+  <a href="./t19.html" data-t="t19"><span class="n">19</span>合成事件系统</a>
+  <div class="grp">性能优化</div>
+  <a href="./t20.html" data-t="t20" class="active" aria-current="page"><span class="n">20</span>渲染优化底层</a>
+  <a href="./t21.html" data-t="t21"><span class="n">21</span>渲染 bug 底层解释</a>
+  <div class="grp">高级实践与新架构</div>
+  <a href="./t22.html" data-t="t22"><span class="n">22</span>SSR / Hydration / 流式</a>
+  <a href="./t23.html" data-t="t23"><span class="n">23</span>Server Components</a>
+  <a href="./t24.html" data-t="t24"><span class="n">24</span>React 19 新特性</a>
+  <a href="./t25.html" data-t="t25"><span class="n">25</span>外部状态与撕裂</a>
+  <a href="./t26.html" data-t="t26"><span class="n">26</span>React Compiler</a>
+  <a href="./t27.html" data-t="t27"><span class="n">27</span>高级模式与陷阱</a>
+  <a href="./t28.html" data-t="t28"><span class="n">28</span>性能诊断与工程化</a>
+  <div class="grp">补充专题 · 常被漏掉的核心</div>
+  <a href="./ctx.html" data-t="ctx"><span class="n">C1</span>Context 源码原理</a>
+  <a href="./ref.html" data-t="ref"><span class="n">C2</span>useRef 与 ref 体系</a>
+  <div class="grp">源码附录 · 按需查阅</div>
+  <a href="./pk.html" data-t="pk"><span class="n">A1</span>宏观包结构</a>
+  <a href="./boot.html" data-t="boot"><span class="n">A2</span>启动过程</a>
+  <a href="./obj.html" data-t="obj"><span class="n">A3</span>核心对象速查</a>
+  <a href="./source.html" data-t="source"><span class="n">A4</span>源码阅读路线</a>
+  <div class="grp">总结</div>
+  <a href="./main.html" data-t="main"><span class="n">★</span>React 更新流程总览</a>
+</aside>
+<main id="main"><section class="topic active" id="t20">
+  <div class="crumb">第六层 · 性能优化 / 20</div>
+  <h1>20 · 渲染优化底层</h1>
+  <div style="display:flex;flex-wrap:wrap;gap:3px;align-items:center;font-family:var(--mono);font-size:10.5px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:7px 10px;margin:6px 0 14px;overflow-x:auto"><b style="color:var(--txt2);margin-right:4px;font-family:inherit">🧭 主线</b><span data-go="t4" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">setState</span><span style="color:var(--dim)">→</span><span data-go="t9" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">Update</span><span style="color:var(--dim)">→</span><span data-go="t13" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">Lane</span><span style="color:var(--dim)">→</span><span data-go="t12" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">Scheduler</span><span style="color:var(--dim)">→</span><span data-go="t8" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:rgba(97,218,251,.22);border:1.5px solid var(--accent);color:var(--accent);font-weight:700">Render</span><span style="color:var(--dim)">→</span><span data-go="t10" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">Effect</span><span style="color:var(--dim)">→</span><span data-go="t11" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">Commit</span><span style="color:var(--dim)">→</span><span data-go="t11" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">DOM</span></div>
+  <div class="card" style="border-left:4px solid var(--accent)">
+    <b>🗺 本章路线图</b>
+    <p style="margin:8px 0 0"><b>本节内容：</b>识别可以触发 bailout 的条件，减少不必要的组件执行和 DOM 操作。</p>
+    <p style="margin:6px 0 0">本章包括：<b>① bailout 触发条件 ② memo 浅比较底层 ③ 怎么做到精准局部更新</b>。</p>
+  </div>
+  <h2><span class="dot" style="background:var(--recon)"></span>bailout:满足条件就不渲染</h2>
+  <p>beginWork 里,若同时满足以下条件,React 走 <code>bailoutOnAlreadyFinishedWork</code>,<b>跳过该 fiber 的重渲染,直接复用旧子树</b>:</p>
+  <ul class="clean">
+    <li><code>oldProps === newProps</code>(引用相等)且 context 未变;</li>
+    <li>该 fiber 没有自己的待处理更新(<code>!includesSomeLane(renderLanes, fiber.lanes)</code>);</li>
+    <li>若连 <code>childLanes</code> 也没有待更新 → <b>整棵子树都跳过</b>(这就是精准局部更新的关键:childLanes 让 React 知道子树里哪还有活)。</li>
+  </ul>
+  <h2><span class="dot" style="background:var(--accent)"></span>memo 的浅比较</h2>
+  <pre><span class="kw">function</span> <span class="fn">shallowEqual</span>(objA, objB){
+  <span class="kw">if</span>(<span class="fn">is</span>(objA, objB)) <span class="kw">return</span> <span class="kw">true</span>;
+  <span class="kw">const</span> keysA=<span class="fn">keys</span>(objA), keysB=<span class="fn">keys</span>(objB);
+  <span class="kw">if</span>(keysA.length !== keysB.length) <span class="kw">return</span> <span class="kw">false</span>;
+  <span class="kw">for</span>(<span class="kw">const</span> k <span class="kw">of</span> keysA)              <span class="cm">// 只比第一层</span>
+    <span class="kw">if</span>(!<span class="fn">is</span>(objA[k], objB[k])) <span class="kw">return</span> <span class="kw">false</span>;
+  <span class="kw">return</span> <span class="kw">true</span>;
+}</pre>
+  <p>只比 props 第一层。所以传<b>新建的对象/数组/函数</b>(每次渲染引用都变)会让 memo 失效 —— 这正是要配 <code>useMemo/useCallback</code> 稳定引用的原因。深层嵌套对象浅比较也测不出,需自定义 <code>areEqual</code>。</p>
+  <h2><span class="dot" style="background:var(--fiber)"></span>如何做到精准局部更新</h2>
+  <p>state 定义得越靠近使用它的组件,重渲染范围越小(状态下放)。配合 <code>childLanes</code> 的 bailout,只有"从 root 到发生更新的 fiber"这条路径 + 其必要子树会被 beginWork,兄弟子树整体跳过。</p>
+  <div class="callout good"><b>本章小结：</b>bailout = props 引用没变 + 无自身更新 + context 没变 → 复用旧子树,<code>childLanes</code> 为 0 还能整棵跳过;memo 只浅比较第一层,传新建对象/函数会失效,要配 useMemo/useCallback。→ 下一章:<a class="xref" data-go="t21">第六层·渲染 bug</a>。</div>
+  <div class="navbtns"><button class="ghost" data-go="t19">← 19合成事件系统</button><button class="act" data-go="t21">21渲染 bug 底层解释 →</button></div>
+</section></main>
+<script src="./assets/site.js"></script>
+<script src="./assets/demos.js"></script>
+</body>
+</html>

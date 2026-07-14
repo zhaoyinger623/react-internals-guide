@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+<title>合成事件系统 · React 原理全景</title>
+<script>
+  const embedParams = new URLSearchParams(location.search);
+  if (embedParams.get('embed') === '1') document.documentElement.classList.add('is-embed');
+  if (embedParams.get('theme') === 'light') document.documentElement.classList.add('embed-light');
+</script>
+<link rel="stylesheet" href="./assets/site.css">
+</head>
+<body data-chapter="t19">
+<aside id="side">
+  <div class="brand">⚛️ React 原理全景</div>
+  <button class="themebtn" id="themeBtn"><span class="ic">🌙</span><span id="themeLabel">切换到浅色模式</span></button>
+  <a href="./intro.html" data-t="intro"><span class="n">◎</span>如何使用本页</a>
+  <div class="grp">更新流程</div>
+  <a href="./journey.html" data-t="journey"><span class="n">★</span>一次 setState 的完整旅程</a>
+  <div class="grp">第一层 · 表层原理</div>
+  <a href="./t1.html" data-t="t1"><span class="n">1</span>组件渲染机制</a>
+  <a href="./t2.html" data-t="t2"><span class="n">2</span>虚拟 DOM 真实含义</a>
+  <a href="./t3.html" data-t="t3"><span class="n">3</span>生命周期执行顺序</a>
+  <div class="grp">第二层 · 一次更新的主线</div>
+  <a href="./t4.html" data-t="t4"><span class="n">4</span>更新的四个阶段</a>
+  <div class="grp">阶段一 · Trigger 触发</div>
+  <a href="./t9.html" data-t="t9"><span class="n">5</span>UpdateQueue：更新入队</a>
+  <div class="grp">阶段二 · Schedule 调度</div>
+  <a href="./t13.html" data-t="t13"><span class="n">6</span>Lane：选择更新</a>
+  <a href="./t12.html" data-t="t12"><span class="n">7</span>Scheduler：安排执行</a>
+  <div class="grp">阶段三 · Render 计算</div>
+  <a href="./t8.html" data-t="t8"><span class="n">8</span>Fiber：可中断工作单元</a>
+  <a href="./t5.html" data-t="t5"><span class="n">9</span>双缓存 Fiber 树</a>
+  <a href="./t7.html" data-t="t7"><span class="n">10</span>Hooks：读取与计算状态</a>
+  <a href="./t6.html" data-t="t6"><span class="n">11</span>Diff：协调子节点</a>
+  <a href="./t10.html" data-t="t10"><span class="n">12</span>flags：记录变更</a>
+  <div class="grp">阶段四 · Commit 提交</div>
+  <a href="./t11.html" data-t="t11"><span class="n">13</span>Commit：应用变更</a>
+  <div class="grp">并发延伸</div>
+  <a href="./t14.html" data-t="t14"><span class="n">14</span>Concurrent 并发渲染</a>
+  <a href="./t15.html" data-t="t15"><span class="n">15</span>两大并发 API</a>
+  <div class="grp">架构交互</div>
+  <a href="./t16.html" data-t="t16"><span class="n">16</span>三大模块协作</a>
+  <a href="./t17.html" data-t="t17"><span class="n">17</span>批量更新原理</a>
+  <a href="./t18.html" data-t="t18"><span class="n">18</span>Suspense / lazy</a>
+  <a href="./t19.html" data-t="t19" class="active" aria-current="page"><span class="n">19</span>合成事件系统</a>
+  <div class="grp">性能优化</div>
+  <a href="./t20.html" data-t="t20"><span class="n">20</span>渲染优化底层</a>
+  <a href="./t21.html" data-t="t21"><span class="n">21</span>渲染 bug 底层解释</a>
+  <div class="grp">高级实践与新架构</div>
+  <a href="./t22.html" data-t="t22"><span class="n">22</span>SSR / Hydration / 流式</a>
+  <a href="./t23.html" data-t="t23"><span class="n">23</span>Server Components</a>
+  <a href="./t24.html" data-t="t24"><span class="n">24</span>React 19 新特性</a>
+  <a href="./t25.html" data-t="t25"><span class="n">25</span>外部状态与撕裂</a>
+  <a href="./t26.html" data-t="t26"><span class="n">26</span>React Compiler</a>
+  <a href="./t27.html" data-t="t27"><span class="n">27</span>高级模式与陷阱</a>
+  <a href="./t28.html" data-t="t28"><span class="n">28</span>性能诊断与工程化</a>
+  <div class="grp">补充专题 · 常被漏掉的核心</div>
+  <a href="./ctx.html" data-t="ctx"><span class="n">C1</span>Context 源码原理</a>
+  <a href="./ref.html" data-t="ref"><span class="n">C2</span>useRef 与 ref 体系</a>
+  <div class="grp">源码附录 · 按需查阅</div>
+  <a href="./pk.html" data-t="pk"><span class="n">A1</span>宏观包结构</a>
+  <a href="./boot.html" data-t="boot"><span class="n">A2</span>启动过程</a>
+  <a href="./obj.html" data-t="obj"><span class="n">A3</span>核心对象速查</a>
+  <a href="./source.html" data-t="source"><span class="n">A4</span>源码阅读路线</a>
+  <div class="grp">总结</div>
+  <a href="./main.html" data-t="main"><span class="n">★</span>React 更新流程总览</a>
+</aside>
+<main id="main"><section class="topic active" id="t19">
+  <div class="crumb">第五层 · 架构交互 / 19</div>
+  <h1>19 · 合成事件系统</h1>
+  <div style="display:flex;flex-wrap:wrap;gap:3px;align-items:center;font-family:var(--mono);font-size:10.5px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:7px 10px;margin:6px 0 14px;overflow-x:auto"><b style="color:var(--txt2);margin-right:4px;font-family:inherit">🧭 主线</b><span data-go="t4" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:rgba(97,218,251,.22);border:1.5px solid var(--accent);color:var(--accent);font-weight:700">setState</span><span style="color:var(--dim)">→</span><span data-go="t9" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">Update</span><span style="color:var(--dim)">→</span><span data-go="t13" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">Lane</span><span style="color:var(--dim)">→</span><span data-go="t12" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">Scheduler</span><span style="color:var(--dim)">→</span><span data-go="t8" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">Render</span><span style="color:var(--dim)">→</span><span data-go="t10" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">Effect</span><span style="color:var(--dim)">→</span><span data-go="t11" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">Commit</span><span style="color:var(--dim)">→</span><span data-go="t11" style="cursor:pointer;padding:3px 8px;border-radius:6px;white-space:nowrap;background:var(--panel);border:1px solid var(--line);color:var(--dim)">DOM</span></div>
+  <div class="card" style="border-left:4px solid var(--accent)">
+    <b>🗺 本章路线图</b>
+    <p style="margin:8px 0 0">React 把事件统一<b>委托到根容器</b>,靠 <code>__reactFiber</code> 反查 fiber、<b>沿 fiber 树模拟捕获/冒泡</b>,派发归一化的 SyntheticEvent。</p>
+    <p style="margin:6px 0 0">本章包括：<b>事件委托、事件池、合成 vs 原生顺序、stopPropagation 为何有时无效</b>。</p>
+  </div>
+  <h2><span class="dot" style="background:var(--render)"></span>事件委托</h2>
+  <p>React 不给每个元素绑监听器,而是<b>把所有事件统一委托到根容器</b>(React 17+ 是 <code>createRoot</code> 的 container,16 是 document)。DOM 节点上挂 <code>__reactFiber$xxx</code> 指回 fiber,事件触发时反查目标 fiber,再<b>沿 fiber 树的 return 链模拟捕获/冒泡</b>,派发归一化的 <b>SyntheticEvent</b>。</p>
+  <h2><span class="dot" style="background:var(--sched)"></span>事件池(event pooling)</h2>
+  <p>React 16 会<b>复用</b> SyntheticEvent 对象(用完清空属性),异步访问 <code>e.target</code> 会拿到 null,需 <code>e.persist()</code>。<b>React 17 起移除了事件池</b>,可放心异步使用事件对象。</p>
+  <h2><span class="dot" style="background:var(--warn)"></span>合成事件 vs 原生事件顺序 / 为什么 stopPropagation 有时无效</h2>
+  <ul class="clean">
+    <li><b>执行顺序:</b>原生事件先在真实 DOM 冒泡,到达委托根后 React 才开始派发合成事件。所以<b>子元素的原生监听器早于父元素的 React 合成监听器</b>触发。</li>
+    <li><b>为什么阻止冒泡有时无效:</b>合成事件的 <code>e.stopPropagation()</code> 只能阻断<b>合成事件体系内</b>的冒泡,拦不住<b>已经发生的原生冒泡</b>;反之在<b>原生监听器</b>里 <code>stopPropagation</code> 若阻止了事件到达委托根,会导致<b>整个 React 合成事件不触发</b>。混用原生 + 合成事件是这类 bug 的根源。</li>
+  </ul>
+  <div class="card">
+    <h3 style="margin-top:0">互动:点击叶子,沿 fiber 树捕获→冒泡</h3>
+    <div class="demo-guide"><b>怎么操作：</b>先直接点击最内层按钮，观察捕获阶段从外到内、冒泡阶段从内到外；重置后勾选 <code>stopPropagation</code>，查看派发在哪一层停止。</div>
+    <div id="evTree" style="margin:10px 0"></div>
+    <div class="controls"><button class="act" id="evClick">🖱 点击最内层 button</button><button class="ghost" id="evReset">重置</button>
+      <label style="font-size:12px;color:var(--dim);display:flex;align-items:center;gap:5px"><input type="checkbox" id="evStop">Main 处 stopPropagation()</label></div>
+    <div class="status" id="evStatus">点击按钮开始派发。</div>
+  </div>
+  <div class="callout good"><b>本章小结：</b>事件委托到 root、按 fiber 树的 return 链收集监听器模拟冒泡;17 起移除事件池;原生事件先于合成事件;混用原生+合成时 stopPropagation 易失效。→ 下一章:<a class="xref" data-go="t20">第六层·渲染优化</a>。</div>
+  <div class="navbtns"><button class="ghost" data-go="t18">← 18Suspense / lazy</button><button class="act" data-go="t20">20渲染优化底层 →</button></div>
+</section></main>
+<script src="./assets/site.js"></script>
+<script src="./assets/demos.js"></script>
+</body>
+</html>

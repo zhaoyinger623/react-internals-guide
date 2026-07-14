@@ -3,56 +3,6 @@ title: 宏观包结构
 description: React 原理全景中的「宏观包结构」，从运行机制继续深入源码。
 ---
 
-<div className="tutorial-chapter">
+import { EmbeddedChapter } from '../../theme/EmbeddedChapter';
 
-源码附录 / A1
-
-动手看源码前,先建立地图。React 是一个 **monorepo**,`packages/` 下有 30+ 个包。做 Web 开发,真正要理解的**只有 4 个核心包**,它们正好对应前面反复出现的三大模块:
-
-<div className="tutorial-visual">
-<svg viewBox="0 0 1000 430" style={{ width: "100%", height: "auto" }} fontFamily="ui-monospace,monospace"><defs><marker id="pkA" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" style={{ fill: "var(--accent)" }} /></marker></defs><rect x="40" y="40" width="220" height="90" rx="12" style={{ fill: "rgba(97,218,251,.12)", stroke: "var(--accent)" }} strokeWidth="1.8" /><text x="150" y="68" textAnchor="middle" style={{ fill: "var(--accent)" }} fontSize="15" fontWeight="700">react</text> <text x="150" y="90" textAnchor="middle" style={{ fill: "var(--txt)" }} fontSize="10.5">定义 API:createElement</text> <text x="150" y="107" textAnchor="middle" style={{ fill: "var(--txt)" }} fontSize="10.5">Component / Hooks 壳</text> <text x="150" y="122" textAnchor="middle" style={{ fill: "var(--dim)" }} fontSize="9.5">只产出「描述」,不渲染</text> <rect x="390" y="40" width="240" height="90" rx="12" style={{ fill: "rgba(126,231,135,.14)", stroke: "var(--recon)" }} strokeWidth="1.8" /><text x="510" y="68" textAnchor="middle" style={{ fill: "var(--recon)" }} fontSize="15" fontWeight="700">react-reconciler</text> <text x="510" y="90" textAnchor="middle" style={{ fill: "var(--txt)" }} fontSize="10.5">协调器:Fiber / Diff</text> <text x="510" y="107" textAnchor="middle" style={{ fill: "var(--txt)" }} fontSize="10.5">beginWork/completeWork/commit</text> <text x="510" y="122" textAnchor="middle" style={{ fill: "var(--dim)" }} fontSize="9.5">平台无关的「内核」</text> <rect x="740" y="40" width="220" height="90" rx="12" style={{ fill: "rgba(255,123,156,.14)", stroke: "var(--render)" }} strokeWidth="1.8" /><text x="850" y="68" textAnchor="middle" style={{ fill: "var(--render)" }} fontSize="15" fontWeight="700">react-dom</text> <text x="850" y="90" textAnchor="middle" style={{ fill: "var(--txt)" }} fontSize="10.5">渲染器 + 入口 createRoot</text> <text x="850" y="107" textAnchor="middle" style={{ fill: "var(--txt)" }} fontSize="10.5">事件系统 + HostConfig</text> <text x="850" y="122" textAnchor="middle" style={{ fill: "var(--dim)" }} fontSize="9.5">DOM 平台实现</text> <rect x="390" y="300" width="240" height="90" rx="12" style={{ fill: "rgba(242,184,75,.14)", stroke: "var(--sched)" }} strokeWidth="1.8" /><text x="510" y="328" textAnchor="middle" style={{ fill: "var(--sched)" }} fontSize="15" fontWeight="700">scheduler</text> <text x="510" y="350" textAnchor="middle" style={{ fill: "var(--txt)" }} fontSize="10.5">时间切片 / 优先级</text> <text x="510" y="367" textAnchor="middle" style={{ fill: "var(--txt)" }} fontSize="10.5">MessageChannel · 最小堆</text> <text x="510" y="382" textAnchor="middle" style={{ fill: "var(--dim)" }} fontSize="9.5">独立,不认识 React</text> <rect x="740" y="185" width="220" height="60" rx="10" style={{ fill: "none", stroke: "var(--render)" }} strokeWidth="1.5" strokeDasharray="5 4" /><text x="850" y="210" textAnchor="middle" style={{ fill: "var(--render)" }} fontSize="12" fontWeight="700">HostConfig 适配层</text> <text x="850" y="228" textAnchor="middle" style={{ fill: "var(--dim)" }} fontSize="9.5">createInstance/appendChild…</text> <line x1="260" y1="85" x2="388" y2="85" style={{ stroke: "var(--accent)" }} strokeWidth="2.5" markerEnd="url(#pkA)" /><text x="324" y="76" textAnchor="middle" style={{ fill: "var(--dim)" }} fontSize="10">元素描述</text> <line x1="630" y1="85" x2="738" y2="85" style={{ stroke: "var(--accent)" }} strokeWidth="2.5" markerEnd="url(#pkA)" /><text x="684" y="76" textAnchor="middle" style={{ fill: "var(--dim)" }} fontSize="10">要做什么</text> <line x1="510" y1="298" x2="510" y2="132" style={{ stroke: "var(--accent)" }} strokeWidth="2.5" markerEnd="url(#pkA)" /><text x="524" y="220" style={{ fill: "var(--dim)" }} fontSize="10">调度时间片</text> <path d="M850,185 L850,132" style={{ fill: "none", stroke: "var(--render)" }} strokeWidth="2" markerEnd="url(#pkA)" /><path d="M740,215 L636,215 L636,130" style={{ fill: "none", stroke: "var(--render)" }} strokeWidth="2" strokeDasharray="4 3" markerEnd="url(#pkA)" /><text x="690" y="260" textAnchor="middle" style={{ fill: "var(--dim)" }} fontSize="9.5">reconciler 通过 HostConfig 调 react-dom</text></svg>
-</div>
-
-包
-
-角色
-
-关键内容
-
-平台相关?
-
-`react`
-
-核心 API
-
-`createElement`、`Component`、`Hooks` 的「壳」、`createContext`
-
-❌ 无关
-
-`react-reconciler`
-
-协调器(WHAT)
-
-Fiber、Diff、beginWork/completeWork、commit、Hooks 真正实现
-
-❌ 无关
-
-`react-dom`
-
-渲染器 + 入口(HOW)
-
-`createRoot`、事件系统、**HostConfig**(DOM 操作实现)
-
-✅ 相关
-
-`scheduler`
-
-调度器(WHEN)
-
-时间切片、优先级、MessageChannel、最小堆
-
-❌ 无关
-
-**HostConfig 用于隔离平台差异。**`react-reconciler` 通过 `createInstance`、`appendChild`、`commitUpdate` 等接口操作宿主节点。`react-dom` 提供 DOM 实现，React Native 的渲染器提供原生视图实现，因此 reconciler 不需要包含具体平台的节点操作。
-
-</div>
+<EmbeddedChapter chapter="pk" />

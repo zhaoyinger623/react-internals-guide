@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+<title>宏观包结构 · React 原理全景</title>
+<script>
+  const embedParams = new URLSearchParams(location.search);
+  if (embedParams.get('embed') === '1') document.documentElement.classList.add('is-embed');
+  if (embedParams.get('theme') === 'light') document.documentElement.classList.add('embed-light');
+</script>
+<link rel="stylesheet" href="./assets/site.css">
+</head>
+<body data-chapter="pk">
+<aside id="side">
+  <div class="brand">⚛️ React 原理全景</div>
+  <button class="themebtn" id="themeBtn"><span class="ic">🌙</span><span id="themeLabel">切换到浅色模式</span></button>
+  <a href="./intro.html" data-t="intro"><span class="n">◎</span>如何使用本页</a>
+  <div class="grp">更新流程</div>
+  <a href="./journey.html" data-t="journey"><span class="n">★</span>一次 setState 的完整旅程</a>
+  <div class="grp">第一层 · 表层原理</div>
+  <a href="./t1.html" data-t="t1"><span class="n">1</span>组件渲染机制</a>
+  <a href="./t2.html" data-t="t2"><span class="n">2</span>虚拟 DOM 真实含义</a>
+  <a href="./t3.html" data-t="t3"><span class="n">3</span>生命周期执行顺序</a>
+  <div class="grp">第二层 · 一次更新的主线</div>
+  <a href="./t4.html" data-t="t4"><span class="n">4</span>更新的四个阶段</a>
+  <div class="grp">阶段一 · Trigger 触发</div>
+  <a href="./t9.html" data-t="t9"><span class="n">5</span>UpdateQueue：更新入队</a>
+  <div class="grp">阶段二 · Schedule 调度</div>
+  <a href="./t13.html" data-t="t13"><span class="n">6</span>Lane：选择更新</a>
+  <a href="./t12.html" data-t="t12"><span class="n">7</span>Scheduler：安排执行</a>
+  <div class="grp">阶段三 · Render 计算</div>
+  <a href="./t8.html" data-t="t8"><span class="n">8</span>Fiber：可中断工作单元</a>
+  <a href="./t5.html" data-t="t5"><span class="n">9</span>双缓存 Fiber 树</a>
+  <a href="./t7.html" data-t="t7"><span class="n">10</span>Hooks：读取与计算状态</a>
+  <a href="./t6.html" data-t="t6"><span class="n">11</span>Diff：协调子节点</a>
+  <a href="./t10.html" data-t="t10"><span class="n">12</span>flags：记录变更</a>
+  <div class="grp">阶段四 · Commit 提交</div>
+  <a href="./t11.html" data-t="t11"><span class="n">13</span>Commit：应用变更</a>
+  <div class="grp">并发延伸</div>
+  <a href="./t14.html" data-t="t14"><span class="n">14</span>Concurrent 并发渲染</a>
+  <a href="./t15.html" data-t="t15"><span class="n">15</span>两大并发 API</a>
+  <div class="grp">架构交互</div>
+  <a href="./t16.html" data-t="t16"><span class="n">16</span>三大模块协作</a>
+  <a href="./t17.html" data-t="t17"><span class="n">17</span>批量更新原理</a>
+  <a href="./t18.html" data-t="t18"><span class="n">18</span>Suspense / lazy</a>
+  <a href="./t19.html" data-t="t19"><span class="n">19</span>合成事件系统</a>
+  <div class="grp">性能优化</div>
+  <a href="./t20.html" data-t="t20"><span class="n">20</span>渲染优化底层</a>
+  <a href="./t21.html" data-t="t21"><span class="n">21</span>渲染 bug 底层解释</a>
+  <div class="grp">高级实践与新架构</div>
+  <a href="./t22.html" data-t="t22"><span class="n">22</span>SSR / Hydration / 流式</a>
+  <a href="./t23.html" data-t="t23"><span class="n">23</span>Server Components</a>
+  <a href="./t24.html" data-t="t24"><span class="n">24</span>React 19 新特性</a>
+  <a href="./t25.html" data-t="t25"><span class="n">25</span>外部状态与撕裂</a>
+  <a href="./t26.html" data-t="t26"><span class="n">26</span>React Compiler</a>
+  <a href="./t27.html" data-t="t27"><span class="n">27</span>高级模式与陷阱</a>
+  <a href="./t28.html" data-t="t28"><span class="n">28</span>性能诊断与工程化</a>
+  <div class="grp">补充专题 · 常被漏掉的核心</div>
+  <a href="./ctx.html" data-t="ctx"><span class="n">C1</span>Context 源码原理</a>
+  <a href="./ref.html" data-t="ref"><span class="n">C2</span>useRef 与 ref 体系</a>
+  <div class="grp">源码附录 · 按需查阅</div>
+  <a href="./pk.html" data-t="pk" class="active" aria-current="page"><span class="n">A1</span>宏观包结构</a>
+  <a href="./boot.html" data-t="boot"><span class="n">A2</span>启动过程</a>
+  <a href="./obj.html" data-t="obj"><span class="n">A3</span>核心对象速查</a>
+  <a href="./source.html" data-t="source"><span class="n">A4</span>源码阅读路线</a>
+  <div class="grp">总结</div>
+  <a href="./main.html" data-t="main"><span class="n">★</span>React 更新流程总览</a>
+</aside>
+<main id="main"><section class="topic active" id="pk">
+  <div class="crumb">源码附录 / A1</div>
+  <h1>A1 · 宏观包结构</h1>
+  <p>动手看源码前,先建立地图。React 是一个 <b>monorepo</b>,<code>packages/</code> 下有 30+ 个包。做 Web 开发,真正要理解的<b>只有 4 个核心包</b>,它们正好对应前面反复出现的三大模块:</p>
+  <div class="card" style="text-align:center">
+    <svg viewBox="0 0 1000 430" style="width:100%;height:auto" font-family="ui-monospace,monospace">
+      <defs><marker id="pkA" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" style="fill:var(--accent)"/></marker></defs>
+      <!-- react -->
+      <rect x="40" y="40" width="220" height="90" rx="12" style="fill:rgba(97,218,251,.12);stroke:var(--accent)" stroke-width="1.8"/>
+      <text x="150" y="68" text-anchor="middle" style="fill:var(--accent)" font-size="15" font-weight="700">react</text>
+      <text x="150" y="90" text-anchor="middle" style="fill:var(--txt)" font-size="10.5">定义 API:createElement</text>
+      <text x="150" y="107" text-anchor="middle" style="fill:var(--txt)" font-size="10.5">Component / Hooks 壳</text>
+      <text x="150" y="122" text-anchor="middle" style="fill:var(--dim)" font-size="9.5">只产出「描述」,不渲染</text>
+      <!-- react-reconciler -->
+      <rect x="390" y="40" width="240" height="90" rx="12" style="fill:rgba(126,231,135,.14);stroke:var(--recon)" stroke-width="1.8"/>
+      <text x="510" y="68" text-anchor="middle" style="fill:var(--recon)" font-size="15" font-weight="700">react-reconciler</text>
+      <text x="510" y="90" text-anchor="middle" style="fill:var(--txt)" font-size="10.5">协调器:Fiber / Diff</text>
+      <text x="510" y="107" text-anchor="middle" style="fill:var(--txt)" font-size="10.5">beginWork/completeWork/commit</text>
+      <text x="510" y="122" text-anchor="middle" style="fill:var(--dim)" font-size="9.5">平台无关的「内核」</text>
+      <!-- react-dom -->
+      <rect x="740" y="40" width="220" height="90" rx="12" style="fill:rgba(255,123,156,.14);stroke:var(--render)" stroke-width="1.8"/>
+      <text x="850" y="68" text-anchor="middle" style="fill:var(--render)" font-size="15" font-weight="700">react-dom</text>
+      <text x="850" y="90" text-anchor="middle" style="fill:var(--txt)" font-size="10.5">渲染器 + 入口 createRoot</text>
+      <text x="850" y="107" text-anchor="middle" style="fill:var(--txt)" font-size="10.5">事件系统 + HostConfig</text>
+      <text x="850" y="122" text-anchor="middle" style="fill:var(--dim)" font-size="9.5">DOM 平台实现</text>
+      <!-- scheduler -->
+      <rect x="390" y="300" width="240" height="90" rx="12" style="fill:rgba(242,184,75,.14);stroke:var(--sched)" stroke-width="1.8"/>
+      <text x="510" y="328" text-anchor="middle" style="fill:var(--sched)" font-size="15" font-weight="700">scheduler</text>
+      <text x="510" y="350" text-anchor="middle" style="fill:var(--txt)" font-size="10.5">时间切片 / 优先级</text>
+      <text x="510" y="367" text-anchor="middle" style="fill:var(--txt)" font-size="10.5">MessageChannel · 最小堆</text>
+      <text x="510" y="382" text-anchor="middle" style="fill:var(--dim)" font-size="9.5">独立,不认识 React</text>
+      <!-- HostConfig adapter -->
+      <rect x="740" y="185" width="220" height="60" rx="10" style="fill:none;stroke:var(--render)" stroke-width="1.5" stroke-dasharray="5 4"/>
+      <text x="850" y="210" text-anchor="middle" style="fill:var(--render)" font-size="12" font-weight="700">HostConfig 适配层</text>
+      <text x="850" y="228" text-anchor="middle" style="fill:var(--dim)" font-size="9.5">createInstance/appendChild…</text>
+      <!-- arrows -->
+      <line x1="260" y1="85" x2="388" y2="85" style="stroke:var(--accent)" stroke-width="2.5" marker-end="url(#pkA)"/>
+      <text x="324" y="76" text-anchor="middle" style="fill:var(--dim)" font-size="10">元素描述</text>
+      <line x1="630" y1="85" x2="738" y2="85" style="stroke:var(--accent)" stroke-width="2.5" marker-end="url(#pkA)"/>
+      <text x="684" y="76" text-anchor="middle" style="fill:var(--dim)" font-size="10">要做什么</text>
+      <line x1="510" y1="298" x2="510" y2="132" style="stroke:var(--accent)" stroke-width="2.5" marker-end="url(#pkA)"/>
+      <text x="524" y="220" style="fill:var(--dim)" font-size="10">调度时间片</text>
+      <path d="M850,185 L850,132" style="fill:none;stroke:var(--render)" stroke-width="2" marker-end="url(#pkA)"/>
+      <path d="M740,215 L636,215 L636,130" style="fill:none;stroke:var(--render)" stroke-width="2" stroke-dasharray="4 3" marker-end="url(#pkA)"/>
+      <text x="690" y="260" text-anchor="middle" style="fill:var(--dim)" font-size="9.5">reconciler 通过 HostConfig 调 react-dom</text>
+    </svg>
+  </div>
+  <table class="simple">
+    <tr><th>包</th><th>角色</th><th>关键内容</th><th>平台相关?</th></tr>
+    <tr><td><code>react</code></td><td>核心 API</td><td><code>createElement</code>、<code>Component</code>、<code>Hooks</code> 的「壳」、<code>createContext</code></td><td>❌ 无关</td></tr>
+    <tr><td><code>react-reconciler</code></td><td>协调器(WHAT)</td><td>Fiber、Diff、beginWork/completeWork、commit、Hooks 真正实现</td><td>❌ 无关</td></tr>
+    <tr><td><code>react-dom</code></td><td>渲染器 + 入口(HOW)</td><td><code>createRoot</code>、事件系统、<b>HostConfig</b>(DOM 操作实现)</td><td>✅ 相关</td></tr>
+    <tr><td><code>scheduler</code></td><td>调度器(WHEN)</td><td>时间切片、优先级、MessageChannel、最小堆</td><td>❌ 无关</td></tr>
+  </table>
+  <div class="callout"><b>HostConfig 用于隔离平台差异。</b><code>react-reconciler</code> 通过 <code>createInstance</code>、<code>appendChild</code>、<code>commitUpdate</code> 等接口操作宿主节点。<code>react-dom</code> 提供 DOM 实现，React Native 的渲染器提供原生视图实现，因此 reconciler 不需要包含具体平台的节点操作。</div>
+  <div class="navbtns"><button class="ghost" data-go="ref">← C2useRef 与 ref 体系</button><button class="act" data-go="boot">A2启动过程 →</button></div>
+</section></main>
+<script src="./assets/site.js"></script>
+<script src="./assets/demos.js"></script>
+</body>
+</html>

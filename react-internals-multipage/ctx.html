@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+<title>Context 源码原理 · React 原理全景</title>
+<script>
+  const embedParams = new URLSearchParams(location.search);
+  if (embedParams.get('embed') === '1') document.documentElement.classList.add('is-embed');
+  if (embedParams.get('theme') === 'light') document.documentElement.classList.add('embed-light');
+</script>
+<link rel="stylesheet" href="./assets/site.css">
+</head>
+<body data-chapter="ctx">
+<aside id="side">
+  <div class="brand">⚛️ React 原理全景</div>
+  <button class="themebtn" id="themeBtn"><span class="ic">🌙</span><span id="themeLabel">切换到浅色模式</span></button>
+  <a href="./intro.html" data-t="intro"><span class="n">◎</span>如何使用本页</a>
+  <div class="grp">更新流程</div>
+  <a href="./journey.html" data-t="journey"><span class="n">★</span>一次 setState 的完整旅程</a>
+  <div class="grp">第一层 · 表层原理</div>
+  <a href="./t1.html" data-t="t1"><span class="n">1</span>组件渲染机制</a>
+  <a href="./t2.html" data-t="t2"><span class="n">2</span>虚拟 DOM 真实含义</a>
+  <a href="./t3.html" data-t="t3"><span class="n">3</span>生命周期执行顺序</a>
+  <div class="grp">第二层 · 一次更新的主线</div>
+  <a href="./t4.html" data-t="t4"><span class="n">4</span>更新的四个阶段</a>
+  <div class="grp">阶段一 · Trigger 触发</div>
+  <a href="./t9.html" data-t="t9"><span class="n">5</span>UpdateQueue：更新入队</a>
+  <div class="grp">阶段二 · Schedule 调度</div>
+  <a href="./t13.html" data-t="t13"><span class="n">6</span>Lane：选择更新</a>
+  <a href="./t12.html" data-t="t12"><span class="n">7</span>Scheduler：安排执行</a>
+  <div class="grp">阶段三 · Render 计算</div>
+  <a href="./t8.html" data-t="t8"><span class="n">8</span>Fiber：可中断工作单元</a>
+  <a href="./t5.html" data-t="t5"><span class="n">9</span>双缓存 Fiber 树</a>
+  <a href="./t7.html" data-t="t7"><span class="n">10</span>Hooks：读取与计算状态</a>
+  <a href="./t6.html" data-t="t6"><span class="n">11</span>Diff：协调子节点</a>
+  <a href="./t10.html" data-t="t10"><span class="n">12</span>flags：记录变更</a>
+  <div class="grp">阶段四 · Commit 提交</div>
+  <a href="./t11.html" data-t="t11"><span class="n">13</span>Commit：应用变更</a>
+  <div class="grp">并发延伸</div>
+  <a href="./t14.html" data-t="t14"><span class="n">14</span>Concurrent 并发渲染</a>
+  <a href="./t15.html" data-t="t15"><span class="n">15</span>两大并发 API</a>
+  <div class="grp">架构交互</div>
+  <a href="./t16.html" data-t="t16"><span class="n">16</span>三大模块协作</a>
+  <a href="./t17.html" data-t="t17"><span class="n">17</span>批量更新原理</a>
+  <a href="./t18.html" data-t="t18"><span class="n">18</span>Suspense / lazy</a>
+  <a href="./t19.html" data-t="t19"><span class="n">19</span>合成事件系统</a>
+  <div class="grp">性能优化</div>
+  <a href="./t20.html" data-t="t20"><span class="n">20</span>渲染优化底层</a>
+  <a href="./t21.html" data-t="t21"><span class="n">21</span>渲染 bug 底层解释</a>
+  <div class="grp">高级实践与新架构</div>
+  <a href="./t22.html" data-t="t22"><span class="n">22</span>SSR / Hydration / 流式</a>
+  <a href="./t23.html" data-t="t23"><span class="n">23</span>Server Components</a>
+  <a href="./t24.html" data-t="t24"><span class="n">24</span>React 19 新特性</a>
+  <a href="./t25.html" data-t="t25"><span class="n">25</span>外部状态与撕裂</a>
+  <a href="./t26.html" data-t="t26"><span class="n">26</span>React Compiler</a>
+  <a href="./t27.html" data-t="t27"><span class="n">27</span>高级模式与陷阱</a>
+  <a href="./t28.html" data-t="t28"><span class="n">28</span>性能诊断与工程化</a>
+  <div class="grp">补充专题 · 常被漏掉的核心</div>
+  <a href="./ctx.html" data-t="ctx" class="active" aria-current="page"><span class="n">C1</span>Context 源码原理</a>
+  <a href="./ref.html" data-t="ref"><span class="n">C2</span>useRef 与 ref 体系</a>
+  <div class="grp">源码附录 · 按需查阅</div>
+  <a href="./pk.html" data-t="pk"><span class="n">A1</span>宏观包结构</a>
+  <a href="./boot.html" data-t="boot"><span class="n">A2</span>启动过程</a>
+  <a href="./obj.html" data-t="obj"><span class="n">A3</span>核心对象速查</a>
+  <a href="./source.html" data-t="source"><span class="n">A4</span>源码阅读路线</a>
+  <div class="grp">总结</div>
+  <a href="./main.html" data-t="main"><span class="n">★</span>React 更新流程总览</a>
+</aside>
+<main id="main"><section class="topic active" id="ctx">
+  <div class="crumb">补充专题 · 常被漏掉的核心 / C1</div>
+  <h1>C1 · Context 源码原理</h1>
+  <div class="card" style="border-left:4px solid var(--accent)">
+    <b>🗺 本章路线图</b>
+    <p style="margin:8px 0 0">很多人会用 useContext,却说不清「<b>为什么 Provider 一变,深层组件即使被 memo 包住也更新</b>」。</p>
+    <p style="margin:6px 0 0">本章包括：<b>值栈 push/pop、定向传播(为何穿透 memo)</b>。</p>
+  </div>
+  <p>很多人只会用 <code>useContext</code>,但说不清「为什么 Provider 一变,深层组件即使被 memo 包住也会更新」。这背后是<b>值栈 + 定向传播</b>两套机制。</p>
+
+  <h2><span class="dot" style="background:var(--accent)"></span>createContext 与值栈(stack)</h2>
+  <p><code>createContext(default)</code> 返回一个对象,里面有 <code>Provider</code>、<code>Consumer</code> 和一个 <code>_currentValue</code>。渲染遇到 <code>&lt;Provider value=x&gt;</code> 时,reconciler 在 <b>beginWork 把旧值压栈、写入新值</b>,在 <b>completeWork 弹栈还原</b> —— 这样嵌套的同一个 Context 的多个 Provider 才能各自作用在自己的子树范围内。</p>
+  <pre><span class="cm">// beginWork 进入 Provider(pushProvider 简化)</span>
+<span class="fn">push</span>(valueStack, context._currentValue);  <span class="cm">// 旧值压栈</span>
+context._currentValue = newValue;         <span class="cm">// 写入本层新值</span>
+<span class="cm">// completeWork 离开 Provider(popProvider)</span>
+context._currentValue = <span class="fn">pop</span>(valueStack);   <span class="cm">// 还原为上层的值</span></pre>
+  <div class="card" style="text-align:center">
+    <svg viewBox="0 0 900 210" style="width:100%;height:auto" font-family="ui-monospace,monospace">
+      <defs><marker id="cxA" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" style="fill:var(--accent)"/></marker></defs>
+      <text x="150" y="26" text-anchor="middle" style="fill:var(--dim)" font-size="11">进入 Provider(push)→ 处理子树 → 离开(pop)</text>
+      <rect x="40" y="45" width="220" height="40" rx="8" style="fill:rgba(167,139,250,.16);stroke:var(--fiber)"/><text x="150" y="70" text-anchor="middle" style="fill:var(--txt)" font-size="11">&lt;Provider value="A"&gt; push A</text>
+      <rect x="70" y="95" width="220" height="40" rx="8" style="fill:rgba(167,139,250,.12);stroke:var(--fiber)"/><text x="180" y="120" text-anchor="middle" style="fill:var(--txt)" font-size="11">&lt;Provider value="B"&gt; push B</text>
+      <rect x="100" y="145" width="240" height="40" rx="8" style="fill:rgba(97,218,251,.14);stroke:var(--accent)"/><text x="220" y="170" text-anchor="middle" style="fill:var(--txt)" font-size="11">useContext → 读到最近的 "B"</text>
+      <!-- stack viz -->
+      <text x="600" y="26" text-anchor="middle" style="fill:var(--dim)" font-size="11">valueStack(栈顶 = 当前生效值)</text>
+      <rect x="520" y="45" width="160" height="34" rx="6" style="fill:rgba(97,218,251,.14);stroke:var(--accent)"/><text x="600" y="67" text-anchor="middle" style="fill:var(--txt)" font-size="11">"B" ◀ 栈顶</text>
+      <rect x="520" y="83" width="160" height="34" rx="6" style="fill:var(--panel2);stroke:var(--line)"/><text x="600" y="105" text-anchor="middle" style="fill:var(--txt2)" font-size="11">"A"</text>
+      <rect x="520" y="121" width="160" height="34" rx="6" style="fill:var(--panel2);stroke:var(--line)"/><text x="600" y="143" text-anchor="middle" style="fill:var(--dim)" font-size="11">default</text>
+      <text x="600" y="178" text-anchor="middle" style="fill:var(--dim)" font-size="9.5">离开 B 时 pop → 栈顶回到 "A"</text>
+    </svg>
+  </div>
+
+  <h2><span class="dot" style="background:var(--recon)"></span>定向传播:为什么能绕过 memo / bailout</h2>
+  <p>组件调用 <code>useContext(ctx)</code> 时,除了读值,还会把<b>当前 fiber 登记到该 context 的依赖上</b>。当 Provider 的 value 变化(<code>Object.is</code> 判不等),reconciler 执行 <code>propagateContextChange</code>:<b>从 Provider 向下深度遍历子树,凡是登记了该 context 的 fiber,直接给它标记一个更新 lane</b> —— 即使这条路径上有组件本可以 bailout(memo/props 没变),也会因为「有 context 依赖的待更新」而<b>被强制往下走到消费者</b>。这就是「Context 变化穿透 memo」的源码真相。</p>
+  <div class="callout warn"><b>性能启示(呼应<a class="xref" data-go="t27">第七层·高级模式与陷阱</a>):</b>正因为是「Provider 一变→所有消费者全更新」,才要<b>拆分 Context</b>(把频繁变和不常变的分开)、用 <code>useMemo</code> 稳定 value、或改用 <code>useSyncExternalStore</code>/状态库做<b>选择性订阅</b>(只让真正用到那块数据的组件更新)。</div>
+  <div class="callout good"><b>本章小结：</b>Context 的值靠一个「值栈」在 Provider 进出时 push/pop;value 变化时 <code>propagateContextChange</code> 从 Provider 向下<b>定向</b>标记依赖该 context 的 fiber,穿透 bailout/memo。→ 下一章:<a class="xref" data-go="ref">补充·useRef</a>。</div>
+  <div class="navbtns"><button class="ghost" data-go="t28">← 28性能诊断与工程化</button><button class="act" data-go="ref">C2useRef 与 ref 体系 →</button></div>
+</section></main>
+<script src="./assets/site.js"></script>
+<script src="./assets/demos.js"></script>
+</body>
+</html>

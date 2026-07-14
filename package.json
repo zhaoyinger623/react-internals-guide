@@ -5,9 +5,13 @@
   "description": "从心智模型到源码调用链的 React 原理学习指南",
   "type": "module",
   "scripts": {
+    "predev": "npm run multipage:build",
     "dev": "rspress dev",
+    "prebuild": "npm run multipage:build",
     "build": "rspress build",
-    "preview": "rspress preview"
+    "preview": "rspress preview",
+    "multipage:build": "node scripts/build-multipage.mjs",
+    "multipage:dev": "python3 -m http.server 4174 --directory react-internals-multipage"
   },
   "devDependencies": {
     "@rspress/core": "latest"
