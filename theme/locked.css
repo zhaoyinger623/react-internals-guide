@@ -44,6 +44,8 @@ a[data-course-locked='true']::after {
 /* Tutorial shell: retain Rspress routing/search, but visually stay close to
    the original single-page React tutorial. */
 :root {
+  --tutorial-shell-max-width: 1720px;
+  --tutorial-shell-edge: 12px;
   --rp-c-brand: #0b93b8;
   --rp-c-brand-light: #14a6ca;
   --rp-c-brand-dark: #087c9c;
@@ -119,6 +121,12 @@ body {
   margin-left: 0 !important;
 }
 
+.rp-doc-layout__container {
+  width: 100%;
+  max-width: var(--tutorial-shell-max-width);
+  margin-inline: auto;
+}
+
 .embedded-chapter-shell {
   width: 100%;
   background: transparent;
@@ -153,6 +161,10 @@ body {
 }
 
 .rp-nav {
+  --rp-nav-padding-x: max(
+    20px,
+    calc((100vw - var(--tutorial-shell-max-width)) / 2 + var(--tutorial-shell-edge))
+  ) !important;
   border-bottom-color: var(--rp-c-divider);
   background: color-mix(in srgb, var(--rp-c-bg) 94%, transparent);
   box-shadow: 0 1px 8px rgb(20 30 50 / 5%);
