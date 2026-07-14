@@ -1,0 +1,69 @@
+---
+title: Server Components
+description: React 原理全景中的「Server Components」，从运行机制继续深入源码。
+---
+
+<div className="tutorial-chapter">
+
+第七层 · 高级实践与新架构 / 23
+
+**🗺 本章路线图**
+
+RSC 让一部分组件**只在服务器运行、代码不进 bundle**,只有交互的「叶子」下沉到客户端。
+
+本章包括：**Server vs Client 组件、'use client'/'use server'、RSC Payload**。
+
+RSC 是比 SSR 更进一步的架构。SSR 是「在服务器跑一遍组件生成 HTML,然后整个应用还要在客户端再 hydrate」;**RSC 则让一部分组件只在服务器运行、永不发送到客户端**,连它们的代码都不进 bundle。
+
+## Server Component vs Client Component
+
+Server Component(默认)
+
+Client Component(`'use client'`)
+
+运行位置
+
+只在服务器
+
+服务器预渲染 + 客户端 hydrate
+
+能否用 state/effect/事件
+
+**不能**(无 useState/useEffect/onClick)
+
+能
+
+能否直接读数据库/文件
+
+**能**(async 组件里直接 await)
+
+不能
+
+代码进 bundle 吗
+
+**不进**,减小体积
+
+进
+
+```js
+// 服务器组件:可以是 async,直接取数据,零客户端 JS
+async function ProductPage({id}){
+  const product = await db.products.find(id);  // 直接查库
+  return <div>
+    <h1>{product.name}</h1>
+    <AddToCartButton id={id}/>   // ← 这个需交互,是客户端组件
+  </div>;
+}
+// AddToCartButton.jsx
+'use client';   // ★声明这是客户端组件,才能用 onClick/useState
+```
+
+## 底层:RSC Payload 与边界
+
+服务器不把 Server Component 渲染成 HTML,而是渲染成一种特殊的**序列化格式(RSC Payload)** —— 一棵描述 UI 的树,其中客户端组件是「占位引用」(指向要加载的 JS chunk)。客户端拿到 payload 后拼装,只为标了 `'use client'` 的部分下载和 hydrate JS。`'use server'` 则用于 **Server Actions**(客户端能直接调用的服务器函数)。
+
+RSC 通常由框架(Next.js App Router 等)集成,不是裸 React 直接用。理解要点:**组件默认在服务器,交互的「叶子」才下沉到客户端**,从而大幅减少发到浏览器的 JS。
+
+**本章小结：**默认服务器组件(能 await 取数据、零客户端 JS),标 `'use client'` 的才下载/hydrate;服务器把树序列化成 RSC Payload,客户端拼装。→ 下一章:[第七层·React 19](/04-advanced/t24)。
+
+</div>

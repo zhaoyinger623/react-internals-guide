@@ -1,0 +1,15 @@
+[
+  { "type": "section-header", "label": "阶段一 · Trigger 触发" },
+  "t9",
+  { "type": "section-header", "label": "阶段二 · Schedule 调度" },
+  "t13",
+  "t12",
+  { "type": "section-header", "label": "阶段三 · Render 计算" },
+  "t8",
+  "t5",
+  "t7",
+  "t6",
+  "t10",
+  { "type": "section-header", "label": "阶段四 · Commit 提交" },
+  "t11"
+]

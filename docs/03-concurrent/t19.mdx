@@ -1,0 +1,37 @@
+---
+title: 合成事件系统
+description: React 原理全景中的「合成事件系统」，从运行机制继续深入源码。
+---
+
+<div className="tutorial-chapter">
+
+第五层 · 架构交互 / 19
+
+**🧭 主线**setState→Update→Lane→Scheduler→Render→Effect→Commit→DOM
+
+**🗺 本章路线图**
+
+React 把事件统一**委托到根容器**,靠 `__reactFiber` 反查 fiber、**沿 fiber 树模拟捕获/冒泡**,派发归一化的 SyntheticEvent。
+
+本章包括：**事件委托、事件池、合成 vs 原生顺序、stopPropagation 为何有时无效**。
+
+## 事件委托
+
+React 不给每个元素绑监听器,而是**把所有事件统一委托到根容器**(React 17+ 是 `createRoot` 的 container,16 是 document)。DOM 节点上挂 `__reactFiber$xxx` 指回 fiber,事件触发时反查目标 fiber,再**沿 fiber 树的 return 链模拟捕获/冒泡**,派发归一化的 **SyntheticEvent**。
+
+## 事件池(event pooling)
+
+React 16 会**复用** SyntheticEvent 对象(用完清空属性),异步访问 `e.target` 会拿到 null,需 `e.persist()`。**React 17 起移除了事件池**,可放心异步使用事件对象。
+
+## 合成事件 vs 原生事件顺序 / 为什么 stopPropagation 有时无效
+
+-   **执行顺序:**原生事件先在真实 DOM 冒泡,到达委托根后 React 才开始派发合成事件。所以**子元素的原生监听器早于父元素的 React 合成监听器**触发。
+-   **为什么阻止冒泡有时无效:**合成事件的 `e.stopPropagation()` 只能阻断**合成事件体系内**的冒泡,拦不住**已经发生的原生冒泡**;反之在**原生监听器**里 `stopPropagation` 若阻止了事件到达委托根,会导致**整个 React 合成事件不触发**。混用原生 + 合成事件是这类 bug 的根源。
+
+### 互动:点击叶子,沿 fiber 树捕获→冒泡
+
+**怎么操作：**先直接点击最内层按钮，观察捕获阶段从外到内、冒泡阶段从内到外；重置后勾选 `stopPropagation`，查看派发在哪一层停止。
+
+**本章小结：**事件委托到 root、按 fiber 树的 return 链收集监听器模拟冒泡;17 起移除事件池;原生事件先于合成事件;混用原生+合成时 stopPropagation 易失效。→ 下一章:[第六层·渲染优化](/04-advanced/t20)。
+
+</div>

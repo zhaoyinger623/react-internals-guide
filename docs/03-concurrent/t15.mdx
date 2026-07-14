@@ -1,0 +1,125 @@
+---
+title: 两大并发 API
+description: React 原理全景中的「两大并发 API」，从运行机制继续深入源码。
+---
+
+<div className="tutorial-chapter">
+
+第四层 · 并发架构 / 15
+
+**🧭 主线**setState→Update→Lane→Scheduler→Render→Effect→Commit→DOM
+
+**🗺 本章路线图**
+
+useTransition 把「**更新**」降优先级,useDeferredValue 把「**值**」降优先级——本质都是让高优交互能抢占。
+
+本章包括：**两者原理、区别、使用场景、底层 Lane 差异**。
+
+### `useTransition`
+
+把**更新**标记为低优。`startTransition(fn)` 内的 setState 拿到 **TransitionLane**,可被用户输入等高优**打断**。返回 `isPending` 标识过渡进行中。
+
+```js
+const [isPending, startTransition] = useTransition();
+startTransition(() => {
+  setList(bigFilteredList);  // → TransitionLane(低优)
+});
+```
+
+### `useDeferredValue`
+
+把**值**降级。返回一个"滞后版"的值,React 先用旧值渲染(高优),再在低优 lane 用新值渲染一遍。适合你**拿不到 setState**(值来自 props)的场景。
+
+```js
+const deferredQuery = useDeferredValue(query);
+// 输入框用 query 即时更新,列表用 deferredQuery 滞后更新
+```
+
+## 怎么用:两个真实场景(照着抄)
+
+### 场景 A · 搜索框打字卡顿 → useDeferredValue
+
+受控输入 + 一个**昂贵的派生视图**(过滤大列表 / Markdown 预览 / 图表)。你拿不到列表的 setState(它是 query 派生的),就用 `useDeferredValue` 包住那个「值」:
+
+```js
+function SearchPage(){
+  const [query, setQuery] = useState('');
+  const deferredQuery = useDeferredValue(query); // 滞后版的 query
+  return (
+    <>
+      <input value={query} onChange={e => setQuery(e.target.value)} />  // 输入框用 query:即时、跟手
+      <BigList query={deferredQuery} />   // 大列表用 deferredQuery:稍后跟上,不卡输入
+    </>
+  );
+}
+```
+
+效果:你飞快打字时,输入框每个字都即时显示(高优);而重型列表用「滞后值」在空档里慢慢追上,不会因为列表重渲染卡住你打字。
+
+### 场景 B · 切换重型 tab / 提交搜索 → useTransition
+
+一次交互会触发**昂贵渲染**,但你想让交互本身保持跟手。你**能拿到那段 setState**,就用 `startTransition` 把它标成「非紧急」;`isPending` 还能显示 loading:
+
+```js
+function Tabs(){
+  const [tab, setTab] = useState('home');
+  const [isPending, startTransition] = useTransition();
+  function select(next){
+    startTransition(() => setTab(next)); // 这次切换是「可被打断的低优」
+  }
+  return (
+    <>
+      <button onClick={() => select('posts')}>Posts</button>
+      {isPending && <Spinner/>}        // 过渡中显示 loading
+      <TabContent tab={tab}/>            // 切到很重的 tab 时,旧内容先留着,不白屏
+    </>
+  );
+}
+```
+
+效果:点按钮瞬间响应,重型 tab 内容在后台低优渲染(可被你下一次点击打断),ready 后再换上;期间用 isPending 显示转圈。
+
+**选择方式：**你能改那段 **setState** → 用 **useTransition**(还能拿 isPending 显 loading);你手里只有一个**值**(通常来自 props/上游),改不到它的 setState → 用 **useDeferredValue**。
+
+**📋 常见适用场景**
+
+-   大列表**实时过滤 / 搜索**(输入跟手、结果稍后)
+-   切换**重型 tab / 路由**(旧页先留,新页后台渲染)
+-   输入时的**实时预览**:Markdown、代码高亮、图表重绘
+-   **自动补全**下拉:输入即时、候选列表滞后
+
+⚠️ 不要滥用:只在「某段渲染确实重、且会拖慢交互」时用。轻量更新加了反而多一次渲染。
+
+useTransition
+
+useDeferredValue
+
+作用对象
+
+一段更新逻辑(你能改 setState)
+
+一个值(常是外部传入的 props)
+
+底层
+
+startTransition 内更新走 TransitionLane
+
+内部对该值发起一个 TransitionLane 的延迟更新
+
+额外产出
+
+`isPending` 布尔
+
+无(直接返回滞后值)
+
+场景
+
+点 tab、提交搜索触发大列表渲染
+
+受控输入 + 昂贵派生视图
+
+两者都会让相关更新使用 TransitionLane，使输入等高优先级更新可以先执行。区别在于：`useTransition` 包装状态更新，`useDeferredValue` 接收一个值并返回它的延迟版本。
+
+**本章小结：**两者都把某些更新降到 **TransitionLane**、让用户输入能抢占;useTransition 包一段更新(带 isPending),useDeferredValue 包一个值(拿不到 setState 时用)。→ 下一章:[第五层·三大模块协作](/03-concurrent/t16)。
+
+</div>

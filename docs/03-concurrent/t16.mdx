@@ -1,0 +1,62 @@
+---
+title: 三大模块协作
+description: React 原理全景中的「三大模块协作」，从运行机制继续深入源码。
+---
+
+<div className="tutorial-chapter">
+
+第五层 · 架构交互 / 16
+
+**🧭 主线**setState→Update→Lane→Scheduler→Render→Effect→Commit→DOM
+
+**🗺 本章路线图**
+
+Scheduler(WHEN)→ Reconciler(WHAT)→ Renderer(HOW)**三层解耦**,任务像流水线一样流转。
+
+本章包括：**三层各自职责、解耦价值、任务流转全链路**(附源码调用链图)。
+
+Scheduler / Reconciler / Renderer **三层解耦**,任务像流水线一样流转:
+
+Scheduler 调度层
+
+纯 JS 时间/优先级管理,不认识 React。产出:在时间片里调用 callback。
+
+→
+
+Reconciler 协调层
+
+平台无关。beginWork/completeWork + Diff,产出带 flags 的 WIP 树。
+
+→
+
+Renderer 渲染层
+
+平台相关。react-dom / native / 三方,据 flags 落地。
+
+### 📊 源码调用链全景(ReactFiberWorkLoop)
+
+这张图把从「输入(触发更新)」到「输出(react-dom)」的真实函数调用链画出来了 —— 全文的骨架都在这里。
+
+<div className="tutorial-visual">
+<svg viewBox="0 0 1000 700" style={{ width: "100%", height: "auto" }} fontFamily="ui-monospace,monospace"><defs><marker id="mcArrB" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" style={{ fill: "var(--accent)" }} /></marker><marker id="mcArrG" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" style={{ fill: "var(--dim)" }} /></marker><marker id="mcArrR" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" style={{ fill: "var(--recon)" }} /></marker></defs><rect x="300" y="80" width="680" height="500" rx="14" style={{ fill: "none", stroke: "var(--line)" }} strokeWidth="1.5" strokeDasharray="5 4" /><text x="640" y="100" textAnchor="middle" style={{ fill: "var(--dim)" }} fontSize="13">ReactFiberWorkLoop</text> <rect x="330" y="115" width="620" height="330" rx="12" style={{ fill: "rgba(242,184,75,.10)", stroke: "var(--sched)" }} strokeWidth="1.5" /><rect x="470" y="130" width="465" height="160" rx="10" style={{ fill: "rgba(97,218,251,.10)", stroke: "var(--accent)" }} strokeWidth="1.2" /><circle cx="482" cy="130" r="13" style={{ fill: "var(--accent)" }} /><text x="482" y="135" textAnchor="middle" fill="#fff" fontSize="13" fontWeight="700">3</text> <rect x="495" y="150" width="215" height="120" rx="9" style={{ fill: "rgba(242,184,75,.18)", stroke: "var(--sched)" }} strokeWidth="1.5" /><text x="602" y="173" textAnchor="middle" style={{ fill: "var(--txt)" }} fontSize="13" fontWeight="700">performUnitOfWork</text> <rect x="515" y="186" width="175" height="30" rx="6" style={{ fill: "var(--panel)", stroke: "var(--line)" }} /><text x="602" y="206" textAnchor="middle" style={{ fill: "var(--txt)" }} fontSize="12">beginWork</text> <rect x="515" y="224" width="175" height="30" rx="6" style={{ fill: "var(--panel)", stroke: "var(--line)" }} /><text x="602" y="244" textAnchor="middle" style={{ fill: "var(--txt)" }} fontSize="12">completeWork</text> <circle cx="855" cy="210" r="50" style={{ fill: "none", stroke: "var(--recon)" }} strokeWidth="2.5" /><text x="855" y="206" textAnchor="middle" style={{ fill: "var(--txt)" }} fontSize="12" fontWeight="700">workLoop</text> <text x="855" y="223" textAnchor="middle" style={{ fill: "var(--recon)" }} fontSize="10">构建 fiber 树</text> <line x1="803" y1="210" x2="716" y2="210" style={{ stroke: "var(--dim)" }} strokeWidth="3" markerEnd="url(#mcArrG)" /><rect x="360" y="360" width="250" height="46" rx="8" style={{ fill: "rgba(167,139,250,.16)", stroke: "var(--fiber)" }} strokeWidth="1.5" /><text x="485" y="388" textAnchor="middle" style={{ fill: "var(--txt)" }} fontSize="12.5">performSyncWorkOnRoot</text> <rect x="650" y="360" width="280" height="46" rx="8" style={{ fill: "rgba(167,139,250,.16)", stroke: "var(--fiber)" }} strokeWidth="1.5" /><text x="790" y="388" textAnchor="middle" style={{ fill: "var(--txt)" }} fontSize="12">performConcurrentWorkOnRoot</text> <text x="485" y="330" textAnchor="middle" style={{ fill: "var(--txt)" }} fontSize="12">renderRootSync</text> <line x1="485" y1="360" x2="485" y2="340" style={{ stroke: "var(--dim)" }} strokeWidth="2" /><line x1="485" y1="316" x2="485" y2="292" style={{ stroke: "var(--dim)" }} strokeWidth="2" markerEnd="url(#mcArrG)" /><text x="790" y="330" textAnchor="middle" style={{ fill: "var(--txt)" }} fontSize="12">renderRootConcurrent</text> <line x1="790" y1="360" x2="790" y2="340" style={{ stroke: "var(--dim)" }} strokeWidth="2" /><line x1="790" y1="316" x2="790" y2="292" style={{ stroke: "var(--dim)" }} strokeWidth="2" markerEnd="url(#mcArrG)" /><rect x="250" y="185" width="170" height="46" rx="8" style={{ fill: "rgba(126,231,135,.20)", stroke: "var(--recon)" }} strokeWidth="1.5" /><circle cx="250" cy="185" r="13" style={{ fill: "var(--accent)" }} /><text x="250" y="190" textAnchor="middle" fill="#fff" fontSize="13" fontWeight="700">4</text> <text x="335" y="213" textAnchor="middle" style={{ fill: "var(--txt)" }} fontSize="13" fontWeight="700">commitRoot</text> <line x1="495" y1="208" x2="424" y2="208" style={{ stroke: "var(--accent)" }} strokeWidth="2.5" markerEnd="url(#mcArrB)" /><text x="459" y="199" textAnchor="middle" style={{ fill: "var(--accent)" }} fontSize="10.5">fiber 构造完成</text> <rect x="30" y="163" width="150" height="90" rx="10" style={{ fill: "none", stroke: "var(--line)" }} strokeWidth="1.5" strokeDasharray="5 4" /><text x="105" y="213" textAnchor="middle" style={{ fill: "var(--txt)" }} fontSize="13">react-dom</text> <line x1="250" y1="208" x2="184" y2="208" style={{ stroke: "var(--recon)" }} strokeWidth="2.5" markerEnd="url(#mcArrR)" /><text x="216" y="199" textAnchor="middle" style={{ fill: "var(--recon)" }} fontSize="10.5">输出</text> <text x="176" y="533" textAnchor="middle" style={{ fill: "var(--dim)" }} fontSize="11">输入</text> <line x1="150" y1="545" x2="206" y2="545" style={{ stroke: "var(--render)" }} strokeWidth="2.5" markerEnd="url(#mcArrB)" /><rect x="210" y="522" width="215" height="46" rx="8" style={{ fill: "rgba(255,123,156,.16)", stroke: "var(--render)" }} strokeWidth="1.5" /><circle cx="212" cy="522" r="13" style={{ fill: "var(--accent)" }} /><text x="212" y="527" textAnchor="middle" fill="#fff" fontSize="13" fontWeight="700">1</text> <text x="317" y="550" textAnchor="middle" style={{ fill: "var(--txt)" }} fontSize="12">scheduleUpdateOnFiber</text> <line x1="425" y1="545" x2="495" y2="545" style={{ stroke: "var(--accent)" }} strokeWidth="2.5" markerEnd="url(#mcArrB)" /><rect x="500" y="518" width="270" height="54" rx="8" style={{ fill: "rgba(167,139,250,.16)", stroke: "var(--fiber)" }} strokeWidth="1.5" /><circle cx="502" cy="518" r="13" style={{ fill: "var(--accent)" }} /><text x="502" y="523" textAnchor="middle" fill="#fff" fontSize="13" fontWeight="700">2</text> <text x="635" y="550" textAnchor="middle" style={{ fill: "var(--txt)" }} fontSize="12.5">ensureRootIsScheduled</text> <rect x="740" y="600" width="240" height="90" rx="10" style={{ fill: "none", stroke: "var(--line)" }} strokeWidth="1.5" strokeDasharray="5 4" /><text x="820" y="620" textAnchor="middle" style={{ fill: "var(--dim)" }} fontSize="12">Scheduler</text> <circle cx="900" cy="652" r="30" style={{ fill: "none", stroke: "var(--accent)" }} strokeWidth="2.5" /><text x="900" y="650" textAnchor="middle" style={{ fill: "var(--txt)" }} fontSize="10" fontWeight="700">workLoop</text> <text x="900" y="663" textAnchor="middle" style={{ fill: "var(--accent)" }} fontSize="8.5">任务调度</text> <path d="M690,572 L690,645 L868,645" style={{ fill: "none", stroke: "var(--accent)" }} strokeWidth="2" markerEnd="url(#mcArrB)" /><text x="700" y="600" style={{ fill: "var(--accent)" }} fontSize="10.5">注册调度 task</text> <path d="M930,600 L930,420 L862,420 L862,410" style={{ fill: "none", stroke: "var(--accent)" }} strokeWidth="2" markerEnd="url(#mcArrB)" /><text x="922" y="498" textAnchor="end" style={{ fill: "var(--accent)" }} fontSize="10.5">执行 task 回调</text> <text x="922" y="512" textAnchor="end" style={{ fill: "var(--accent)" }} fontSize="10.5">fiber 树构造</text></svg>
+</div>
+
+① 触发 → ② 调度(注册到 Scheduler)→ ③ Scheduler 回调里驱动 render(sync / concurrent 两条入口 → performUnitOfWork 循环构建 fiber 树)→ ④ commitRoot 输出到 react-dom
+
+### 解耦的价值
+
+-   Scheduler 不知道 Fiber,只调度"一个会返回续作的函数",可单独用于任何切片场景。
+-   Reconciler 只输出"要做什么"(抽象增删改),不碰具体 API,通过 **HostConfig** 适配层调用 Renderer。
+-   换 Renderer 就能换平台:同一套核心渲染 DOM / 原生 / Canvas / 3D。
+
+```js
+// 任务流转全链路(bind 把它们串起来)
+scheduleCallback(prio, performConcurrentWorkOnRoot.bind(null, root))
+   Scheduler 在时间片里 → performConcurrentWorkOnRoot
+      → renderRootConcurrent → workLoopConcurrent → beginWork/completeWork  [Reconciler]
+      → commitRoot → commitMutationEffects → HostConfig.appendChild/...      [Renderer]
+```
+
+**本章小结：**Scheduler 只调度「会返回续作的函数」、Reconciler 通过 **HostConfig** 调 Renderer、换 Renderer 就换平台;调用链 scheduleCallback→performConcurrentWorkOnRoot→workLoop→commitRoot。→ 下一章:[第五层·批量更新](/03-concurrent/t17)。
+
+</div>

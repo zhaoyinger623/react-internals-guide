@@ -1,0 +1,53 @@
+---
+title: React 19 新特性
+description: React 原理全景中的「React 19 新特性」，从运行机制继续深入源码。
+---
+
+<div className="tutorial-chapter">
+
+第七层 · 高级实践与新架构 / 24
+
+**🗺 本章路线图**
+
+**本节内容：**React 19 引入或稳定的主要 API 及其适用场景。
+
+本章包括：**use()、Actions/useActionState/useFormStatus/useOptimistic、ref 作 prop、文档元数据、&lt;Context&gt; 直接作 Provider**。
+
+React 19 中需要关注的 API 变化：
+
+## `use()`:读取 Promise / Context 的新原语
+
+`use` 可以在渲染中「读取」一个 Promise(配合 Suspense 挂起)或 Context,**且能在条件语句里调用**(不同于普通 Hook)。
+
+```js
+function Comments({commentsPromise}){
+  const comments = use(commentsPromise);  // 未就绪 → 抛出挂起,由 Suspense 接住
+  return comments.map(c => <p>{c.text}</p>);
+}
+```
+
+## Actions 与表单
+
+-   **Actions:**`&lt;form action=&#123;fn&#125;>` 直接把函数交给表单,React 管理 pending/error/乐观更新。
+-   `useActionState(fn, initial)`:管理一个 action 的状态与返回值。
+-   `useFormStatus()`:子组件里读取父 `&lt;form&gt;` 的提交状态(pending),无需 props 透传。
+-   `useOptimistic(state, updateFn)`:提交时**先乐观更新 UI**,失败自动回滚。
+
+```js
+const [optimistic, addOptimistic] = useOptimistic(messages);
+async function send(formData){
+  addOptimistic(newMsg);        // UI 立刻显示(乐观)
+  await sendToServer(formData);   // 真正提交;失败则自动回滚
+}
+```
+
+## 其它易忽略的改进
+
+-   **`ref` 作为普通 prop:**函数组件可直接接收 `ref`,**不再需要 `forwardRef`**。
+-   **ref 清理函数:**ref 回调可返回一个清理函数(类似 effect)。
+-   **文档元数据:**组件里直接写 `&lt;title&gt;&lt;meta&gt;&lt;link&gt;`,React 自动提升到 `&lt;head&gt;`。
+-   **`&lt;Context&gt;` 直接作 Provider:**`&lt;ThemeContext value=&#123;...&#125;>`,不再写 `.Provider`。
+
+**本章小结：**use() 读 Promise/Context(可条件调用);Actions 一套管表单 pending/error/乐观更新;ref 可直接作 prop(告别 forwardRef);组件里可直接写 &lt;title&gt;/&lt;meta&gt;。→ 下一章:[第七层·外部状态与撕裂](/04-advanced/t25)。
+
+</div>

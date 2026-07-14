@@ -1,0 +1,53 @@
+---
+title: useRef 与 ref 体系
+description: React 原理全景中的「useRef 与 ref 体系」，从运行机制继续深入源码。
+---
+
+<div className="tutorial-chapter">
+
+补充专题 · 常被漏掉的核心 / C2
+
+**🗺 本章路线图**
+
+useRef 是「**跨渲染不变的盒子**」,改 `.current` 不触发渲染。
+
+本章包括：**useRef 原理、ref 何时被赋值(commit layout)、回调 ref / forwardRef / useImperativeHandle**。
+
+## useRef:一个「跨渲染不变」的盒子
+
+`useRef(init)` 在该 Hook 的 `memoizedState` 上保存一个 `&#123; current: init &#125;` 对象，并在后续渲染中返回同一个对象。修改 `ref.current` 不会触发渲染，因为它不属于 state。常见用途包括保存 DOM 节点、定时器 id 和上一次的值。
+
+```js
+// mount 时创建盒子;update 时原样返回,引用永不变
+function mountRef(initialValue){
+  const hook = mountWorkInProgressHook();
+  const ref = { current: initialValue };
+  hook.memoizedState = ref;
+  return ref;
+}
+// 对比闭包陷阱:ref.current 总是最新的,因为大家共享同一个盒子
+```
+
+**useRef vs useState:**都能跨渲染保存值。区别:改 state **触发**重渲染并参与 UI;改 ref.current **不触发**渲染,适合存「不该驱动 UI 的可变值」。
+
+## ref 属性:什么时候被赋值
+
+`&lt;div ref=&#123;myRef&#125;>` 里的 `myRef.current` 不是渲染时赋值的,而是在 **Commit 的 Layout 阶段**由 React 设置:`commitAttachRef` 把真实 DOM 赋给 `ref.current`;卸载或 ref 变化时先 `commitDetachRef` 置为 `null`。顺序是**先卸旧 ref(=null)、再挂新 ref**。所以在 `useLayoutEffect` 里能拿到 ref,在渲染函数体里拿到的还是上一次的(或 null)。
+
+## 回调 ref / forwardRef / useImperativeHandle
+
+-   **回调 ref:**`ref=&#123;node => ...&#125;`,挂载时收到 node、卸载时收到 null。React 19 起回调可返回一个**清理函数**(替代收到 null)。
+-   **forwardRef:**React 18 及以前,函数组件要接收父级 ref 必须用 `forwardRef` 包裹。**React 19 起 `ref` 可直接作为 prop**,不再需要 forwardRef。
+-   **useImperativeHandle:**配合 ref 只暴露**受控的命令式接口**(如 `&#123; focus, scrollToTop &#125;`),而不是把整个 DOM/实例暴露出去,保持封装。
+-   **string ref(废弃):**`ref="input"` 这种老写法已不推荐,存在性能与语义问题。
+
+```js
+// 只暴露 focus,不暴露整个 input 节点
+useImperativeHandle(ref, () => ({
+  focus(){ inputRef.current.focus(); }
+}), []);
+```
+
+**本章小结：**useRef 存一个 &#123;current&#125; 对象、每次渲染返回同一个(改它不重渲染);ref 在 commit 的 layout 阶段赋值;React 19 起 ref 可直接作 prop。→ 最后:[更新流程总览](/06-source-reading/main),把整条线串起来。
+
+</div>

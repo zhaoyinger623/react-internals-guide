@@ -1,0 +1,68 @@
+---
+title: React 更新的四个阶段
+description: 用 Trigger、Schedule、Render、Commit 建立更新主线，并理解它们与 React 包结构之间的关系。
+---
+
+import { FourPhaseDiagram, LearningRoute } from '../../theme/FoundationVisuals';
+import { Callout, ChapterRoute, ContentCard } from '../../theme/TutorialPrimitives';
+
+<div className="tutorial-crumb">第一部分 · 表层原理 / 04</div>
+
+<ChapterRoute steps={[
+  { label: 'setState', href: '/01-foundations/journey' },
+  { label: 'Update', href: '/02-update-pipeline/t9' },
+  { label: 'Lane', href: '/02-update-pipeline/t13' },
+  { label: 'Scheduler', href: '/02-update-pipeline/t12' },
+  { label: 'Render', href: '/02-update-pipeline/t8' },
+  { label: 'Effect', href: '/02-update-pipeline/t10' },
+  { label: 'Commit', href: '/02-update-pipeline/t11' },
+  { label: 'DOM', href: '/02-update-pipeline/t11' },
+]} />
+
+<ContentCard tone="accent">
+
+一次更新按 **Trigger → Schedule → Render → Commit** 推进。本章只建立整体顺序和模块边界；接下来的章节会沿这四个阶段依次展开。
+
+</ContentCard>
+
+## 四阶段总览
+
+| 阶段 | 输入 | 主要工作 | 输出 |
+| --- | --- | --- | --- |
+| Trigger 触发 | 用户调用 `setState` | 创建 Update，接入组件的更新队列，并把 Lane 标记到 root | 待处理的更新 |
+| Schedule 调度 | root 上等待的 Lanes | 选择本轮工作，保证 root 拥有匹配优先级的回调 | 获得执行机会的任务 |
+| Render 计算 | `renderLanes` 与当前 Fiber 树 | 执行组件、计算状态、协调子节点并记录 flags | 带变更标记的新树 |
+| Commit 提交 | 完成的 workInProgress 树 | 执行 DOM 变更、切换 current、运行 Layout 与 Passive Effect | 用户可见的新界面 |
+
+<FourPhaseDiagram />
+
+<Callout>
+
+阶段名描述的是一次更新的职责边界，不是四个互相独立的线程。Trigger 和部分 Schedule 往往发生在同一事件调用栈中；Render 可以分片；Commit 必须同步连续完成。
+
+</Callout>
+
+## 四阶段背后的 React 包结构
+
+| 包 | 在四阶段中的位置 | 核心职责 |
+| --- | --- | --- |
+| `react` | Trigger 的公开入口 | 暴露组件、Hooks、`startTransition` 等 API |
+| `react-dom` / `react-dom-client` | Trigger 入口与 Commit 落地 | 接入浏览器事件、创建 root，并提供 DOM Host Config |
+| `react-reconciler` | 四阶段主控制器 | UpdateQueue、Lane、Fiber 工作循环、Diff、flags 与 Commit 编排 |
+| `scheduler` | Schedule 阶段的执行机会 | 保存回调、按时间优先级执行，并提供 `shouldYield()` |
+
+<ContentCard tone="success">
+
+`react-reconciler` 是更新主线的核心。Scheduler 并不认识 Fiber；React DOM 也不负责选择 Lane。Reconciler 把“何时执行”交给 Scheduler，把“如何落地到平台”交给 Renderer。
+
+</ContentCard>
+
+## 后续章节按这条路线学习
+
+<LearningRoute />
+
+<Callout type="success">
+
+**当前位置：**现在只建立了四阶段的目录。下一章从第一阶段 Trigger 开始，沿一次更新继续向后追踪。
+
+</Callout>

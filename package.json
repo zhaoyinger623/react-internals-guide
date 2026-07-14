@@ -1,0 +1,15 @@
+{
+  "name": "react-internals-guide",
+  "version": "1.0.0",
+  "private": true,
+  "description": "从心智模型到源码调用链的 React 原理学习指南",
+  "type": "module",
+  "scripts": {
+    "dev": "rspress dev",
+    "build": "rspress build",
+    "preview": "rspress preview"
+  },
+  "devDependencies": {
+    "@rspress/core": "latest"
+  }
+}

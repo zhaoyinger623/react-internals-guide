@@ -1,0 +1,156 @@
+---
+title: 双缓存 Fiber 树
+description: React 原理全景中的「双缓存 Fiber 树」，从运行机制继续深入源码。
+---
+
+import { TutorialSequence } from '../../theme/TutorialSequence';
+
+<div className="tutorial-chapter">
+
+阶段三 · Render / 09
+
+**🧭 主线**setState→Update→Lane→Scheduler→Render→Effect→Commit→DOM
+
+**🗺 本章路线图**
+
+React 同时维护**两棵 Fiber 树**——current(屏幕上显示的)和 workInProgress(内存里构建的),靠 `alternate` 互指,像双缓冲。
+
+本章包括：**① 两棵树什么关系 ② 怎么交替切换 ③ 为什么需要它 ④「复用」到底复用了什么**。
+
+React 同时维护**两棵 Fiber 树**。它们不是两棵毫无关系的树:**两棵树上「同一个位置」的节点,是同一个组件的两个版本(两个 fiber 对象),彼此用 `alternate` 指针互指**——就像双缓冲绘图里的「前台画面」和「后台画布」。
+
+**先理解 `alternate`:**current 树的节点 `A` 和 WIP 树里对应的节点 `A'`,满足 `A.alternate === A'` 且 `A'.alternate === A`。它们代表**同一个组件**,只是一个是「现在屏幕上的样子」、一个是「正在算的新样子」。构建 WIP 时,React 会尽量**复用** current 节点的 alternate(已有的 fiber 对象),而不是每次都 new。
+
+current 树(屏幕正显示) workInProgress 树(内存中构建) alternate 互指(同一 fiber 的两个版本)
+
+**怎么操作：**点击“下一步”逐个构建右侧 WIP 树。重点看黄色虚线如何连接同一 Fiber 的两个版本，以及最后 `fiberRoot.current` 如何从左树切到右树。
+
+### 三个关键点
+
+-   **交替:**每次更新,以 current 为蓝本在内存构建 workInProgress。构建完,`fiberRoot.current` 指针从旧树切到新树 —— **一次指针切换 = 整屏更新**。
+-   **复用:**WIP 节点尽量复用 current 上的 `alternate`(已有的 fiber 对象),减少创建和 GC。旧树不丢,留作下次画布。
+-   **为什么需要它:**有两棵树,才能在内存里安全构建 WIP 的同时,current 保持完整可用。**被中断时直接丢弃 WIP,current 不受影响**,用户永远看到一致画面。这正是可中断渲染的根本。
+
+## 「复用」到底复用了什么?(createWorkInProgress)
+
+先以一个普通组件 Fiber 为例，把两个配对对象叫作 **A** 和 **B**。React 更新时不是一直修改 current，也不是每次创建第三个对象，而是让 A、B 轮流充当 current 和 workInProgress：
+
+时间
+
+current（屏幕对应的已提交结果）
+
+workInProgress（正在计算）
+
+发生什么
+
+首次挂载完成
+
+**A**
+
+还没有
+
+`A.alternate = null`
+
+第一次更新
+
+**A**
+
+**B（首次创建）**
+
+A、B 通过 `alternate` 互相指向
+
+第一次提交后
+
+**B**
+
+A 留作下次使用
+
+`root.current` 从 A 切到 B
+
+第二次更新
+
+**B**
+
+**A（直接复用）**
+
+重置 A 的临时字段，在 A 上计算新结果
+
+**因此，复用 Fiber 对象指的是复用另一棵树中的配对对象。**第一次更新必须创建 B；从第二次更新开始，`current.alternate` 已经存在，只需清理上次计算留下的临时字段，然后再次使用。
+
+### 先看真正决定“创建还是复用”的代码
+
+```js
+function createWorkInProgress(current, pendingProps) {
+  let wip = current.alternate;
+
+  if (wip === null) {
+    // 第一次更新：配对 Fiber 还不存在，只创建这一次
+    wip = createFiber(current.tag, pendingProps, current.key);
+    wip.stateNode = current.stateNode;
+    wip.alternate = current;
+    current.alternate = wip;
+  } else {
+    // 后续更新：直接拿已有的配对 Fiber
+    wip.pendingProps = pendingProps;
+    wip.flags = NoFlags;
+    wip.subtreeFlags = NoFlags;
+    wip.deletions = null;
+  }
+
+  return wip;
+}
+```
+
+上面的 `else` 就是“复用对象”的真实位置：没有调用 `createFiber`，而是拿到旧的 A 或 B，清掉上次 Render 留下的 flags，再把它当作新的工作区。
+
+### 为什么还要从 current 复制字段
+
+复用的是对象外壳，但本轮计算必须以上一次提交结果为起点，所以函数后半段还会把 current 的基线数据放到 wip：
+
+```js
+// 本轮计算的起点
+wip.child = current.child;
+wip.memoizedProps = current.memoizedProps;
+wip.memoizedState = current.memoizedState;
+wip.updateQueue = current.updateQueue;
+wip.lanes = current.lanes;
+wip.childLanes = current.childLanes;
+```
+
+字段
+
+为什么先带到 wip
+
+本轮之后会怎样
+
+`stateNode`
+
+继续指向同一个 DOM 节点或类组件实例
+
+属性变化时修改该 DOM，不重新创建
+
+`memoizedState`
+
+以上次提交的 state / Hook 链表为计算起点
+
+处理 update 后，wip 保存本轮算出的新状态
+
+`memoizedProps`
+
+用于和新传入的 `pendingProps` 比较
+
+Render 完成后记录本轮已经使用的 props
+
+`child`
+
+先取得旧子树，供 Diff 判断哪些子 Fiber 可以复用
+
+Diff 后指向本轮得到的新子 Fiber
+
+**把“复用”拆成两层就清楚了：**第一层，A/B 两个 Fiber 对象轮流作为工作区，避免反复创建对象；第二层，本轮的 wip Fiber 仍指向原来的 `stateNode`，并以上次 state 为计算起点，所以 DOM 和组件状态能够延续。只有 type 或 key 不匹配时，旧 Fiber 才会删除，并挂载新的 Fiber、DOM 和 state。
+
+**Render 的两棵树：**current 保存已提交界面，workInProgress 用于本次计算；Render 被中断时不会影响 current。下一章看 [Hooks](/02-update-pipeline/t7) 如何在执行组件时读取并计算状态。
+
+<TutorialSequence kind="doubleBuffer" />
+
+</div>

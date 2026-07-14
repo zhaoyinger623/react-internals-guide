@@ -1,0 +1,283 @@
+---
+title: Scheduler：安排执行
+description: 从一次普通更新开始，理解 React Scheduler 如何安排 root 回调、时间切片与高优先级抢占。
+---
+
+Scheduler 这一章最容易看乱，是因为四套概念经常同时出现：Update、Lane、Scheduler task 和 Fiber。
+
+先只记住一句话：
+
+> **更新留在 React 内部；Scheduler 只替 React 安排一个“稍后回来继续处理 root”的回调。**
+
+## 先认清四个角色
+
+| 角色 | 它手里有什么 | 它负责什么 |
+| --- | --- | --- |
+| **Update** | `setState` 产生的状态变化 | 描述数据要怎样变化 |
+| **Lane** | Update 的紧急程度 | 让 React 选择本轮处理哪些更新 |
+| **Scheduler** | 回调函数和时间优先级 | 安排回调何时执行，并提供让位判断 |
+| **Fiber / Reconciler** | 组件对应的工作单元 | 真正执行组件、Diff 和构建新树 |
+
+最关键的边界是：**Scheduler 不读取 Update，不选择 Lane，也不遍历 Fiber。**它只保管 React 交给它的回调；回调被调用后，控制权才重新回到 React。
+
+## 第一遍：先走通一次普通更新
+
+暂时不考虑 Transition、抢占和最小堆。只看一次 `setCount(1)` 怎样走到 Render。
+
+### 1. setState 产生 Update
+
+```js
+setCount(1);
+```
+
+React 创建一个 Update，把它放进组件的更新队列，并给它分配一条 Lane。
+
+### 2. React 把“root 上有活”记下来
+
+Lane 沿 Fiber 树向上传递，最后进入：
+
+```js
+root.pendingLanes
+```
+
+这表示整棵应用还有哪些更新没有处理。**真正的更新请求始终保存在 React 内部。**
+
+### 3. React 预约一次执行机会
+
+`ensureRootIsScheduled(root)` 检查 root，并准备一个回调：
+
+```js
+performConcurrentWorkOnRoot.bind(null, root)
+```
+
+可以把它读成：**“下次获得主线程时，回来处理这个 root。”**
+
+React 把这个回调和时间优先级交给 Scheduler：
+
+```js
+scheduleCallback(NormalPriority, callback);
+```
+
+### 4. Scheduler 到点调用回调
+
+Scheduler 不会自己处理组件。它只是调用刚才保存的 callback：
+
+```text
+Scheduler 调用 callback
+        ↓
+performConcurrentWorkOnRoot(root)
+        ↓
+控制权重新回到 React
+```
+
+### 5. React 开始 Render
+
+React 从 `root.pendingLanes` 中选择本轮 `renderLanes`，再进入 Fiber 工作循环：
+
+```js
+function workLoopConcurrent() {
+  while (workInProgress !== null && !shouldYield()) {
+    performUnitOfWork(workInProgress);
+  }
+}
+```
+
+到这里，最短闭环已经形成：
+
+```text
+setState
+  → Update + Lane 留在 React
+  → React 把 root 回调交给 Scheduler
+  → Scheduler 调用回调
+  → React 遍历 Fiber
+```
+
+## Scheduler 实际收到什么
+
+Scheduler 收到的是“回调函数 + Scheduler 优先级”，不是 Fiber 列表：
+
+```js
+const callback = performConcurrentWorkOnRoot.bind(null, root);
+const task = scheduleCallback(NormalPriority, callback);
+
+// Scheduler 内部看到的近似任务
+task = {
+  callback,
+  priorityLevel,
+  startTime,
+  expirationTime,
+};
+```
+
+即使页面中有一万个 Fiber，React 通常也只是为一个 root 保留一个并发回调。回调真正执行后，Reconciler 才在 React 内部逐个处理 Fiber。
+
+| 对象 | 保存在哪里 | 含义 |
+| --- | --- | --- |
+| Update | Hook / Class 更新队列 | 数据要怎样变化 |
+| pending Lanes | `root.pendingLanes` | root 还有哪些工作 |
+| Scheduler task | Scheduler 的任务队列 | 何时调用 React |
+| 当前 Fiber 位置 | `workInProgress` | React 已经算到哪里 |
+
+## 为什么要反复预约回调
+
+如果 Fiber 树很大，React 不希望一次并发 Render 长时间霸占主线程。它会重复下面的节奏：
+
+```text
+Scheduler 调用 React
+  → React 处理若干 Fiber
+  → shouldYield() 判断时间片已用完
+  → React 退出并保留 workInProgress
+  → 浏览器处理输入和绘制
+  → Scheduler 再次调用 React
+```
+
+这里要分清职责：
+
+- Scheduler 提供执行机会，并通过 `shouldYield()` 告诉 React 是否应该让位。
+- React 自己决定在哪里退出工作循环。
+- Fiber 结构和 `workInProgress` 指针让 React 能保存进度并继续计算。
+
+因此不是 Scheduler 把组件树“切碎”了。**Scheduler 管时间，Fiber 提供可暂停的工作单位。**
+
+## 暂停、续算和抢占不是一回事
+
+### 情况 A：时间片结束，没有更急的更新
+
+React 暂停当前并发 Render，保留 `workInProgress`。下一次回调到来后，从原位置继续。
+
+```text
+Transition Render 算到 Fiber 301
+  → 时间片结束
+  → 浏览器获得主线程
+  → 下一次回调从 Fiber 301 继续
+```
+
+这叫**暂停后续算**。
+
+### 情况 B：暂停期间来了更急的更新
+
+假设慢列表正在使用 Transition Lane 计算，用户又在输入框键入一个字符，产生 Sync Lane：
+
+```text
+Transition Render 暂停
+  → 浏览器派发输入事件
+  → Sync Update 入队
+  → React 先选择 Sync Lane
+  → 完成并提交输入框更新
+  → Transition Update 仍在队列中，稍后重算
+```
+
+这叫**高优更新抢占低优更新**。
+
+被放弃的是旧的低优 WIP 计算结果，不是 Update：
+
+| 内容 | 抢占后怎样处理 |
+| --- | --- |
+| 低优 Update | 保留在更新队列中 |
+| Transition Lane | 仍保留在 `root.pendingLanes` |
+| 未完成的低优 WIP | 不提交，可以被覆盖重算 |
+| `root.current` 和 DOM | 保持原样，用户不会看到半成品 |
+
+## ensureRootIsScheduled 在判断什么
+
+每次有新 Update 到来，React 都会重新检查 root，但不一定创建新任务。
+
+| root 当前状态 | React 的决定 |
+| --- | --- |
+| 没有已安排的入口 | 安排同步入口或并发 Scheduler 回调 |
+| 已有同等优先级回调 | 直接复用，避免重复安排 |
+| 来了更高优更新 | 取消旧并发回调，按更高优先级重排 |
+| 已经没有 pending Lane | 取消回调并清空记录 |
+
+<details>
+<summary><strong>展开查看简化源码</strong></summary>
+
+```js
+const nextLanes = getNextLanes(root.pendingLanes);
+const newPriority = getHighestPriorityLane(nextLanes);
+
+if (newPriority === root.callbackPriority) {
+  return; // 已经有同等优先级的工作入口
+}
+
+if (root.callbackNode !== null) {
+  cancelCallback(root.callbackNode);
+}
+
+if (newPriority === SyncLane) {
+  scheduleSyncCallback(performSyncWorkOnRoot);
+  root.callbackNode = null;
+} else {
+  root.callbackNode = scheduleCallback(
+    lanesToSchedulerPriority(nextLanes),
+    performConcurrentWorkOnRoot.bind(null, root),
+  );
+}
+
+root.callbackPriority = newPriority;
+```
+
+</details>
+
+`cancelCallback` 取消的只是 Scheduler 中的执行入口。它不会删除 Update，也不会回滚 DOM。
+
+## Lane 优先级与 Scheduler 优先级
+
+这两种优先级属于不同层：
+
+| Lane | Scheduler 优先级 |
+| --- | --- |
+| React 内部的更新分类 | Scheduler 内部的任务排序 |
+| 决定本轮 Render 包含哪些 Update | 决定 root 回调何时获得执行机会 |
+| 会保存在 Fiber 和 root 上 | 映射完成后不再关心具体 Fiber |
+
+可以记成：
+
+> **Lane 回答“这次算什么”，Scheduler 回答“什么时候开始或继续算”。**
+
+## MessageChannel 在哪里出现
+
+Scheduler 需要在一次工作片结束后，安排下一次主线程回调。浏览器环境中可以用 `MessageChannel` 驱动这个循环：
+
+```text
+postMessage 安排下一次回调
+  → 当前 JavaScript 任务结束
+  → 浏览器获得处理其他工作的机会
+  → onmessage 执行下一片 React 工作
+```
+
+`MessageChannel` 不负责拆分 Fiber，也不会让计算本身变快。它只是让“继续工作”可以排到稍后执行。
+
+<details>
+<summary><strong>展开查看 Scheduler 的两个内部队列</strong></summary>
+
+- `taskQueue`：已经可以执行的任务，按 `expirationTime` 排序。
+- `timerQueue`：尚未到开始时间的延迟任务，按 `startTime` 排序。
+- `advanceTimers`：把已经到时间的任务从 `timerQueue` 移入 `taskQueue`。
+- 任务到达 `expirationTime` 后，即使时间片紧张也会获得执行机会，避免低优任务长期饿死。
+
+</details>
+
+## 最后再压缩一次
+
+```text
+Update：数据要怎么变
+Lane：这次先处理哪些 Update
+Scheduler：什么时候调用 React
+Fiber：React 真正计算到哪里
+```
+
+一次并发更新的完整关系是：
+
+```text
+Update 入队并标记 Lane
+  → root 记录 pendingLanes
+  → React 向 Scheduler 注册 root 回调
+  → Scheduler 调用回调
+  → React 按 renderLanes 遍历 Fiber
+  → 时间片结束则让位并续算
+  → 出现更高优 Lane 则先处理高优更新
+  → Render 完成后进入 Commit
+```
+
+下一章进入 Render，继续看 React 获得执行机会后，怎样沿 Fiber 树计算新界面。

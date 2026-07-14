@@ -1,0 +1,485 @@
+a[data-course-locked='true'] {
+  color: var(--rp-c-text-3, #9ca3af) !important;
+  cursor: not-allowed !important;
+  opacity: 0.48;
+  filter: grayscale(1);
+  text-decoration: none !important;
+}
+
+a[data-course-locked='true']::after {
+  content: ' · 编撰中';
+  font-size: 0.72em;
+  white-space: nowrap;
+}
+
+.course-draft-notice {
+  position: fixed;
+  z-index: 9999;
+  left: 50%;
+  bottom: 42px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 230px;
+  padding: 14px 18px;
+  border: 1px solid var(--rp-c-divider, #d1d5db);
+  border-radius: 12px;
+  color: var(--rp-c-text-1, #111827);
+  background: var(--rp-c-bg, #fff);
+  box-shadow: 0 12px 38px rgb(0 0 0 / 18%);
+  transform: translateX(-50%);
+  animation: course-notice-in 180ms ease-out;
+}
+
+.course-draft-notice > span { font-size: 24px; }
+.course-draft-notice strong,
+.course-draft-notice small { display: block; }
+.course-draft-notice small { margin-top: 2px; opacity: 0.68; }
+
+@keyframes course-notice-in {
+  from { opacity: 0; transform: translate(-50%, 8px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+/* Tutorial shell: retain Rspress routing/search, but visually stay close to
+   the original single-page React tutorial. */
+:root {
+  --rp-c-brand: #0b93b8;
+  --rp-c-brand-light: #14a6ca;
+  --rp-c-brand-dark: #087c9c;
+  --rp-c-brand-rgb: 11, 147, 184;
+  --rp-c-bg: #f7f9fc;
+  --rp-c-bg-soft: #eef2f8;
+  --rp-c-bg-mute: #e7edf6;
+  --rp-c-divider: #d3dbe8;
+  --rp-c-divider-light: #e0e6ef;
+  --rp-c-text-1: #1a2330;
+  --rp-c-text-2: #37424f;
+  --rp-c-text-3: #647386;
+  --rp-sidebar-width: 290px;
+  --rp-outline-width: 250px;
+  --rp-content-max-width: 1040px;
+  --rp-content-padding-x: 36px;
+  --rp-content-padding-y: 30px;
+}
+
+html.dark {
+  --rp-c-brand: #61dafb;
+  --rp-c-brand-light: #89e4fc;
+  --rp-c-brand-dark: #31c7ef;
+  --rp-c-brand-rgb: 97, 218, 251;
+  --rp-c-bg: #0e1117;
+  --rp-c-bg-soft: #161b22;
+  --rp-c-bg-mute: #1c2330;
+  --rp-c-divider: #2b3444;
+  --rp-c-divider-light: #222b38;
+  --rp-c-text-1: #e6edf3;
+  --rp-c-text-2: #c4cede;
+  --rp-c-text-3: #8b98a9;
+}
+
+body,
+.rp-doc-layout__container,
+.rp-doc-layout__doc {
+  background: var(--rp-c-bg);
+}
+
+body {
+  color: var(--rp-c-text-1);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+}
+
+.rp-nav {
+  border-bottom-color: var(--rp-c-divider);
+  background: color-mix(in srgb, var(--rp-c-bg) 94%, transparent);
+  box-shadow: 0 1px 8px rgb(20 30 50 / 5%);
+  backdrop-filter: blur(14px);
+}
+
+.rp-nav__title__link {
+  color: var(--rp-c-brand);
+  font-weight: 800;
+  letter-spacing: 0.01em;
+}
+
+.rp-nav__title__link::after {
+  content: 'React 原理全景';
+  margin-left: 8px;
+  color: var(--rp-c-text-1);
+  font-size: 16px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+/* No chapter links in the header. */
+.rp-nav-menu { display: none !important; }
+
+.rp-doc-layout__sidebar {
+  border-right-color: var(--rp-c-divider);
+  background: color-mix(in srgb, var(--rp-c-bg) 97%, var(--rp-c-bg-soft));
+  padding: 16px 12px 48px;
+}
+
+.rp-sidebar-item {
+  min-height: 35px;
+  margin: 2px 0;
+  border-left: 2px solid transparent;
+  border-radius: 7px;
+  color: var(--rp-c-text-2);
+  font-size: 13px;
+  transition: color 150ms ease, background 150ms ease, border-color 150ms ease;
+}
+
+.rp-sidebar-item:hover {
+  color: var(--rp-c-brand);
+  background: rgb(var(--rp-c-brand-rgb) / 9%);
+}
+
+.rp-sidebar-item--active {
+  border-left-color: var(--rp-c-brand);
+  color: var(--rp-c-brand) !important;
+  background: rgb(var(--rp-c-brand-rgb) / 12%) !important;
+  font-weight: 700;
+}
+
+.rp-sidebar-item--group-item::before,
+.rp-sidebar-item--group-item.rp-sidebar-item--active .rp-sidebar-item__left::before {
+  display: none !important;
+}
+
+.rp-sidebar-group[data-depth='0'] {
+  margin-top: 12px;
+  border-top: 1px solid var(--rp-c-divider-light);
+  border-radius: 0;
+  color: var(--rp-c-text-3);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.rp-sidebar-section-header {
+  margin-top: 12px;
+  padding: 7px 10px 3px;
+  border-top: 1px solid var(--rp-c-divider-light);
+}
+
+.rp-sidebar-section-header__left {
+  color: var(--rp-c-text-3);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+}
+
+/* The first tutorial group starts the sidebar, so it does not need the
+   inter-group spacer and divider used by every following group. */
+.rp-sidebar-group[data-tutorial-first-group='true'] {
+  margin-top: 0;
+  border-top: 0;
+}
+
+.rp-doc-layout__doc-container { width: 100%; max-width: 1040px; margin: 0 auto; }
+.rp-doc { font-size: 14px; line-height: 1.75; }
+.rp-doc > h1 { margin: 2px 0 8px !important; font-size: 26px !important; line-height: 1.25; }
+.rp-doc h2 { margin: 26px 0 8px !important; font-size: 19px !important; line-height: 1.4; }
+.rp-doc h3 { margin: 20px 0 6px !important; font-size: 15.5px !important; line-height: 1.45; }
+.rp-doc p { margin: 8px 0 !important; line-height: 1.75 !important; }
+.rp-doc p, .rp-doc li { color: var(--rp-c-text-2); }
+.rp-doc h2:first-of-type::before { content: none !important; display: none !important; }
+.rp-doc .rp-header-anchor { display: none !important; }
+
+/* The original tutorial has no right outline or document utility row. */
+.rp-doc-layout__outline,
+.rp-doc-layout__outline-placeholder,
+.rp-llms-container { display: none !important; }
+
+.rp-doc blockquote {
+  margin: 16px 0;
+  padding: 12px 16px;
+  border: 1px solid var(--rp-c-divider);
+  border-left: 4px solid var(--rp-c-brand);
+  border-radius: 0 10px 10px 0;
+  background: rgb(var(--rp-c-brand-rgb) / 6%);
+  color: var(--rp-c-text-2);
+}
+
+.rp-doc table {
+  width: 100%;
+  margin: 16px 0;
+  border: 1px solid var(--rp-c-divider);
+  border-collapse: separate;
+  border-spacing: 0;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgb(30 45 70 / 6%);
+}
+
+.rp-doc th, .rp-doc td {
+  padding: 10px 13px;
+  border-right: 1px solid var(--rp-c-divider);
+  border-bottom: 1px solid var(--rp-c-divider);
+  text-align: left;
+  vertical-align: top;
+}
+
+.rp-doc th { background: var(--rp-c-bg-mute); color: var(--rp-c-text-1); }
+.rp-doc td { background: color-mix(in srgb, var(--rp-c-bg) 92%, var(--rp-c-bg-soft)); }
+.rp-doc tr:nth-child(even) td { background: var(--rp-c-bg-soft); }
+.rp-doc tr:last-child td { border-bottom: 0; }
+.rp-doc th:last-child, .rp-doc td:last-child { border-right: 0; }
+
+.rp-doc :not(pre) > code {
+  border: 1px solid var(--rp-c-divider);
+  border-radius: 5px;
+  background: var(--rp-c-bg-soft);
+  color: var(--rp-c-text-2);
+  padding: 1px 6px;
+  font-size: 0.88em;
+}
+
+.rp-code-block {
+  border: 1px solid var(--rp-c-divider) !important;
+  border-radius: 10px !important;
+  box-shadow: 0 2px 8px rgb(20 30 50 / 6%);
+}
+
+.rp-doc-layout__outline { box-shadow: none; border-left: 1px solid var(--rp-c-divider-light); }
+
+a[data-tutorial-root='true'],
+a[data-tutorial-overview='true'] { display: none !important; }
+
+/* Native MDX chapters keep the original tutorial's visual language while
+   Rspress remains the only page shell and content runtime. */
+.tutorial-chapter {
+  --bg: var(--rp-c-bg);
+  --panel: color-mix(in srgb, var(--rp-c-bg) 96%, var(--rp-c-bg-soft));
+  --panel2: var(--rp-c-bg-soft);
+  --line: var(--rp-c-divider);
+  --txt: var(--rp-c-text-1);
+  --txt2: var(--rp-c-text-2);
+  --dim: var(--rp-c-text-3);
+  --strong: var(--rp-c-text-1);
+  --accent: var(--rp-c-brand);
+  --sched: #b8760a;
+  --recon: #1a9250;
+  --render: #cf3663;
+  --fiber: #6b41cc;
+  --warn: #d53535;
+  --code: var(--rp-c-bg-soft);
+  --codetxt: var(--rp-c-text-2);
+  --thbg: var(--rp-c-bg-mute);
+}
+
+html.dark .tutorial-chapter {
+  --sched: #f2b84b;
+  --recon: #7ee787;
+  --render: #ff7b9c;
+  --fiber: #a78bfa;
+  --warn: #ff6b6b;
+}
+
+.tutorial-chapter .crumb {
+  margin: -2px 0 8px;
+  color: var(--dim);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+  letter-spacing: 0.03em;
+}
+
+.tutorial-chapter .card,
+.tutorial-chapter .intro-hero {
+  margin: 16px 0;
+  padding: 18px 20px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--panel);
+  box-shadow: 0 2px 8px rgb(30 45 70 / 6%);
+}
+
+.tutorial-chapter .intro-hero {
+  border-left: 4px solid var(--accent);
+  background: linear-gradient(135deg, rgb(var(--rp-c-brand-rgb) / 9%), rgb(124 92 231 / 7%)), var(--panel);
+}
+
+.tutorial-chapter .grid2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin: 14px 0;
+}
+
+.tutorial-chapter .phase-strip,
+.tutorial-chapter .flow {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+  margin: 14px 0;
+}
+
+.tutorial-chapter .phase-strip > div,
+.tutorial-chapter .flowbox {
+  flex: 1 1 0;
+  min-width: 120px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  background: var(--panel2);
+  text-align: center;
+}
+
+.tutorial-chapter .arrow { align-self: center; color: var(--dim); font-size: 21px; }
+.tutorial-chapter .key-differences { display: grid; gap: 10px; margin: 16px 0; }
+.tutorial-chapter .key-diff {
+  display: grid;
+  grid-template-columns: 165px 1fr;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--panel);
+}
+.tutorial-chapter .key-diff-title {
+  display: flex;
+  align-items: center;
+  padding: 14px 16px;
+  border-right: 1px solid var(--line);
+  background: var(--panel2);
+  color: var(--strong);
+  font-weight: 800;
+}
+.tutorial-chapter .key-diff-body { padding: 12px 16px; }
+
+.tutorial-visual {
+  margin: 18px 0;
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--panel);
+}
+
+.tutorial-visual svg {
+  display: block;
+  width: 100%;
+  min-width: 620px;
+  height: auto;
+}
+
+.tutorial-chapter .archdot { fill: var(--accent); filter: drop-shadow(0 0 5px var(--accent)); }
+
+.tutorial-sequence {
+  margin: 18px 0;
+  padding: 18px;
+  border: 1px solid var(--rp-c-divider);
+  border-radius: 14px;
+  background: var(--rp-c-bg-soft);
+}
+.tutorial-sequence__track { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 9px; }
+.tutorial-sequence__track > div {
+  min-height: 82px;
+  padding: 12px;
+  border: 1px solid var(--rp-c-divider);
+  border-radius: 10px;
+  background: var(--rp-c-bg);
+  opacity: .48;
+  transition: opacity 180ms ease, border-color 180ms ease, transform 180ms ease, background 180ms ease;
+}
+.tutorial-sequence__track > div.is-current {
+  border-color: var(--rp-c-brand);
+  background: rgb(var(--rp-c-brand-rgb) / 10%);
+  opacity: 1;
+  transform: translateY(-3px);
+}
+.tutorial-sequence__track > div.is-done { border-color: #1a9250; opacity: .78; }
+.tutorial-sequence__track span { display: block; color: var(--rp-c-text-3); font-size: 11px; }
+.tutorial-sequence__track strong { display: block; margin-top: 7px; color: var(--rp-c-text-1); font-size: 13px; }
+.tutorial-sequence > p { margin: 12px 0 8px; color: var(--rp-c-brand); font-size: 13px; font-weight: 700; }
+.tutorial-sequence__controls { display: flex; flex-wrap: wrap; gap: 8px; }
+.tutorial-sequence__controls button {
+  padding: 7px 12px;
+  border: 1px solid var(--rp-c-brand);
+  border-radius: 8px;
+  color: #fff;
+  background: var(--rp-c-brand);
+  cursor: pointer;
+  font-weight: 700;
+}
+.tutorial-sequence__controls button.is-ghost { color: var(--rp-c-text-2); background: transparent; border-color: var(--rp-c-divider); }
+
+@media (max-width: 768px) {
+  .tutorial-chapter .grid2,
+  .tutorial-chapter .key-diff { grid-template-columns: 1fr; }
+  .tutorial-chapter .key-diff-title { border-right: 0; border-bottom: 1px solid var(--line); }
+  .tutorial-chapter .phase-strip,
+  .tutorial-chapter .flow { flex-wrap: wrap; }
+  .tutorial-sequence__track { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+.lane-playground {
+  margin: 18px 0;
+  padding: 18px;
+  border: 1px solid var(--rp-c-divider);
+  border-radius: 12px;
+  background: var(--rp-c-bg-soft);
+}
+
+.lane-playground__buttons,
+.lane-playground__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.lane-playground__buttons button {
+  padding: 8px 12px;
+  border: 1px solid var(--lane-color, var(--rp-c-divider));
+  border-radius: 8px;
+  color: var(--lane-color, var(--rp-c-text-1));
+  background: var(--rp-c-bg);
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.lane-playground__buttons button:hover { background: rgb(var(--rp-c-brand-rgb) / 8%); }
+.lane-playground__buttons .lane-playground__reset { --lane-color: var(--rp-c-text-3); }
+
+.lane-playground__result {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin: 14px 0;
+}
+
+.lane-playground__result > div {
+  padding: 12px;
+  border: 1px solid var(--rp-c-divider);
+  border-radius: 9px;
+  background: var(--rp-c-bg);
+}
+
+.lane-playground__result span,
+.lane-playground__result strong { display: block; }
+.lane-playground__result span { color: var(--rp-c-text-3); font-size: 12px; }
+.lane-playground__result strong { margin-top: 5px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+
+.lane-playground__chips span {
+  padding: 4px 8px;
+  border: 1px solid var(--rp-c-divider);
+  border-radius: 999px;
+  color: var(--rp-c-text-3);
+  font-size: 12px;
+}
+
+.lane-playground__chips span.is-active {
+  border-color: var(--rp-c-brand);
+  color: var(--rp-c-brand);
+  background: rgb(var(--rp-c-brand-rgb) / 9%);
+}
+
+.lane-playground > p { margin: 12px 0 0; color: var(--rp-c-text-3); font-size: 12px; }
+
+@media (max-width: 768px) {
+  .lane-playground__result { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 768px) {
+  :root { --rp-content-padding-x: 18px; --rp-content-padding-y: 22px; }
+  .rp-doc h1 { font-size: 26px; }
+}

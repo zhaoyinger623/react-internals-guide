@@ -1,0 +1,79 @@
+---
+title: 启动过程
+description: React 原理全景中的「启动过程」，从运行机制继续深入源码。
+---
+
+<div className="tutorial-chapter">
+
+源码附录 / A2
+
+从 `createRoot(...).render(&lt;App/>)` 到第一次把界面画出来,React 先搭了个「地基」——创建两个根对象。很多人卡在**「为什么要两个?它们分别是啥?那些箭头又是什么?」**,先用一个类比讲清楚,再看代码和图。
+
+### 🏗️ 先用「盖楼」类比理解三个角色
+
+源码里的东西
+
+类比
+
+大白话
+
+`#root`(DOM 容器)
+
+一块空地
+
+你在 HTML 里留的 `&lt;div id="root">`,界面就盖在这块地上
+
+`fiberRootNode`
+
+应用根对象
+
+保存 DOM 容器、待处理的更新优先级，以及当前正在使用的 Fiber 树
+
+`hostRootFiber`
+
+组件树的「树根」
+
+你写的所有组件(`&lt;App/>` 及其子孙)都长在它下面,是 Fiber 树最顶端的节点
+
+`fiberRoot.current` 指向当前 Fiber 树的根节点；`hostRootFiber.stateNode` 反向指向 `fiberRoot`。这两个引用让调度系统可以从应用根找到当前树，也可以从树根返回应用根。
+
+```js
+// React 18 并发入口
+import { createRoot } from 'react-dom/client';
+const root = createRoot(document.getElementById('root'));  // ① 建两个根对象
+root.render(<App/>);                                    // ② 发起首次更新
+```
+
+<div className="tutorial-visual">
+<svg viewBox="0 0 1000 250" style={{ width: "100%", height: "auto" }} fontFamily="ui-monospace,monospace"><defs><marker id="btA" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" style={{ fill: "var(--accent)" }} /></marker></defs><rect x="30" y="90" width="150" height="70" rx="10" style={{ fill: "none", stroke: "var(--line)" }} strokeWidth="1.5" strokeDasharray="5 4" /><text x="105" y="120" textAnchor="middle" style={{ fill: "var(--txt)" }} fontSize="12">#root</text> <text x="105" y="138" textAnchor="middle" style={{ fill: "var(--dim)" }} fontSize="9.5">真实 DOM 容器</text> <rect x="250" y="80" width="200" height="90" rx="12" style={{ fill: "rgba(242,184,75,.14)", stroke: "var(--sched)" }} strokeWidth="1.8" /><text x="350" y="108" textAnchor="middle" style={{ fill: "var(--sched)" }} fontSize="13" fontWeight="700">fiberRootNode</text> <text x="350" y="128" textAnchor="middle" style={{ fill: "var(--txt)" }} fontSize="9.5">整个应用的根对象</text> <text x="350" y="143" textAnchor="middle" style={{ fill: "var(--txt)" }} fontSize="9.5">记着 容器/待办/调度</text> <text x="350" y="158" textAnchor="middle" style={{ fill: "var(--dim)" }} fontSize="9">.current ↴</text> <rect x="540" y="80" width="200" height="90" rx="12" style={{ fill: "rgba(167,139,250,.16)", stroke: "var(--fiber)" }} strokeWidth="1.8" /><text x="640" y="108" textAnchor="middle" style={{ fill: "var(--fiber)" }} fontSize="13" fontWeight="700">hostRootFiber</text> <text x="640" y="128" textAnchor="middle" style={{ fill: "var(--txt)" }} fontSize="9.5">Fiber 树的根节点</text> <text x="640" y="143" textAnchor="middle" style={{ fill: "var(--txt)" }} fontSize="9.5">tag = HostRoot</text> <text x="640" y="158" textAnchor="middle" style={{ fill: "var(--dim)" }} fontSize="9">.stateNode ↰</text> <rect x="830" y="90" width="140" height="70" rx="10" style={{ fill: "rgba(97,218,251,.12)", stroke: "var(--accent)" }} strokeWidth="1.5" /><text x="900" y="120" textAnchor="middle" style={{ fill: "var(--accent)" }} fontSize="12" fontWeight="700">&lt;App/> 树</text> <text x="900" y="138" textAnchor="middle" style={{ fill: "var(--dim)" }} fontSize="9.5">你的组件 Fiber</text> <line x1="180" y1="125" x2="248" y2="125" style={{ stroke: "var(--accent)" }} strokeWidth="2" markerEnd="url(#btA)" /><text x="214" y="115" textAnchor="middle" style={{ fill: "var(--dim)" }} fontSize="9">container</text> <path d="M450,120 C490,120 500,120 538,120" style={{ fill: "none", stroke: "var(--accent)" }} strokeWidth="2" markerEnd="url(#btA)" /><text x="495" y="110" textAnchor="middle" style={{ fill: "var(--accent)" }} fontSize="9">.current</text> <path d="M540,150 C500,150 490,150 452,150" style={{ fill: "none", stroke: "var(--fiber)" }} strokeWidth="2" markerEnd="url(#btA)" /><text x="495" y="168" textAnchor="middle" style={{ fill: "var(--fiber)" }} fontSize="9">.stateNode</text> <line x1="740" y1="125" x2="828" y2="125" style={{ stroke: "var(--accent)" }} strokeWidth="2" markerEnd="url(#btA)" /><text x="784" y="115" textAnchor="middle" style={{ fill: "var(--dim)" }} fontSize="9">render(App)</text></svg>
+</div>
+
+### 启动过程分为三步
+
+1.  **创建两个根对象** —— `createRoot(#root)` 创建应用根 `fiberRootNode` 和 Fiber 树根 `hostRootFiber`，并建立双向引用。
+2.  **把 &lt;App/> 变成一次「更新」** —— `root.render(&lt;App/>)` 生成一个 `Update`,挂到 `hostRootFiber` 的更新队列上,再喊一声 `scheduleUpdateOnFiber`(“有活了,安排渲染”)。
+3.  **进入四个阶段** —— 从此走[更新主线·四个阶段](/01-foundations/t4) 的 Trigger→Schedule→Render→Commit。因为屏幕上还什么都没有,这第一次特别叫 **mount(挂载)**;以后再更新叫 update。
+
+**与双缓存的关系：**首次渲染时，`hostRootFiber` 是 current 树的起点，React 在内存中构建 workInProgress 树。提交完成后，`fiberRoot.current` 指向新树。详见[Render·双缓存](/02-update-pipeline/t5)。
+
+**本节过程：**创建应用根和 Fiber 树根 → 将 `&lt;App/>` 放入根节点的更新队列 → 触发首次渲染（mount）。
+
+入口
+
+模式
+
+说明
+
+`ReactDOM.render`(旧)
+
+Legacy 同步
+
+React 17 及以前默认;更新同步、不开并发特性
+
+`createRoot().render`
+
+Concurrent
+
+React 18 起;开启并发、自动批处理、时间切片
+
+</div>

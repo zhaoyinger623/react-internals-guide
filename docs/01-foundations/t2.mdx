@@ -1,0 +1,174 @@
+---
+title: 虚拟 DOM 的真实含义
+description: 从 JSX、React Element、Fiber 到真实 DOM，理解虚拟 DOM 是描述层而不是性能魔法。
+---
+
+import { VirtualDomPipeline } from '../../theme/FoundationVisuals';
+import { Callout, ChapterRoute, ContentCard, SectionTitle } from '../../theme/TutorialPrimitives';
+
+<div className="tutorial-crumb">第一部分 · 表层原理 / 02</div>
+
+<ChapterRoute steps={[
+  { label: 'setState', href: '/01-foundations/journey' },
+  { label: 'Update', href: '/02-update-pipeline/t9' },
+  { label: 'Lane', href: '/02-update-pipeline/t13' },
+  { label: 'Scheduler', href: '/02-update-pipeline/t12' },
+  { label: 'Render', active: true },
+  { label: 'Effect', href: '/02-update-pipeline/t10' },
+  { label: 'Commit', href: '/02-update-pipeline/t11' },
+  { label: 'DOM', href: '/02-update-pipeline/t11' },
+]} />
+
+<ContentCard tone="accent">
+
+虚拟 DOM 不是一份藏在内存里的真实 DOM，也不是“肯定比直接操作 DOM 快”的算法。它首先是一层**界面描述**：React 可以先计算“下一版界面应该是什么”，再由不同 Renderer 决定如何落地。
+
+</ContentCard>
+
+<Callout type="danger">
+
+**最大误解：虚拟 DOM 不是为了“比原生 DOM 更快”。**手写一次精准的 DOM 修改，当然比“生成描述 → Diff → 再修改 DOM”步骤更少。虚拟 DOM 的价值是让大型应用获得统一、声明式、跨平台并且可中断的更新架构。
+
+</Callout>
+
+<SectionTitle>从 JSX 到真实 DOM</SectionTitle>
+
+<VirtualDomPipeline />
+
+中间不是一次笼统的“虚拟 DOM 转换”，而是三种职责不同的对象：
+
+1. **JSX → React Element：**JSX 是语法。编译并执行后得到轻量、不可变的普通 JavaScript 对象。
+2. **React Element → Fiber：**Reconciler 使用新 Element 协调当前 Fiber。Fiber 带有 `child/sibling/return` 指针、状态和工作信息。
+3. **Fiber → 真实 DOM：**首次挂载时 Renderer 创建节点，Fiber 的 `stateNode` 指向 DOM；更新时 Commit 只应用 Render 计算出的差异。
+
+```jsx
+const element = (
+  <button className="save" onClick={handleSave}>
+    保存
+  </button>
+);
+```
+
+JSX 编译后得到 React Element。Element 只描述 `type`、`key`、`props` 等信息；Render 阶段用它协调 Fiber，Commit 阶段才由 React DOM 创建或更新真实节点。
+
+```js
+// <div className="x">hi</div> 执行后的近似结果
+{
+  $$typeof: Symbol.for('react.transitional.element'),
+  type: 'div',
+  key: null,
+  props: {
+    className: 'x',
+    children: 'hi'
+  }
+}
+```
+
+这个对象没有 `appendChild`、`style` 或浏览器布局信息。它只回答“期望的界面是什么”。
+
+| 对象 | 本质 | 生命周期 | 能否直接显示在页面 |
+| --- | --- | --- | --- |
+| JSX | JavaScript 的语法扩展 | 编译时转换 | 不能 |
+| React Element | 不可变的轻量描述对象 | 每次创建新描述 | 不能 |
+| Fiber | React 内部的可变工作单元 | 可跨多次更新复用 | 不能 |
+| DOM Node | 浏览器平台对象 | 由 Renderer 创建和维护 | 能 |
+
+<Callout>
+
+“虚拟 DOM”在讨论中有时泛指 React Element，有时也把 Fiber 计算过程包含进来。阅读源码时要明确具体对象，避免把 Element 和 Fiber 当成同一个结构。
+
+</Callout>
+
+<SectionTitle tone="green">它解决的核心问题</SectionTitle>
+
+### 1. 把 UI 声明与平台操作解耦
+
+组件只返回界面描述，不需要知道浏览器如何创建节点。因此同一套 React 模型可以由 React DOM、React Native 或自定义 Renderer 落地。
+
+### 2. 让 React 先完成计算，再集中提交
+
+Render 可以在内存中构建下一版 Fiber 树，暂停、重做或放弃；只有结果完整后才进入 Commit。用户不会看到计算到一半的界面。
+
+### 3. 提供可比较的结构
+
+React 比较新旧子节点的类型和 key，决定 Fiber 是复用、移动、插入还是删除。Diff 比较的是描述与 Fiber，不是把两棵真实 DOM 树逐节点扫描。
+
+<SectionTitle tone="purple">事件和样式保存在哪里</SectionTitle>
+
+```js
+{
+  type: 'button',
+  props: {
+    className: 'save',
+    style: { color: 'white' },
+    onClick: handleSave,
+    children: '保存'
+  }
+}
+```
+
+- `className` 和 `style` 先作为 props 保存，Commit 时再交给 DOM Renderer。
+- `onClick` 保存的是函数引用。它不会在 Render 时执行。
+- 浏览器事件发生后，React 的事件系统定位 Fiber 与监听器，再调用函数。
+
+| prop | Element 中保存的值 | Renderer 如何处理 |
+| --- | --- | --- |
+| `className` | 字符串 `'save'` | 写入 DOM 的 `class` |
+| `style` | 样式对象 | 逐项写入 `dom.style`；更新时修改变化项并清除删除项 |
+| `disabled` | 布尔值 | 根据值设置或移除 DOM 属性 |
+| `children` | 字符串或子 Element | 创建文本，或继续协调子 Fiber |
+| `onClick` | 函数引用 | 交给 React 事件系统保存和派发，而不是此刻执行 |
+
+### 事件为什么能在点击时执行
+
+<div className="native-flow-row">
+  <div><strong>① createRoot</strong><span>React 在根容器注册支持的事件监听器。</span></div>
+  <i>→</i>
+  <div><strong>② 用户点击</strong><span>原生 click 沿 DOM 冒泡到根容器。</span></div>
+  <i>→</i>
+  <div><strong>③ 定位 Fiber</strong><span>React 从目标 DOM 找到对应 Fiber 和最新 props。</span></div>
+  <i>→</i>
+  <div><strong>④ 派发回调</strong><span>按捕获与冒泡顺序调用 `onClick`。</span></div>
+</div>
+
+<SectionTitle tone="orange">React 与 Vue 的更新策略为什么不同</SectionTitle>
+
+| 维度 | React | Vue 3 |
+| --- | --- | --- |
+| 变化从哪里得知 | 状态更新后重新执行相关组件，在运行时比较结果 | 响应式依赖记录哪些计算读取了哪些数据 |
+| 编译器参与程度 | 传统模式主要依赖运行时；Compiler 可补充静态优化 | 模板编译会生成 patch flags、静态提升等提示 |
+| 主要优势 | JavaScript 表达自由，更新模型统一，可与并发调度结合 | 依赖更精确，模板可提前提供优化信息 |
+| 代价 | 需要 memo/bailout/Compiler 避免无效工作 | 响应式追踪和编译约束带来另一套心智模型 |
+
+### Vue 3 的编译期优化怎样减少 Diff
+
+Vue 模板的结构更容易在编译期分析，因此可以提前给运行时提供信息：
+
+| 优化 | 做什么 |
+| --- | --- |
+| 静态提升 `hoistStatic` | 把不会变化的节点移到渲染函数外，只创建一次并跨更新复用 |
+| Patch Flag | 标记节点只有哪些属性可能变化，运行时跳过静态属性 |
+| Block Tree | 把动态节点收集成更扁平的列表，更新时减少对静态子树的遍历 |
+| 事件缓存 | 缓存合适的内联处理函数，避免每轮都被识别成新 prop |
+
+### React 如何减少运行时重复工作
+
+JSX 可以嵌入任意 JavaScript，传统 React 更多依赖运行时协调。项目可以通过组件边界、`memo`、bailout 和稳定引用减少工作；React Compiler 则尝试在编译阶段自动加入记忆化。这与 Vue 的模板编译优化目标相似，但分析输入和运行模型不同。
+
+<Callout>
+
+所谓“React 的虚拟 DOM 更纯粹”，只是说传统 React 把运行时协调作为统一更新路径；Vue 会把响应式依赖和模板编译提示一起交给运行时。它不是质量高低判断：前者强调统一表达和可调度计算，后者强调更精确地减少运行时工作。
+
+</Callout>
+
+<Callout type="warning">
+
+不要把差异简化成“React 慢、Vue 快”。真实性能取决于组件边界、更新范围、列表 key、调度需求和编译优化。两者是在表达自由度、依赖追踪和运行时工作量之间选择不同平衡。
+
+</Callout>
+
+<ContentCard tone="success">
+
+**本章小结：**React Element 描述界面，Fiber 承载可调度的计算，Renderer 把结果落到平台。虚拟 DOM 的核心价值是解耦与可计算性，而不是一句“比 DOM 快”。下一章进入[生命周期执行顺序](/01-foundations/t3)。
+
+</ContentCard>

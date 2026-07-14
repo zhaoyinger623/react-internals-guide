@@ -1,0 +1,45 @@
+---
+title: SSR / Hydration / 流式
+description: React 原理全景中的「SSR / Hydration / 流式」，从运行机制继续深入源码。
+---
+
+<div className="tutorial-chapter">
+
+第七层 · 高级实践与新架构 / 22
+
+**🗺 本章路线图**
+
+SSR 在服务器先生成 HTML(首屏快),再由客户端 **hydration「激活」**。
+
+本章包括：**hydration 是什么、mismatch 怎么来、React 18 流式渲染 + 选择性注水**。
+
+客户端渲染(CSR)首屏是一张空 HTML,JS 下载执行后才有内容 —— 首屏慢、SEO 差。**服务端渲染(SSR)**在服务器先把组件渲染成 HTML 字符串发给浏览器,首屏立刻可见,再由客户端「激活」。
+
+## Hydration(注水/激活)
+
+服务器发来的 HTML 是「死」的(没有事件、没有 state)。**Hydration** 是客户端 React **复用**这些已有 DOM、给它们绑定事件、挂上 Fiber/state,让它「活」过来的过程。关键:**不重新创建 DOM,只是附着**。
+
+```js
+// 客户端:hydrateRoot 而非 createRoot
+import { hydrateRoot } from 'react-dom/client';
+hydrateRoot(document.getElementById('root'), <App/>);
+// 服务端
+import { renderToPipeableStream } from 'react-dom/server';
+```
+
+**Hydration 不匹配(mismatch):**若服务端渲染的 HTML 与客户端首次渲染结果不一致(如用了 `Date.now()`、`window`、随机数),React 会警告并可能丢弃服务端 HTML 重新渲染,首屏优势尽失。用 `useEffect` 里读浏览器专属值、或 `useId` 保证 id 一致来避免。
+
+## React 18 两大 SSR 升级:流式 + 选择性 Hydration
+
+-   **Streaming SSR(流式渲染):**`renderToPipeableStream` 边渲染边把 HTML **分块**发给浏览器,不必等整页渲染完。慢的部分(数据未就绪)用 `&lt;Suspense&gt;` 包住先发 fallback,数据好了再流式补发那一块 HTML + 内联脚本替换。
+-   **Selective Hydration(选择性注水):**不必等整棵树的 JS 都加载完才能交互。React 按 `Suspense` 边界**分块注水**,而且**用户点击哪块就优先注水哪块**(利用并发的 Lane 优先级)。这就是 SSR 与并发架构的结合点。
+
+<div className="tutorial-visual">
+<svg viewBox="0 0 720 150" style={{ width: "100%", height: "auto" }}><g fontFamily="monospace" fontSize="11"><rect x="10" y="20" width="200" height="110" rx="12" style={{ fill: "var(--panel2)", stroke: "var(--sched)" }} strokeWidth="2" /><text x="110" y="42" textAnchor="middle" style={{ fill: "var(--sched)" }} fontSize="12" fontWeight="700">服务器</text> <text x="110" y="66" textAnchor="middle" style={{ fill: "var(--dim)" }}>renderToPipeableStream</text> <text x="110" y="88" textAnchor="middle" style={{ fill: "var(--dim)" }}>边渲染边发 HTML 块</text> <text x="110" y="110" textAnchor="middle" style={{ fill: "var(--dim)" }}>慢块 → 先发 fallback</text> <rect x="510" y="20" width="200" height="110" rx="12" style={{ fill: "var(--panel2)", stroke: "var(--recon)" }} strokeWidth="2" /><text x="610" y="42" textAnchor="middle" style={{ fill: "var(--recon)" }} fontSize="12" fontWeight="700">浏览器</text> <text x="610" y="66" textAnchor="middle" style={{ fill: "var(--dim)" }}>立即显示首屏 HTML</text> <text x="610" y="88" textAnchor="middle" style={{ fill: "var(--dim)" }}>按 Suspense 边界注水</text> <text x="610" y="110" textAnchor="middle" style={{ fill: "var(--dim)" }}>点哪块先激活哪块</text></g><line x1="215" y1="60" x2="505" y2="60" style={{ stroke: "var(--accent)" }} strokeWidth="2" strokeDasharray="6 4"><animate attributeName="stroke-dashoffset" from="0" to="-20" dur="0.7s" repeatCount="indefinite" /></line><line x1="215" y1="95" x2="505" y2="95" style={{ stroke: "var(--accent)" }} strokeWidth="2" strokeDasharray="6 4"><animate attributeName="stroke-dashoffset" from="0" to="-20" dur="0.7s" repeatCount="indefinite" /></line><circle r="5" style={{ fill: "var(--accent)" }}><animateMotion dur="2.2s" repeatCount="indefinite" path="M215,60 L505,60" /></circle><circle r="5" style={{ fill: "var(--recon)" }}><animateMotion dur="2.6s" repeatCount="indefinite" path="M215,95 L505,95" /></circle></svg>
+</div>
+
+HTML 分块流式传输,浏览器逐块显示并按需注水
+
+**本章小结：**hydration = 复用服务端 HTML、绑事件挂 state 让它「活」;18 支持流式(边渲染边发 HTML)+ 选择性注水(点哪块先激活哪块);mismatch 来自服务端/客户端首渲不一致。→ 下一章:[第七层·Server Components](/04-advanced/t23)。
+
+</div>

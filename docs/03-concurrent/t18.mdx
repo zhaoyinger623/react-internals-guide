@@ -1,0 +1,40 @@
+---
+title: Suspense / lazy
+description: React 原理全景中的「Suspense / lazy」，从运行机制继续深入源码。
+---
+
+<div className="tutorial-chapter">
+
+第五层 · 架构交互 / 18
+
+**🧭 主线**setState→Update→Lane→Scheduler→Render→Effect→Commit→DOM
+
+**🗺 本章路线图**
+
+子组件没准备好就 `throw` 一个 Promise,最近的 Suspense 边界捕获它、先渲染 fallback,Promise resolve 后重渲染。
+
+本章包括：**挂起机制、与 Scheduler 协同、优先级降级**。
+
+## 挂起机制:靠 throw 一个 Promise
+
+当子组件的数据/代码没就绪,它在渲染时 **`throw` 一个 Promise**(不是错误)。最近的 `Suspense` 边界捕获它:
+
+-   Reconciler 捕获到抛出的是 Promise → 把该 Suspense fiber 标记为"挂起",渲染其 `fallback` 而非 children。
+-   给 Promise 挂上 `.then`:**resolve 后触发一次重新渲染**,这次 children 能正常渲染,替换掉 fallback。
+-   `React.lazy` 就是把动态 `import()` 包装成"未加载时 throw Promise"的组件,天然配合 Suspense。
+
+```js
+// 概念示意:数据未就绪就抛 Promise
+function read(){
+  if(status==='pending') throw promise;   // ★被 Suspense 捕获
+  if(status==='resolved') return data;
+}
+```
+
+## 与 Scheduler 协同 & 优先级降级
+
+配合并发,Suspense 可以做到"避免 loading 闪烁":高优更新若会导致已显示内容退回 fallback,React 可用 **transition 优先级**让旧 UI 继续显示、在后台低优渲染新内容,ready 后再切换。边界的 fallback 渲染本身也是一次正常的 Reconcile,受同一套 Lane 调度。
+
+**本章小结：**「throw Promise」挂起 → 渲染 fallback → resolve 后重渲染换回内容;`lazy` 就是把 import() 包成会 throw 的组件;配合并发可避免 loading 闪烁。→ 下一章:[第五层·合成事件](/03-concurrent/t19)。
+
+</div>

@@ -1,0 +1,214 @@
+---
+title: 生命周期完整执行顺序
+description: 从 Render、Commit 到浏览器绘制，系统理解类组件生命周期、Effect 清理以及 useLayoutEffect 的执行时机。
+---
+
+import { Callout, ChapterRoute, ContentCard, PhaseStrip, SectionTitle } from '../../theme/TutorialPrimitives';
+import { LifecycleTimingDemo } from '../../theme/LifecycleTimingDemo';
+
+<div className="tutorial-crumb">第一部分 · 表层原理 / 03</div>
+
+<ChapterRoute steps={[
+  { label: 'setState', href: '/01-foundations/journey' },
+  { label: 'Update', href: '/02-update-pipeline/t9' },
+  { label: 'Lane', href: '/02-update-pipeline/t13' },
+  { label: 'Scheduler', href: '/02-update-pipeline/t12' },
+  { label: 'Render', href: '/02-update-pipeline/t8' },
+  { label: 'Effect', active: true },
+  { label: 'Commit', href: '/02-update-pipeline/t11', active: true },
+  { label: 'DOM', href: '/02-update-pipeline/t11' },
+]} />
+
+<ContentCard tone="accent">
+
+### 🗺 本章路线图
+
+生命周期不是一组需要背诵的 API，而是组件从计算到提交、再到清理的执行顺序。
+
+本章依次解决五个问题：**Render 与 Commit 的边界**、**类组件的挂载/更新/卸载**、**Effect 的创建与清理**、**两种 Effect 的执行时机**，以及 **StrictMode 为什么会多执行一次**。
+
+</ContentCard>
+
+<SectionTitle>先看一次更新的时间顺序</SectionTitle>
+
+<PhaseStrip items={[
+  { title: 'Render', description: '执行组件，计算新 JSX 和 Fiber。可以暂停或重新开始，不能修改 DOM。' },
+  { title: 'Mutation', description: '把 Render 算好的变更写入 DOM，例如新增、修改或删除节点。', tone: 'orange' },
+  { title: 'Layout', description: 'DOM 已更新、浏览器尚未绘制。执行 layout effect 和 DidMount/DidUpdate。', tone: 'green' },
+  { title: 'Passive', description: '浏览器获得绘制机会后，React 再执行普通的 useEffect。', tone: 'pink' },
+]} />
+
+<Callout>
+
+**“组件渲染完成”可能指不同时间点：**组件函数执行完，只代表 Render 完成；DOM 修改完成发生在 Commit；用户看到画面还要等浏览器绘制；`useEffect` 通常在此后执行。
+
+</Callout>
+
+<SectionTitle tone="purple">类组件：挂载、更新与卸载</SectionTitle>
+
+| 场景 | Render 阶段 | Commit 阶段 | 常见用途 |
+| --- | --- | --- | --- |
+| 挂载 | `constructor` → `getDerivedStateFromProps` → `render` | 修改 DOM → `componentDidMount` | 初始化 state；提交后建立订阅或读取 DOM |
+| 更新 | `getDerivedStateFromProps` → `shouldComponentUpdate` → `render` | `getSnapshotBeforeUpdate` → 修改 DOM → `componentDidUpdate` | 决定是否更新；DOM 改变前保存信息；提交后同步外部系统 |
+| 卸载 | — | `componentWillUnmount` → 删除 DOM | 取消订阅、定时器和未完成任务 |
+
+### 为什么三个旧生命周期被标记为 UNSAFE
+
+旧方法都在 **Render 阶段**执行。同步渲染时代，Render 通常会紧接着 Commit，于是开发者很容易在这些方法里建立订阅、发请求或读取 DOM。但现代 React 可以暂停或放弃一次 Render：**调用了 will 方法，并不代表这次更新一定会提交。**
+
+<ContentCard tone="warning">
+
+### 在 `componentWillMount` 中建立订阅会发生什么
+
+<PhaseStrip items={[
+  { title: '开始渲染 room=A', description: '调用 willMount，提前建立订阅 A。' },
+  { title: 'Render 被放弃', description: '例如子组件挂起；A 对应的界面从未提交。', tone: 'orange' },
+  { title: 'React 重新渲染', description: 'willMount 再次执行，又建立一个订阅。', tone: 'green' },
+  { title: '产生泄漏', description: '第一次没有真正挂载，不能依赖正常卸载撤销它。', tone: 'pink' },
+]} />
+
+问题不在“调用了两次”，而在“副作用发生了，但对应的 Commit 可能根本不存在”。把订阅放入 `componentDidMount` 后，只有节点真正提交时才建立订阅，并可由 `componentWillUnmount` 对称清理。
+
+</ContentCard>
+
+| 旧方法 | 常见的不安全写法 | 为什么有问题 | 替代位置 |
+| --- | --- | --- | --- |
+| `componentWillMount` | 发请求、订阅、操作全局对象 | 方法执行后，组件不一定真的挂载 | 初始化 state 放 `constructor`；副作用放 `componentDidMount` |
+| `componentWillReceiveProps` | 收到新 props 就请求数据或同步 state | 这组 props 对应的 Render 可能永远不提交 | 提交后同步放 `componentDidUpdate`；派生数据通常在 Render 中直接计算 |
+| `componentWillUpdate` | 启动动画、操作 DOM、重建订阅 | 它可能针对最终未提交的更新产生副作用 | 改变前读取信息用 `getSnapshotBeforeUpdate`；提交后放 `componentDidUpdate` |
+
+<Callout type="danger">
+
+**准确说法：**这些 API 不是因为“旧”而突然失效。`UNSAFE` 表示它们不适合承载依赖“这次更新一定会提交”的逻辑，新代码不应使用。
+
+</Callout>
+
+<SectionTitle tone="green">函数组件：Effect 的完整生命周期</SectionTitle>
+
+```js
+useEffect(() => {
+  // setup：连接外部系统
+  const connection = connect(roomId);
+
+  return () => {
+    // cleanup：撤销本次 setup 做的事情
+    connection.disconnect();
+  };
+}, [roomId]);
+```
+
+| 发生什么 | 执行顺序 | 读取到的值 |
+| --- | --- | --- |
+| 首次挂载 | 提交界面 → 执行 setup | 首次渲染的 `roomId` |
+| `roomId` 改变 | 先执行上一次 cleanup → 再执行新的 setup | 旧 cleanup 读取旧值；新 setup 读取新值 |
+| 依赖没有变化 | setup 和 cleanup 都不执行 | — |
+| 组件卸载 | 执行最后一次 cleanup | 最后一次 setup 对应的值 |
+
+<Callout type="success">
+
+**依赖数组控制重新同步的频率：**不传依赖数组时，每次提交后执行；传 `[]` 时只在挂载后 setup、卸载时 cleanup；传 `[a, b]` 时，任一依赖通过 `Object.is` 比较发生变化才重新同步。
+
+</Callout>
+
+### Effect 不能只理解为“挂载后执行”
+
+假设聊天室当前连接 `general`，用户随后把 `roomId` 改成 `travel`。组件没有卸载，但旧连接必须断开，并建立新连接：
+
+<PhaseStrip items={[
+  { title: 'roomId = general', description: 'Effect setup：连接 general。' },
+  { title: '用户选择 travel', description: '组件重新渲染，界面准备显示 travel。', tone: 'orange' },
+  { title: '先执行旧 cleanup', description: '断开 general，避免同时保留两个连接。', tone: 'green' },
+  { title: '再执行新 setup', description: '连接 travel，使外部系统与当前 props 一致。', tone: 'pink' },
+]} />
+
+因此，一个 Effect 更适合看成一对操作：**setup 建立外部连接，cleanup 撤销这次连接**。依赖变化时，这一对操作会重复发生；它不只对应挂载和卸载。
+
+<div className="tutorial-two-column">
+  <ContentCard tone="success">
+
+### 需要 Effect
+
+```js
+useEffect(() => {
+  const connection = connect(roomId);
+  return () => connection.disconnect();
+}, [roomId]);
+```
+
+聊天室连接是 React 之外的系统，需要在 props 改变后重新同步。
+
+  </ContentCard>
+  <ContentCard tone="purple">
+
+### 不需要 Effect
+
+```js
+// 直接由本次 props 计算
+const total = price * quantity;
+```
+
+`total` 只是已有数据的计算结果，不需要先渲染一次，再通过 Effect 写回 state。
+
+  </ContentCard>
+</div>
+
+<SectionTitle tone="pink">useEffect 与 useLayoutEffect</SectionTitle>
+
+| 对比项 | `useLayoutEffect` | `useEffect` |
+| --- | --- | --- |
+| 执行时机 | DOM 修改后、浏览器绘制前，同步执行 | 提交后调度，通常不阻塞浏览器绘制 |
+| 是否阻塞绘制 | 会；其中的状态更新也会在绘制前处理 | 通常不会 |
+| 适用场景 | 读取布局并立即修正位置、尺寸或滚动 | 请求、订阅、日志以及大多数外部同步 |
+| 清理时机 | 下一次 layout setup 前或卸载期间同步执行 | 下一次 passive setup 前或卸载时执行 |
+
+<LifecycleTimingDemo />
+
+<Callout>
+
+**选择原则：**默认使用 `useEffect`。只有当 Effect 必须读取 DOM 布局并在浏览器绘制前同步修正界面时，才使用 `useLayoutEffect`。Layout Effect 会阻塞绘制，应保持简短。
+
+</Callout>
+
+<SectionTitle tone="orange">StrictMode 下为什么会多执行一次</SectionTitle>
+
+React 额外执行一次，是为了让两类原本偶发的 bug 在开发时立即出现：
+
+- **组件函数执行两次，结果仍应相同。**组件不能在 Render 中修改 props、全局变量或其他外部数据。
+- **Effect 必须能安全地 setup → cleanup → setup。**cleanup 要完整撤销上一次 setup。
+
+<div className="tutorial-two-column">
+  <ContentCard tone="warning">
+
+### 检查 Render 是否纯净
+
+```js
+function List({ items }) {
+  items.push('新项目'); // ❌ 修改了 props
+  return items.map(/* ... */);
+}
+```
+
+StrictMode 连续执行后，“新项目”会重复出现，直接暴露 Render 修改了外部数据。
+
+  </ContentCard>
+  <ContentCard tone="purple">
+
+### 检查 Effect 是否正确清理
+
+```js
+useEffect(() => {
+  socket.connect();
+  // ❌ 没有 return disconnect
+}, []);
+```
+
+如果 cleanup 缺失，第二次 setup 会留下两个连接；补上清理后，任意时刻只保留一个连接。
+
+  </ContentCard>
+</div>
+
+<Callout type="success">
+
+**本章小结：**Render 只计算；Commit 修改 DOM。Layout Effect 在绘制前同步运行，普通 Effect 在提交后调度。依赖变化时先清理旧 Effect，再建立新 Effect；卸载时执行最后一次清理。
+
+</Callout>

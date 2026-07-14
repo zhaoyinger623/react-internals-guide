@@ -1,0 +1,11 @@
+[
+  "intro",
+  { "type": "section-header", "label": "更新流程" },
+  "journey",
+  { "type": "section-header", "label": "第一层 · 表层原理" },
+  "t1",
+  "t2",
+  "t3",
+  { "type": "section-header", "label": "第二层 · 一次更新的主线" },
+  "t4"
+]
