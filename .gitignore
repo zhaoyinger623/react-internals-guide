@@ -3,3 +3,4 @@ doc_build/
 .rspress/
 .DS_Store
 docs/public/chapters/
+README.maintainer.local.md
