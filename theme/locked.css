@@ -107,6 +107,18 @@ body {
   padding: 0 20px;
 }
 
+/* Every document route now uses EmbeddedChapter, so the Rspress 1040px
+   desktop column must not constrain the iframe or reserve an outline column. */
+.rp-doc-layout__doc {
+  flex: 1 1 0 !important;
+  min-width: 0;
+  max-width: none !important;
+}
+
+.rp-doc-layout__sidebar {
+  margin-left: 0 !important;
+}
+
 .embedded-chapter-shell {
   width: 100%;
   background: transparent;
@@ -168,12 +180,12 @@ body {
 .rp-doc-layout__sidebar {
   border-right-color: var(--rp-c-divider);
   background: color-mix(in srgb, var(--rp-c-bg) 97%, var(--rp-c-bg-soft));
-  padding: 16px 12px 48px;
+  padding: 14px 10px 48px;
 }
 
 .rp-sidebar-item {
   min-height: 35px;
-  margin: 2px 0;
+  margin: 2px 6px;
   border-left: 2px solid transparent;
   border-radius: 7px;
   color: var(--rp-c-text-2);
@@ -195,37 +207,78 @@ body {
 
 .rp-sidebar-item--group-item::before,
 .rp-sidebar-item--group-item.rp-sidebar-item--active .rp-sidebar-item__left::before {
-  display: none !important;
+  display: block !important;
 }
 
 .rp-sidebar-group[data-depth='0'] {
-  margin-top: 12px;
-  border-top: 1px solid var(--rp-c-divider-light);
-  border-radius: 0;
-  color: var(--rp-c-text-3);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
+  min-height: 42px;
+  margin: 18px 2px 7px;
+  padding: 9px 11px !important;
+  border: 1px solid var(--rp-c-divider-light);
+  border-left: 3px solid var(--rp-c-brand);
+  border-radius: 9px;
+  color: var(--rp-c-text-1);
+  background: color-mix(in srgb, var(--rp-c-bg-soft) 78%, transparent);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.01em;
 }
 
 .rp-sidebar-section-header {
-  margin-top: 12px;
-  padding: 7px 10px 3px;
-  border-top: 1px solid var(--rp-c-divider-light);
+  position: relative;
+  margin: 12px 10px 4px;
+  padding: 5px 8px 4px 14px;
+  border-top: 0;
+}
+
+.rp-sidebar-section-header::before {
+  position: absolute;
+  top: 9px;
+  left: 2px;
+  width: 4px;
+  height: 12px;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--rp-c-brand) 68%, var(--rp-c-divider));
+  content: '';
 }
 
 .rp-sidebar-section-header__left {
   color: var(--rp-c-text-3);
-  font-size: 11px;
+  font-size: 11.5px;
   font-weight: 800;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.035em;
+}
+
+.rp-sidebar-item--group-item {
+  min-height: 34px;
+  margin: 1px 7px;
+  padding: 6px 10px 6px 28px !important;
+  border-left-color: transparent;
+  font-size: 13px;
+}
+
+.rp-sidebar-item--group-item::before {
+  left: 14px !important;
+  background: var(--rp-c-divider-light) !important;
+}
+
+.rp-sidebar-item--group-item.rp-sidebar-item--active {
+  border-left-color: transparent !important;
+}
+
+.rp-sidebar-item--group-item.rp-sidebar-item--active .rp-sidebar-item__left::before {
+  top: 8px !important;
+  bottom: 8px !important;
+  left: 13px !important;
+  width: 3px !important;
+  height: auto !important;
+  border-radius: 3px;
 }
 
 /* The first tutorial group starts the sidebar, so it does not need the
    inter-group spacer and divider used by every following group. */
 .rp-sidebar-group[data-tutorial-first-group='true'] {
   margin-top: 0;
-  border-top: 0;
 }
 
 .rp-doc-layout__doc-container { width: 100%; max-width: 1040px; margin: 0 auto; }
