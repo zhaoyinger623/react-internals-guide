@@ -43,6 +43,18 @@ const TITLES = {
 const redraws = [];
 const $ = id => document.getElementById(id);
 function cssVar(name) { return getComputedStyle(document.body).getPropertyValue(name).trim() || '#888'; }
+function constrainSvgScale() {
+  document.querySelectorAll('section.topic svg[viewBox]').forEach(svg => {
+    const nativeWidth = svg.viewBox?.baseVal?.width;
+    if (!nativeWidth) return;
+    svg.style.width = '100%';
+    svg.style.maxWidth = nativeWidth + 'px';
+    svg.style.height = 'auto';
+    svg.style.marginInline = 'auto';
+    svg.style.display = 'block';
+  });
+}
+constrainSvgScale();
 function reportEmbedHeight() {
   if (!EMBED_MODE) return;
   const main = document.getElementById('main');
